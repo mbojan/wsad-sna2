@@ -5,10 +5,16 @@
 Order of topics to be reordered.
 
 
+# Data collection
+
+* Name generator
+* Position generator
+* Resource generator
+
 
 # Local neighborhoods
 
-Ego-centric perspective on networks. 
+Ego-centric perspective on networks (also: data from name generator).
 Definition of ego-networks, neighborhoods of different degree. 
 
 Basic properties of ego-networks:
@@ -24,6 +30,7 @@ Concepts of brokerage:
 * efficiency,
 * Burt’s constraint
 * dyadic con- straint.
+
 
 
 

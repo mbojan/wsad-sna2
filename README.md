@@ -33,9 +33,11 @@ Concepts of brokerage:
 High clustering, short geodesics.
 
 
+
 # Friendship paradox
 
 Why you friends have on average more friends than you do?
+
 
 
 # Homophily and segregation
@@ -43,16 +45,21 @@ Why you friends have on average more friends than you do?
 Bojanowski & Corten
 
 Segregation and homophily as local and global characteristics of the network.
-Mixing matrices. Segregation as dependence of edge probability on node at- tributes.
-Segregation as dependence between node attributes (mixing). Overview of existing
-homophily and segregation measures: Freeman’s segre- gation index, Coleman’s
-homophily index, assortativity coefficient, spectral segregation index, and more.
+Mixing matrices. Segregation as dependence of edge probability on node at-
+tributes.  Segregation as dependence between node attributes (mixing). Overview
+of existing homophily and segregation measures: Freeman’s segre- gation index,
+Coleman’s homophily index, assortativity coefficient, spectral segregation
+index, and more.
 
 
 
 # Cohesion
 
-Cliques, groups, two-mode networks (
+1. Cliques
+2. groups
+3. two-mode networks
+	* "having something in common"
+	* projections
 
 
-# ERGMs with statnet
+# Fitting ERGMs with statnet

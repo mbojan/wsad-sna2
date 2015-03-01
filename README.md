@@ -5,11 +5,6 @@
 Order of topics to be reordered.
 
 
-# Data collection
-
-* Name generator
-* Position generator
-* Resource generator
 
 
 # Local neighborhoods
@@ -32,6 +27,13 @@ Concepts of brokerage:
 * dyadic con- straint.
 
 
+# Data collection
+
+Bez przykładów eRowych.
+
+* Name generator
+* Position generator
+* Resource generator
 
 
 
@@ -39,11 +41,16 @@ Concepts of brokerage:
 
 High clustering, short geodesics.
 
+R: 
+* Czy w danej sieci występuję fenomen małych światów
+
 
 
 # Friendship paradox
 
 Why you friends have on average more friends than you do?
+
+Ilustracja w przykładowych dancych.
 
 
 
@@ -70,3 +77,4 @@ index, and more.
 
 
 # Fitting ERGMs with statnet
+

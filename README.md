@@ -1,6 +1,7 @@
-# Further topics in Social Network Analysis
+# Further Topics in Social Network Analysis
 
 Samouczek SNA.
+
 
 
 ## Dane

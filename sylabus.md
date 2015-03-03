@@ -100,6 +100,8 @@ Two-mode networks:
 
 # Data collection
 
+(opcjonalnie)
+
 * Name generator
 * Position generator
 * Resource generator

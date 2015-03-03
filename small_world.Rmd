@@ -1,0 +1,10 @@
+# Small-world phenomenon
+
+High clustering, short geodesics.
+
+Czy w danej sieci występuję fenomen małych światów?
+
+Źródła:
+
+* Watts & Strogatz
+

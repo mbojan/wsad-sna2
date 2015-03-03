@@ -1,0 +1,15 @@
+# Cohesion
+
+Cliques (Wasserman & Faust).
+
+Groups and communities:
+
+* Moody (2003) Structural Cohesion and Embeddedness: Hierarchical Concept of Groups
+* Newman: granularity.
+* Louvain method.
+* Inne metody community detection (te co w igraph)
+
+Two-mode networks:
+
+* "having something in common"
+* projections

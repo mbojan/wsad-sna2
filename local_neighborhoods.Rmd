@@ -1,0 +1,25 @@
+# Local neighborhoods
+
+Ego-centric perspective on networks (also: data from name generator).
+Definition of ego-networks, neighborhoods of different degree. 
+
+Basic properties of ego-networks:
+
+* size, 
+* composition (with respect to node and/or edge attributes),
+* homophily, 
+* heterogeneity. 
+
+Concepts of brokerage:
+
+* effective size,
+* efficiency,
+* Burt’s constraint
+* dyadic con- straint.
+
+Źródła:
+
+* Exploratory SNA with Pajek.
+* Burt
+* W&F
+

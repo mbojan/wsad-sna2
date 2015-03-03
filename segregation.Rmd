@@ -1,0 +1,13 @@
+# Homophily and segregation
+
+
+Segregation and homophily as local and global characteristics of the network.
+Mixing matrices. Segregation as dependence of edge probability on node at-
+tributes.  Segregation as dependence between node attributes (mixing). Overview
+of existing homophily and segregation measures: Freeman’s segre- gation index,
+Coleman’s homophily index, assortativity coefficient, spectral segregation
+index, and more.
+
+Bojanowski & Corten (2014)
+
+Funkcje do większości miar są w https://github.com/mbojan/isnar

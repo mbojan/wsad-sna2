@@ -1,4 +1,43 @@
-# Local neighborhoods
+# Ego-networks and local neighborhood
+
+
+The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
+
+There are multiple approaches in studying social networks. In this chapter we will focus on basic properties of ego-networks extensively used in many social studies. Ego-networks are often sampled from large structures and used as a basis of statistically significant conclusions on whole population [Everett, Borgatti 2005: 31]. Empirical studies of ego-networks include: social support, knowledge sharing or disease spread. More recently, some ego measures can be found on the popular social network sites [e.g. relationship at LinkedIn].
+
+In the subject literature, the ego-networks are also analyzed as the neighbourhood networks [Everett, Borgatti 2005: 31]. In order to understand the variation across actors embedded in their "local" environments we need to introduce some beasic definitions.
+
+a) Ego.
+"Ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a sinlge node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to eg, and measurements on the ties among these alters [1994: 42"
+
+b) Neighborhood.
+A single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes).Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The size of neighborhood is expaneded by connections of N-step and all the connections between actors identified at a path length of N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations.
+
+## Properties of ego and ego-networks
+
+There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) ego properties, b) ego-network properties. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. At the same time, only two of his LinkedIn friends have a direct connection (omitting John). So, the density of John's LinkedIn network is 0.4 [for details see below]. In this case, degree of a vertex represents the ego property, while density refers to the ego-network property. Further in this chapter we will focus on both: a) ego properties [degree, ...., ...], b) ego-network properties [..., ..., ..., ]
+
+### Ego properties
+1. Degree. In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks, degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
+
+2. Structural holes. The idea of structural holes has been introduced by Ronald Burt [Burt 1992]. Generally, structural holes make network structure less dense. Burt defines structural hole as "A relationship of nonredundancy between two contacts. The hole is a buffer, like an insulator in an electric circuit. As a result of the hole between them, the two contacts provide network benefits that are in some degree additive rather than overlapping" [1992: 65]. In other words, there is a structural hole in the ego-network if two of vertex neighbors are not directly connected. There are several measures of structural holes applied by network researchers. Further, we will focus on a) ego-network model, b) whole network model.
+
+    2.1. Ego-network model. 
+
+    2.2. Whole network model. 
+
+3. Brokerage. 
+
+### Ego-network properties
+1. Average distance
+2. Diameter
+3. Pairs
+4. Size
+5. Density
+6. Composition 
+
+
+
 
 Ego-centric perspective on networks (also: data from name generator).
 Definition of ego-networks, neighborhoods of different degree. 

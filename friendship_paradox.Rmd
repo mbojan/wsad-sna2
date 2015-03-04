@@ -2,12 +2,39 @@
 
 Why you friends have on average more friends than you do?
 
-Ilustracja w przykładowych dancych.
 
 Źródła:
 
-* http://en.wikipedia.org/wiki/Friendship_paradox
-* http://www.economist.com/blogs/economist-explains/2013/04/economist-explains-why-friends-more-popular-paradox
-* http://www.jstor.org/discover/10.2307/2781907?sid=21105509656851&uid=4&uid=3738840&uid=2
-* http://opinionator.blogs.nytimes.com/2012/09/17/friends-you-can-count-on/?_r=0
-* http://blogs.cornell.edu/info2040/2012/10/03/the-friendship-paradox-why-your-friends-have-more-friends-than-you-do/
+* [Wikipedia](http://en.wikipedia.org/wiki/Friendship_paradox)
+* [The Economist](http://www.economist.com/blogs/economist-explains/2013/04/economist-explains-why-friends-more-popular-paradox)
+* [Feld](http://www.jstor.org/discover/10.2307/2781907?sid=21105509656851&uid=4&uid=3738840&uid=2)
+* [NYT](http://opinionator.blogs.nytimes.com/2012/09/17/friends-you-can-count-on/?_r=0)
+* [Strogatz](http://blogs.cornell.edu/info2040/2012/10/03/the-friendship-paradox-why-your-friends-have-more-friends-than-you-do/)
+
+
+
+
+Ilustracja na przykładowych danych:
+
+```{r }
+library(isnar)
+data(IBE121)
+# "Z kim chciałbyś się bawić?"
+playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
+# degrees
+degs <- degree(playnet, mode="in")
+plot(playnet, vertex.size=3, vertex.label=NA, edge.arrow.size=.5, edge.curved=.2)
+# adjacency list
+al <- get.adjlist(playnet, mode="out")
+# substituting IDs with degrees
+aldegs <- lapply(al, function(id) degs[id])
+# compute averages
+avg <- sapply(aldegs, mean)
+avg[ is.na(avg) ] <- 0
+
+# Compare ego degree with average degree of alters
+plot(degs, avg, xlab="In-degree", ylab="Avg in-degree of alters")
+abline(a=0, b=1)
+# Proporcja osób, których znajomi mają przeciętnie więcej znajomych niż oni sami
+mean(avg > degs)
+```

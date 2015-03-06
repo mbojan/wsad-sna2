@@ -1,5 +1,7 @@
+---
+output: html_document
+---
 # Ego-networks and local neighborhood
-
 
 The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
 
@@ -15,32 +17,129 @@ A single node in the network is usually less or better connected with other node
 
 ## Properties of ego and ego-networks
 
-There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) ego properties, b) ego-network properties. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. At the same time, only two of his LinkedIn friends have a direct connection (omitting John). So, the density of John's LinkedIn network is 0.4 [for details see below]. In this case, degree of a vertex represents the ego property, while density refers to the ego-network property. Further in this chapter we will focus on both: a) ego properties [degree, ...., ...], b) ego-network properties [..., ..., ..., ]
-
-### Ego properties
-1. Degree. In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks, degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
-
-2. Structural holes. The idea of structural holes has been introduced by Ronald Burt [Burt 1992]. Generally, structural holes make network structure less dense. Burt defines structural hole as "A relationship of nonredundancy between two contacts. The hole is a buffer, like an insulator in an electric circuit. As a result of the hole between them, the two contacts provide network benefits that are in some degree additive rather than overlapping" [1992: 65]. In other words, there is a structural hole in the ego-network if two of vertex neighbors are not directly connected. There are several measures of structural holes applied by network researchers. Further, we will focus on a) ego-network model, b) whole network model.
-
-    2.1. Ego-network model. 
-
-    2.2. Whole network model. 
-
-3. Brokerage. 
+There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) ego properties, b) ego-network properties. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. At the same time, only two of his LinkedIn friends have a direct connection (omitting John). So, the density of John's LinkedIn network is 0.4 [for details see below]. In this case, degree of a vertex represents the ego property, while density refers to the ego-network property. Further in this chapter we will focus on following properties of ego-networks:
 
 ### Ego-network properties
-1. Average distance
-2. Diameter
-3. Pairs
-4. Size
-5. Density
-6. Composition 
+#### 1. Degree 
+In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks (directed graphs), degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
+
+* Question 1: What is the in-degree of vertices in simple directed network m1?
+```{r}
+library(sna)
+m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,1,0),nrow=4,ncol=4)
+rownames(m1) <- c("John", "Lara", "Peter", "Sara")
+colnames(m1) <- c("John", "Lara", "Peter", "Sara")
+class(m1)
+
+library(igraph)
+g=graph.adjacency(m1, mode="directed")
+degree(g, mode="out")
+degree(g, mode="in")
+degree(g, mode="all")
+```
+* Answer Q1: >degree(g, mode="in")
+
+#### 2. Geodesic distance 
+Geodesic distance between two nodes in a network is the number of edges in the shortest path linking them. It may happend that there is more then one shortest paths between two nodes in a network. In a symmetric, connected network there is always a path linking random pair of nodes. It is just a simple sum of edges between two nodes. However, the analytical potential of a network grows if relations are directional. To calculate a geodesic distance between pair of nodes in the asymmetric graph directions of the arcs need to be considered. Thus, in the assymetric graph the geodesic distance between pair of nodes is the number of edges on the route determined by the directions of the arcs. It is possible there is no path between two nodes in a connceted, asymmetric network. The average geodesic distance in a network is the average number of edges along the shortest paths for all pairs of vertices in a graph. Thus, the godesic distance is a property of pair of nodes, while the average geodesic distance is a property of whole network. [MAM JEDNAK WATPLIWOSCI CZY ZOSTAWIC TEN PODPUNKT TUTAJ]
+
+* Question 2: What is the longest path between pair of two nodes in network m1?
+* Question 3: What is the average path length in the network m1 (use igraph package)?
+```{r}
+geodist(m1, count.paths=FALSE)
+
+library(igraph)
+g=graph.adjacency(m1, mode="directed")
+round(average.path.length(g, directed=TRUE), digits=2)
+```
+* Answer Q2: >geodist(m1, count.paths=FALSE)
+* Answer Q3: >library(igraph)
+>g=graph.adjacency(m1, mode="directed")
+>round(average.path.length(g, directed=TRUE), digits=2)
+
+#### 3. Diameter
+Diameter of a network (ego-network) is the length of the longest path between two actors. In other word, it is the largest geodesic distance in the network. Diameter shows the span or scale of the network. In the asymmetric networks diameter is the largest geodesic distance between connected actors.
+
+* Question 4: What is the diameter of the network m1 (in igraph m1 has been transformed to g)?
+```{r}
+diameter(g, directed=TRUE)
+```
+* Answer Q4: >diameter(g, directed=TRUE)
+
+#### 4. Density
+Density can be calculated for both symmetric and asymmetric networks. It also used to measure properties of ego-networks. The density of a network is expressed as a proportion of existing and potential ties. Thus, to calculate the density of a symmetric graph the number of exisiting ties needs to be divided by the number of potential ties. The number of existing ties can be easily read from the matrix. How can we then calculate the number of potential ties? In a symmetric network the number of potential (Pn) ties expressed by following fomula: 
+* Pn = N x (N-1)/2
+* where, N is a number of nodes of a network.
+
+When the density in an assymetric networks is checked the directions of arcs need to be considered. The formula for density in an asymmertric networks is as follows:
+
+* Pn = N x (N-1)
+
+* Question 5: What is the density of the network m1 (in igraph m1 has been transformed to g)?
+```{r}
+gden(m1)
+graph.density(g, loop=FALSE)
+```
+* Answer Q4: >gden(m1) or >graph.density(g, loop=FALSE)
+
+#### 5. Homophily
+Syntetic definition of homophily has been offered by McPherson, Smith-Lovin and Cook "Homophily is a principle that a contact between similar people occurs at a higher rate that among dissimilar people. (...) Homophily implies that distance in terms of social characteristics translates into network distance, the number of relationships through which a piece of information must travel to connect two individuals" [2001:416]. Homophilic relations are based on shared characteristics e.g. values, knowledge, skills, beliefs, wealth, social status, geographic closure, ethnicity etc. If we consider a social network that is made of two types of nodes, the density of connections should be higherer between similar nodes. Details on how to construct the homophily models in social network analysis can be found in Hanneman and Riddle book.
+
+The assortativity coefficient returns the level of graph homophily. Positive value means that similar vertices tend to connect to each other, and negative is opposite. More on measures of homophily can be found in R package igraph documentation. In our exercise we will user assortativity.degree function using vertex degree as vertex values.
+
+* Question 6: What the assortivity coefficient in the graph g?
+```{r}
+assortativity.degree(g, directed=TRUE)
+```
+* Answer Q6: >assortativity.degree(g, directed=TRUE)
+
+#### 6. Heterogeneity
+Generally, an idea of heterogeneity is the opposite to the homophily concept. Individuals connect to each other for love of dissimilarity and diversity. They bring various, diverse proporties composing or dynamizing the network structures. 
+
+!!!!! JESLI FUNKCJA HETEROGENEITY JEST W R GRAPH.DIVERSITY TO INNY PRZYKLAD SIECI JEST POTRZEBNY. ZOSTAWIAM TEMAT BARTKOWI
+```{r}
+### graph.diversity(g, weights=NULL) Error: At structural_properties.c:6431 : Edge weights must be given, Invalid value
+```
+
+#### 7. Brokerage 
+The idea of brokreage is based on ego mediation between alters. As we mentioed above, in the ego-network ego is adjacent to all alters. If alters are not diretly connected to each other, ego act as a broker. Thus, in the ego-networks a brokreage is always considered between pairs of alters.
+
+##### 7.1. Structural holes
+The idea of structural holes is one a few extentions of the brokerage concept. It has been introduced by Ronald Burt [Burt 1992]. Generally, structural holes make network structure less dense. Burt defines structural hole as "A relationship of nonredundancy between two contacts. The hole is a buffer, like an insulator in an electric circuit. As a result of the hole between them, the two contacts provide network benefits that are in some degree additive rather than overlapping" [1992: 65]. In other words, there is a structural hole in the ego-network if two of vertex neighbors are not directly connected. 
+
+##### 7.2. Effective size of the network
+The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [Borgatti 1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). [See more in: Burt 1992; Borgatii 1997].
+
+* Question 6: What is the effective size of the network m1 (in igraph m1 has been transformed to g)?    NIE MA NA TO GOTOWEJ FUNKCJI W PAKIETACH SNA i IGRAPH?
+```{r}
+```
+* Answer Q6: >
+
+##### 7.3. Efficiency
+Efficiency send us to effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [Hanneman & Riddle 2005: 138]
 
 
+##### 7.4. Constraint (aggregate constraint)
+Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides of links to A, A is not constrained. The idea of constrain send us to the important paradox. It happens that people who have many connections may lose autonomy of action. 
+
+In R package igraph there is a function 'constraint' that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
+
+* Question7: What is the constraint of actors in m1 network?
+```{r}
+constraint(g)
+```
+* Answer Q7: >
+
+##### 7.5. Dyadic constraint
+Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [1992].
+
+* Questio8: What is the dyadic constraint of actors in m1 network?
+```{r}
+
+```
+* Answer Q8: >
 
 
-Ego-centric perspective on networks (also: data from name generator).
-Definition of ego-networks, neighborhoods of different degree. 
+MOZE INACZEJ TO WIDZICIE. MI SIE JEDNAK WYDAJE ZE IDEA ANGAZOWANIA UCZESTNIKA KURSU NA ETAPIE ZAPOZNAWANIA SIE Z TEORIA JEST DOBRA. ZOSTAWIAM TA CZESC NA RAZIE W TAKIM KSZTALCIE.
 
 Basic properties of ego-networks:
 
@@ -62,3 +161,11 @@ Concepts of brokerage:
 * Burt
 * W&F
 
+
+Bibliography:
+Everett,M.,Borgatti,S. (2005). Ego network betweenness, "Social Networks" 27. 
+Borgatti,S. (1997). Structural Holes: Unpacking Burt's Redundancy Measures, "CONNECTIONS" 20(1), pp. 35-38.
+Burt,R. (1992). Structural Holes. The Social Structure of Competition, Harvard University Press.
+Hanneman,R.A., Riddle,M. (2005). Introduction to Social Network Methods, http://faculty.ucr.edu/~hanneman/nettext/Introduction_to_Social_Network_Methods.pdf [06.02.2015].
+McPherson M., Smith-Lovin,L., Cook,J.M. (2001), Birds of a Feather: Homophily in Social Networks, "Annual Review of Sociology". 
+Wasserman,S., Faust,K. (1994). Social Network Analysis. Methods and Applications, Cambridge University Press.

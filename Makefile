@@ -27,3 +27,7 @@ html: $(files:=.html)
 .PHONY: pdf
 html: $(files:=.pdf)
 
+
+.PHONY: editall
+editall:
+	vim -p $(files:=.Rmd)

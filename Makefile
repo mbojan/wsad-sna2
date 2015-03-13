@@ -2,9 +2,14 @@ files:=cohesion ergm friendship_paradox local_neighborhoods segregation small_wo
 
 pandoc=pandoc
 pandoc_flags=-s --toc
+use_rmarkdown=1
 
 define run-pandoc
 $(pandoc) $(pandoc_flags) $< -o $@
+endef
+
+define run-rmarkdown
+Rscript -e 'rmarkdown::render("$<")'
 endef
 
 .PHONY: default
@@ -13,6 +18,10 @@ default: html
 
 $(files:=.html) $(files:=.pdf): references.bib
 
+ifeq ($(use_rmarkdown),1) 
+%.html: %.Rmd
+	$(run-rmarkdown)
+else
 $(files:=.html) $(files:=.pdf): pandoc_flags+=--bibliography=references.bib
 
 %.md: %.Rmd
@@ -20,6 +29,7 @@ $(files:=.html) $(files:=.pdf): pandoc_flags+=--bibliography=references.bib
 
 %.html: %.md
 	$(run-pandoc)
+endif
 
 .PHONY: html
 html: $(files:=.html)

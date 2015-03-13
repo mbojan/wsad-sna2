@@ -1,15 +1,70 @@
-# Cohesion
+---
+title: Cohesion in Social Networks
+output: 
+  html_document:
+    theme: united
+    toc: true
+bibliography: references.bib
+---
 
-Cliques (Wasserman & Faust).
 
-Groups and communities:
+Jakiś wstępik...
 
-* Moody (2003) Structural Cohesion and Embeddedness: Hierarchical Concept of Groups
-* Newman: granularity.
-* Louvain method.
-* Inne metody community detection (te co w igraph)
+
+
+
+
+# Cliques
+
+Maximally connected subgraphs.
+
+Wasserman & Faust
+
+
+
+# $k$-cores
+
+
+`sna::kcores`
+
+General:
+[@denooy_etal_2011, Section 3.5]
+[@wasserman_faust_1994, Section ?]
+
+Details:
+[@batagelj_zaversnik_2003]
+[@batagelj_zaversnik_2002]
+
+
+
+# Groups
+
+`igraph::cohesive.blocks`
+
+[@moody_white_2003]
+
+
+
+# Community detection
+
+- Newman: granularity.
+  - `igraph::granularity`, `igraph::optimal.community`, `igraph::fastgreedy.community`
+- Louvain method.
+- Inne metody community detection (te co w igraph)
+
+
+
+# Two-mode networks (affiliation)
 
 Two-mode networks:
 
 * "having something in common"
 * projections
+
+
+
+
+
+
+
+# References

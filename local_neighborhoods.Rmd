@@ -6,6 +6,7 @@ bibliography: references.bib
 ```{r, echo=FALSE}
 library("igraph")
 library("isnar")
+library("knitr")
 ```
 
 The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
@@ -290,53 +291,119 @@ hist(max_share)
 #### 7. Brokerage 
 The idea of brokreage is based on ego mediation between alters. As we mentioed above, in the ego-network ego is adjacent to all alters. If alters are not diretly connected to each other, ego act as a broker. Thus, in the ego-networks a brokreage is always considered between pairs of alters.
 
-```{r, eval=FALSE}
-g <- graph.adjacency(
-m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,1,0),nrow=4,ncol=4)
-rownames(m1) <- c("John", "Lara", "Peter", "Sara")
-colnames(m1) <- c("John", "Lara", "Peter", "Sara")
-class(m1)
+Consider this simple graph, that represents ego-network of John.
 
-g=graph.adjacency(m1, mode="directed")
-degree(g, mode="out")
-degree(g, mode="in")
-degree(g, mode="all")
+```{r}
+g <- graph.edgelist(matrix(c(1,2, 1,3, 1,4, 3,4), ncol = 2, byrow = TRUE),
+                    directed = FALSE)
+V(g)$name <- c("John", "Lara", "Peter", "Sara")
+plot(g)
 ```
+
+Here John serves a broker between Lara and both Peter and Sara, because Sara has no direct connection to them
 
 ##### 7.1. Structural holes
 The idea of structural holes is one a few extentions of the brokerage concept. It has been introduced by Ronald Burt [@burt1992]. Generally, structural holes make network structure less dense. Burt defines structural hole as "A relationship of nonredundancy between two contacts. The hole is a buffer, like an insulator in an electric circuit. As a result of the hole between them, the two contacts provide network benefits that are in some degree additive rather than overlapping" [1992: 65]. In other words, there is a structural hole in the ego-network if two of vertex neighbors are not directly connected. 
 
+In our example of John's ego-network there are structural holes between Lara and both Peter and Sara.
+
+
 ##### 7.2. Effective size of the network
 The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [Borgatti 1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). [See more in: Burt 1992; Borgatii 1997].
 
-* Question 6: What is the effective size of the network m1 (in igraph m1 has been transformed to g)?    NIE MA NA TO GOTOWEJ FUNKCJI W PAKIETACH SNA i IGRAPH?
-```{r}
+To feel how effective size works consider two extreme cases of John's ego-network.
+```{r, echo=FALSE}
+effective_size <- function(g, v) {
+  degree(g, v) - mean(degree(delete.vertices(g, v)))
+}
+par(mfrow = c(1,2))
+
+g1 <- delete.edges(g, E(g)[4])
+plot(g1, main = paste("Effective size = ", effective_size(g1, "John")))
+
+g1 <- add.edges(g, c(2,3, 2,4))
+plot(g1, main = paste("Effective size = ", effective_size(g1, "John")))
+
+par(mfrow = c(1,1))
 ```
-* Answer Q6: >
+
+Effective size of the left network is 3, because alters couldn't communicae with each other at all. On the other hand, effective size of the right network is 1, although John still has three alters. However, this time alters could communicate with each other, therefore links from John redundant - if we remove two of them, information from John could still diffuse on the whole network.
+
+There are no function in `igraph` to calculate effective size of the network, but it is easy to write it by ourselves.
+
+```{r}
+effective_size <- function(g, v) {
+  degree(g, v) - mean(degree(delete.vertices(g, v)))
+}
+effective_size(g, "John")
+```
+
+
 
 ##### 7.3. Efficiency
 Efficiency send us to effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [Hanneman & Riddle 2005: 138]
+
+Again there is no explicit function to calculate efficiency, but we could write our own function.
+```{r}
+efficiency <- function(g, v) {
+  effective_size(g, v) / (vcount(g) - 1)
+}
+efficiency(g, "John")
+```
+
+See how efficiency and effective size are distributed in kinship network --> TUTAJ JAKAŚ INNA SIEĆ DO WYBRANIA - COAUTHORSHIP PEWNIE BYŁBY DOBRY, TYLKO JAKAŚ W MIARĘ MAŁĄ SIEĆ TRZEBA ZNALEŹĆ
+```{r kable}
+data(Wnet)
+plot(Wnet)
+
+tmp <- lapply(V(Wnet)$name, function(name) {
+  g <- graph.neighborhood(Wnet, 1, name)[[1]]
+  data.frame(size = vcount(g) - 1,
+             eff_size = effective_size(g, name),
+             eff = efficiency(g, name))
+})
+kable(do.call(rbind, tmp))
+```
+
+Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't that high.  
 
 
 ##### 7.4. Constraint (aggregate constraint)
 Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides of links to A, A is not constrained. The idea of constrain send us to the important paradox. It happens that people who have many connections may lose autonomy of action. 
 
-In R package igraph there is a function 'constraint' that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
+```{r, echo=FALSE, fig.width=4, fig.height=4, fig.align='center'}
+plot(g)
+```
 
-* Question7: What is the constraint of actors in m1 network?
-```{r, eval=FALSE}
+In our simple example John is constrained by a link between Sara and Peter. 
+
+In R package igraph there is a function `constraint` that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
+
+```{r}
 constraint(g)
 ```
-* Answer Q7: >
 
 ##### 7.5. Dyadic constraint
 Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [1992].
 
-* Questio8: What is the dyadic constraint of actors in m1 network?
-```{r}
+There is no function for calculating dyadic constraint in `igraph`, so we have to implement our own.
 
+```{r}
+dyadic_constraint <- function(g) {
+  # proportional strength of a ties
+  strength <- 1 / degree(g)
+  
+  A <- get.adjacency(g, sparse = FALSE)
+  A2 <- A * strength %*% t(rep(1, vcount(g)))
+  
+  result <- A2 %*% A2 + A2
+  result <- result^2
+  # multiply by A to zero-out non-existent links
+  result * A
+}
+
+kable(zapsmall(dyadic_constraint(Wnet), 3))
 ```
-* Answer Q8: >
 
 
 MOZE INACZEJ TO WIDZICIE. MI SIE JEDNAK WYDAJE ZE IDEA ANGAZOWANIA UCZESTNIKA KURSU NA ETAPIE ZAPOZNAWANIA SIE Z TEORIA JEST DOBRA. ZOSTAWIAM TA CZESC NA RAZIE W TAKIM KSZTALCIE.

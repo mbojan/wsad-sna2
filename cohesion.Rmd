@@ -80,22 +80,15 @@ The Louvain method is another algorithm based on the optimization of modularity.
 ### 2.2.4. Spinglass community
 Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008]. This algorithm is available in R igraph package.
 
-## Two-mode networks
+## 3.Two-mode networks
+Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data refelcting relations between different classes of actors. [When using igraph package search for bipartie graphs to deal with two-mode networks].Two-mode networks
 
+### 3.1. Cohesive subgroups in two-mode networks
+Detecting cohesive subgroups in two-mode networks is a bit more complicated than in ordinary networks. There are couple of methods to do that. The easiest way is to convert two-mode data into one-mode. When data is converted methods designed for one-mode networks can be used to detect communities. Further in this chapter we will focus on the projection procedure used in two-mode networks and multidimensional scaling techniques to detect similarities or dissimilarites among nodes.
 
+#### 3.1.1. Projection procedure
+As we mentioned above, to conduct certain types of analysis researchers transform two-mode data into one-mode. One of few transformation techniques is called projection. In the projection procedure one type of nodes are removed from the two-mode network. Then connections between nodes belonging to one set are then reconstructed. For exmaple, in the network made of two three-elemantary sets of nodes x(a,b,c) and y(1,2,3) relations are as follow: a is connected with 1 and 2, b is linked to 1 and 3 and c is connected to 1.
 
+#### 3.1.2. Multidimensional scaling
+Multidimensional scaling (MDS) techniques are used to identify similarities or dissimilarites among nodes in a network. MDS locate points in space to catch distances between actors. Therefore, Researchers may specify the number of dimensions needed to get similarities or dissimilarites. However, it is more difficult to interpret results if many dimensions are introduced better fit is returned. Metric and non-metric approaches in MDS can be used to indetify the proximities between the nodes. To get more information on MDS techniques in social network analysis we recommend Joseph Kruskal and Myron Wish calssical book "Multidimensional Scaling" [1978]. There are several packages in R offering function based on MDS techniques. In the igraph package there is a function 'layout.mds'. In this case igraph uses the shortest path matrix as the distances between nodes [See more. igraph: 207-208].
 
-
-
-
-
-
-* Moody (2003) Structural Cohesion and Embeddedness: Hierarchical Concept of Groups
-* Newman: granularity.
-* Louvain method.
-* Inne metody community detection (te co w igraph)
-
-Two-mode networks:
-
-* "having something in common"
-* projections

@@ -1,1 +1,126 @@
-# Fitting ERGMs with statnet
+---
+title: Fitting ERGMs with statnet
+output: html_document
+bibliography: references.bib
+---
+
+### Technical note
+In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` graphs. You could use both frameworks at the same time, however we recommend to use only one at a time, to avoid duplicated function names. You could easily swith between `igraph` and `network` objects using `asIgraph` and `asNetwork` functions from `intergraph` package.
+
+
+
+## Exponential Random Graph Models
+
+### Introduction 
+
+ERGMs were first introduced by [@frank_strauss_1986], and further developed by [@frank_1991], [@wasserman_pattison_1996], [@pattison_robins_2002], [@snijders_etal_2006] and many others. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM could be found in [@lusher_etal_2012], and basic information in [@robins_etal_2007]. 
+
+In a nutshell -- Exponential Random Graph Models are family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to graphs (networks) according to network statistics -- summary measures describing given graphs.
+
+### Mathemathical basis  --> DO PRZEPISANIA NA MNIEJ TECHNICZNY JEZYK
+
+Formally, let the random matrix $A$ be an adjacency matrix representing a network and the set $\mathcal{A}$ be a collection of all obtainable matrices, precisely the subset of all $n \times n$ matrices with zeros on its diagonal and, in case of undirected networks, symmetrical. The distribution of  $\mathcal{A}$ can be described by
+
+$$
+P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
+$$
+
+where $\theta$ is the vector of model parameters, $g(a)$ is a vector of network statistics and $\kappa(\theta, \mathcal{A})$ is a normalizing constant
+
+$$
+\kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
+$$
+
+#### Network statistics
+
+A set of network statistics is chosen every time on the basis of theoretical premises concerning a particular network. However, there are a few basic configurations very often included in the model. Some  (for undirected networks) are listed below together with mathematical definition and typical notation:
+
+1. number of edges
+$$
+S_1(a) = \sum_{1\leq i\leq j\leq n}a_{ij},
+$$
+
+2. number of _k_-stars, $k\geq2$
+$$
+S_k(a) = \sum_{1\leq i\leq n}\binom{k_i}{k}.
+$$
+_k_-star consists from a central node and $k$ of its neighbours.
+
+3. number of triangles
+$$
+T(a) = \sum_{1\leq i < j < h\leq n}a_{ij}a_{ih}a_{jh}.
+$$
+
+ERGMs could easily incorporate additional information about actors attributes. To indicate extra information function $g(a)$ could be replaced with $g(a,X)$, where $X$ is a matrix containing attributes. This leads to another statistics, which measure the effect of actor's attributes. $y_i$ denotes value of an attribute $y$ of the $i$-th node:
+
+4. attribute--based activity
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}(y_i + y_j),
+$$
+
+5. homophily (binary attribute)
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}y_i  y_j,
+$$
+
+6. homophily (continuous attribute)
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
+$$
+
+[@snijders_2002] described number of problems with estimation of ERGMs, such as bimodal distributions of network statistics $g(a)$ and possible instability of algorithms. To counteract these issues [@snijders_etal_2006] introduced more robust measures, described extensively in [@robins_etal_2007b]:
+
+7. geometrically weighted degree
+
+$$
+\begin{array}
+z_S(a;\lambda) & =& S_2(a)-\frac{S_3(a)}{\lambda}+\frac{S_4(a)}{\lambda^2}- \ldots + (-1)^{n-1}\frac{S_{n-1}(a)}{\lambda^{n-3}} \nonumber\\
+ & = & \sum_{k=2}^{n-1}(-1)^{k-1}\frac{S_k(a)}{\lambda^{k-2}},
+\end{array}
+$$
+
+8. geometrically weighted edgewise shared partner
+
+$$
+z_T(a;\lambda)  =  \sum_{1\leq i<j\leq n}a_{ij} \sum_{k=1}^{n-2}\left(\frac{-1}{\lambda}\right)^{k-1}\binom{L_{2ij}}{k},
+$$
+
+where $L_{2ij}$ is the number of two-paths connecting $i$ and $j$, that is the number of common neighbours.
+$\lambda$ could be either fixed or estimated together with parameters $\theta$, in latter case a model belongs to curved exponential--family models.
+
+
+#### Estimation --> TU PEWNIE WIĘKSZOŚĆ TRZEBA WYRZUCIĆ
+
+An algorithm to find a maximum likelihood estimator $\hat{\theta}$ (MLE) of a parameter vector $\theta$ is complex, therefore only a brief sketch will be presented here. From defition of distribution the loglikelihood function could be obtained
+$$
+\ell(\theta)=\theta^Tg(a_{obs}) - \log \kappa(\theta, \mathcal{A}),
+$$
+
+where $a_{obs}$ denotes the observed graph. In order to manage estimation with an incalculable normalizing constant the log--ratio of likelihood values is considered:
+
+$$
+\ell(\theta)-\ell(\theta_0)=(\theta-\theta_0)^Tg(a_{obs})-\log \left( \frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})}\right),
+$$
+
+where $\theta_0$ is an arbitrarily chosen starting parameter vector. The ratio of normalizing constants in above equation could be approximated. Following could be derived
+$$
+\frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})} = \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\}.
+$$
+Expected value could be approximated from random sample $a_1, a_2,\ldots,a_m$ from distribution $P_{\theta_0}$
+$$
+ \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\} \approx \frac{1}{m} \sum_{i=1}^m \exp\{(\theta-\theta_0)^T g(a_i)\}.
+$$
+In practice the above approximation works reasonably well if the starting parameter vector $\theta_0$ is close to the true parameter values. The maximum likelihood estimator satisfies equation
+$$
+\mathbb{E}_\theta g(A) = g(a_{obs}).
+$$
+ 
+
+The simplier way to find $\hat{\theta}$ is by the pseudolikelihood estimation. It assumes that dyads $A_{ij}$ are mutually independent
+$$
+\forall_{i,j} P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)=P_\theta(A_{ij}=1) 
+$$
+where $A_{ij}^c$ represents adjacency matrix $A$ without element $A_{ij}$. With that assumption the model is identical to a logistic regression and could be solved using standard techniques. The pseudolikelihood estimator is identical to MLE when ERGM is a dyadic independence model, that means when value of $g(a)$ for a single dyad could be computed without information about the rest of the network. For example an ERMG with number of edges and homophily effect is a dyadic independence model. However, in other cases the statistical properties of pseudolikelihood estimators are not well studied and their use is discouraged.
+
+
+*********

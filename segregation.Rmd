@@ -11,3 +11,91 @@ index, and more.
 Bojanowski & Corten (2014)
 
 Funkcje do większości miar są w https://github.com/mbojan/isnar
+
+
+
+Syntetic definition of homophily has been offered by McPherson, Smith-Lovin and Cook "Homophily is a principle that a contact between similar people occurs at a higher rate that among dissimilar people. (...) Homophily implies that distance in terms of social characteristics translates into network distance, the number of relationships through which a piece of information must travel to connect two individuals" [2001:416]. Homophilic relations are based on shared characteristics e.g. values, knowledge, skills, beliefs, wealth, social status, geographic closure, ethnicity etc. If we consider a social network that is made of two types of nodes, the density of connections should be higherer between similar nodes. Details on how to construct the homophily models in social network analysis can be found in Hanneman and Riddle book.
+
+The assortativity coefficient returns the level of graph homophily. Positive value means that similar vertices tend to connect to each other, and negative is opposite. More on measures of homophily can be found in R package igraph documentation. In our exercise we will user assortativity.degree function using vertex degree as vertex values.
+
+See how assortativity coefficient behaves on following undirected networks consisting of two group of nodes - blue and green, 
+
+IDEAS FOR EXAMPLES
+```{r, echo = FALSE}
+g <- graph.empty(4, directed = FALSE)
+types <- rep(c("blue", "green"), each = 2)
+layout <- matrix(c(0,0, 0,1, 1,0, 1,1), ncol = 2, byrow = TRUE)
+
+old.par <- par(no.readonly = TRUE)
+par(mfrow = c(1, 3), mar = rep(0,4))
+
+g1 <- g + edges(c(1,2, 3,4))
+plot(g1, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
+
+g2 <- g + edges(c(1,2, 1,3, 2,4, 3,4))
+plot(g2, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
+
+g3 <- g + edges(c(1,3, 2,4))
+plot(g3, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
+
+par(old.par)
+
+g <- graph.empty(6, directed = FALSE)
+types <- rep(c("blue", "green"), each = 3)
+layout <- matrix(c(0,0, -0.5,1, 0,2, 1,0, 1.5,1, 1,2), ncol = 2, byrow = TRUE)
+
+old.par <- par(no.readonly = TRUE)
+par(mfrow = c(1, 3))
+
+g1 <- g + edges(c(1,2, 2,3, 4,5, 5,6))
+plot(g1, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
+
+g2 <- g + edges(c(1,2, 2,3, 1,4, 1,6, 3,4, 3,6, 4,5, 5,6))
+plot(g2, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
+
+g3 <- g + edges(c(1,4, 2,5, 3,6))
+plot(g3, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
+
+par(old.par)
+
+
+g <- graph.empty(6, directed = FALSE)
+types <- c(rep("blue", 2), rep("green", 4))
+layout <- matrix(c(0,0.5, 0,1.5, 1,0, 1,2/3, 1,4/3, 1,2), ncol = 2, byrow = TRUE)
+
+old.par <- par(no.readonly = TRUE)
+par(mfrow = c(1, 3))
+
+g1 <- g + edges(c(1,2, 3,4, 3,5, 3,6))
+plot(g1, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
+
+g2 <- g + edges(c(1,2, 2,3, 1,4, 1,6, 3,4, 3,6, 4,5, 5,6))
+plot(g2, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
+
+g3 <- g + edges(c(1,3, 1,4, 2,5, 2,6))
+plot(g3, vertex.color = types, layout = layout)
+text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
+
+par(old.par)
+```
+
+To calculate assortativity coefficient in `igraph` use `assortativity.nominal` function. You have to explicitly provide types of vertices in `types` argument (as integer vector or factor).
+
+We are analysing classroom network. Consider the following question - do children prefer to play withing group of the same sex (girls with girls, boys with boys)? To check this we could plot network with indicated gender.
+```{r}
+plot(playnet, vertex.label = NA, vertex.size = 5, 
+     vertex.color = V(playnet)$female + 2)
+```
+It looks like children indeed prefer to play with same-sex colleagues. To estimate strength of this preference we could calculate assortativity coefficient.
+```{r}
+assortativity.nominal(playnet, types = factor(V(playnet)$female))
+```
+Assortativity coefficient is close to 1, what confirms homophily in researched graph.

@@ -224,7 +224,7 @@ $$
 where $\delta[g(a)]_{ij}$ is the change of $g(a)$ when $a_{ij}$ is changed from 0 to 1. So the probability of an edge is equal to
 
 $$
-\begin{array}
+\begin{array} 
  P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c) & = & \frac{\exp\{\theta^T \delta[g(a)]_{ij}\}}{1+\exp\{\theta^T \delta[g(a)]_{ij}\}} \nonumber\\
  & = & (1 + \exp\{-\theta^T \delta[g(a)]_{ij}\})^{-1} ,
 \end{array}
@@ -257,7 +257,68 @@ $$
 $$
 
 
-#### Dyad independent ERGMs
+#### Dyadic independence ERGMs
+
+Dyadic independence ERGMS are the simplest class of ERGMs. They assume that every dyad is independent from each other. This is very strong assumption which rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat every dyad as a single object, independent from its surrounding. Therefore in such models we could use only such measures, that are dyadic independent. That means that we could calculate change statistic knowing only the state of a given dyad and maybe some attributes of nodes (in this dyad). For instance number of edges is dyadic independent - if we toggle an edges from 0 to 1 we are sure that number of edges will increase by 1, no matter how the rest of the network looks. Another example is homophily effect -- we could compute change in the number of edges between nodes of the same type knowing only attributes of these two specific nodes in a dyad. On the other hand, number of 2-stars is dyadic dependent - we need two know structure of neighborhood network if we want to calculate the change in the number of twopaths.
+
+Assuming that our statistics are dyadic independent we could rewrite edge probability to logit form:
+
+$$
+logit (P_\theta(A_{ij}=1))  = \theta^T \delta[g(a)]_{ij}
+$$
+
+which looks exactly as logistic regression. Indeed, dyadic independence ERGMs are simply logistic regression, where dependent variable are dyads (1 if edge exists, 0 otherwise) and independent variables are change statistics (one for each term). 
+
+Look on the following example to see that it's true. We will use `faux.mesa.high` network provided with `ergm` package. It is in-school friendship network, undirected, with 205 nodes and 203 vertices.
+
+First we need to estimate ergm model, with two parameters -- number of edges and number of edges between students of the same sex.
+
+```{r}
+data(faux.mesa.high)
+faux <- faux.mesa.high
+model <- ergm(faux ~ edges + nodematch("Sex"))
+summary(model)
+```
+
+Further we need to prepare data for logistic regression. It is a bit cumbersome, because we need to take into account all possible dyads in network. We will keep them as a vector.
+```{r}
+y <- faux[upper.tri(faux[,])]
+```
+
+Calculating change statistic vector for number of edges is straightforward as it is always 1.
+```{r}
+edge_change <- rep(1, length(y))
+```
+
+Calculating change statistics for homophily effect is a bit more complicated, but we do it by preparing a logical matrix with `TRUEs` when both vertices have the same sex.
+```{r}
+tmp <- outer(faux %v% "Sex", faux %v% "Sex", `==`)
+nodematch_change <- as.integer(tmp[upper.tri(tmp)])
+```
+
+Last part -- logistic regression
+```{r}
+model2 <- glm(y ~ edge_change + nodematch_change - 1, family = "binomial")
+summary(model2)
+```
+
+We could see that both models give exactly the same results, as expected.
+```{r}
+all.equal(model$coef, model2$coefficients, check.attributes = FALSE)
+```
+
+But how to interpret these coefficients? Let's say we want to know what is the probability of a friendship between students of the same sex. If an edge occurs between such students then both total number of edges and numbef of same-sex edges will icrease by one. So we could calculate probality from equation
+```{r}
+coef <- model$coef
+exp(1 * coef[1] + 1 * coef[2]) / (1 + exp(1 * coef[1] + 1 * coef[2]))
+```
+
+To double-check we could calculate the frequency of same-sex edges amongst all same-sex dyads.
+```{r}
+sum(diag(mixingmatrix(faux, "Sex")$matrix)) / sum(nodematch_change)
+```
+
+
 
 #### Some more sophisticated ERGMs
 

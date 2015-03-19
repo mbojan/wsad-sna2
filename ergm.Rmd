@@ -1,1 +1,325 @@
-# Fitting ERGMs with statnet
+---
+title: Fitting ERGMs with statnet
+output: html_document
+bibliography: references.bib
+---
+
+### Technical introduction
+In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` graphs. You could use both frameworks at the same time, however we recommend to use only one at a time, to avoid duplicated function names. You could easily swith between `igraph` and `network` objects using `asIgraph` and `asNetwork` functions from `intergraph` package.
+
+```{r, message=FALSE}
+library("statnet")
+```
+
+The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
+```{r}
+data(faux.magnolia.high)
+summary(faux.magnolia.high ~ edges + triangle + nodematch("Sex"))
+```
+
+We could also estimate ERGM:
+```{r, message=FALSE}
+model <- ergm(faux.magnolia.high ~ edges + nodematch("Sex"))
+summary(model)
+```
+
+We will discuss what is happening here later.
+
+
+## Exponential Random Graph Models
+
+### Introduction 
+
+ERGMs were first introduced by [@frank_strauss_1986], and further developed by [@frank_1991], [@wasserman_pattison_1996], [@pattison_robins_2002], [@snijders_etal_2006] and many others. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM could be found in [@lusher_etal_2012], and basic information in [@robins_etal_2007]. 
+
+In a nutshell -- Exponential Random Graph Models are family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to graphs (networks) according to network statistics -- summary measures describing given graphs.
+
+### Mathemathical basis  --> DO PRZEPISANIA NA MNIEJ TECHNICZNY JEZYK
+
+Formally, let the random matrix $A$ be an adjacency matrix representing a network and the set $\mathcal{A}$ be a collection of all obtainable matrices, precisely the subset of all $n \times n$ matrices with zeros on its diagonal and, in case of undirected networks, symmetrical. The distribution of  $\mathcal{A}$ can be described by
+
+$$
+P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
+$$
+
+where $\theta$ is the vector of model parameters, $g(a)$ is a vector of network statistics and $\kappa(\theta, \mathcal{A})$ is a normalizing constant
+
+$$
+\kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
+$$
+
+#### Network statistics
+
+A set of network statistics is chosen every time on the basis of theoretical premises concerning a particular network. However, there are a few basic configurations very often included in the model. Some  (for undirected networks) are listed below together with mathematical definition and typical notation:
+
+1. number of edges
+$$
+S_1(a) = \sum_{1\leq i\leq j\leq n}a_{ij},
+$$
+
+2. number of _k_-stars, $k\geq2$
+$$
+S_k(a) = \sum_{1\leq i\leq n}\binom{k_i}{k}.
+$$
+_k_-star consists from a central node and $k$ of its neighbours.
+
+3. number of triangles
+$$
+T(a) = \sum_{1\leq i < j < h\leq n}a_{ij}a_{ih}a_{jh}.
+$$
+
+ERGMs could easily incorporate additional information about actors attributes. To indicate extra information function $g(a)$ could be replaced with $g(a,X)$, where $X$ is a matrix containing attributes. This leads to another statistics, which measure the effect of actor's attributes. $y_i$ denotes value of an attribute $y$ of the $i$-th node:
+
+4. attribute--based activity
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}(y_i + y_j),
+$$
+
+5. homophily (binary attribute)
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}y_i  y_j,
+$$
+
+6. homophily (continuous attribute)
+$$
+\sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
+$$
+
+[@snijders_2002] described number of problems with estimation of ERGMs, such as bimodal distributions of network statistics $g(a)$ and possible instability of algorithms. To counteract these issues [@snijders_etal_2006] introduced more robust measures, described extensively in [@robins_etal_2007b]:
+
+7. geometrically weighted degree
+
+$$
+\begin{array}
+z_S(a;\lambda) & =& S_2(a)-\frac{S_3(a)}{\lambda}+\frac{S_4(a)}{\lambda^2}- \ldots + (-1)^{n-1}\frac{S_{n-1}(a)}{\lambda^{n-3}} \nonumber\\
+ & = & \sum_{k=2}^{n-1}(-1)^{k-1}\frac{S_k(a)}{\lambda^{k-2}},
+\end{array}
+$$
+
+8. geometrically weighted edgewise shared partner
+
+$$
+z_T(a;\lambda)  =  \sum_{1\leq i<j\leq n}a_{ij} \sum_{k=1}^{n-2}\left(\frac{-1}{\lambda}\right)^{k-1}\binom{L_{2ij}}{k},
+$$
+
+where $L_{2ij}$ is the number of two-paths connecting $i$ and $j$, that is the number of common neighbours.
+$\lambda$ could be either fixed or estimated together with parameters $\theta$, in latter case a model belongs to curved exponential--family models.
+
+
+#### Estimation --> TU PEWNIE WIĘKSZOŚĆ TRZEBA WYRZUCIĆ
+
+An algorithm to find a maximum likelihood estimator $\hat{\theta}$ (MLE) of a parameter vector $\theta$ is complex, therefore only a brief sketch will be presented here. From defition of distribution the loglikelihood function could be obtained
+$$
+\ell(\theta)=\theta^Tg(a_{obs}) - \log \kappa(\theta, \mathcal{A}),
+$$
+
+where $a_{obs}$ denotes the observed graph. In order to manage estimation with an incalculable normalizing constant the log--ratio of likelihood values is considered:
+
+$$
+\ell(\theta)-\ell(\theta_0)=(\theta-\theta_0)^Tg(a_{obs})-\log \left( \frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})}\right),
+$$
+
+where $\theta_0$ is an arbitrarily chosen starting parameter vector. The ratio of normalizing constants in above equation could be approximated. Following could be derived
+$$
+\frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})} = \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\}.
+$$
+Expected value could be approximated from random sample $a_1, a_2,\ldots,a_m$ from distribution $P_{\theta_0}$
+$$
+ \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\} \approx \frac{1}{m} \sum_{i=1}^m \exp\{(\theta-\theta_0)^T g(a_i)\}.
+$$
+In practice the above approximation works reasonably well if the starting parameter vector $\theta_0$ is close to the true parameter values. The maximum likelihood estimator satisfies equation
+$$
+\mathbb{E}_\theta g(A) = g(a_{obs}).
+$$
+ 
+
+The simplier way to find $\hat{\theta}$ is by the pseudolikelihood estimation. It assumes that dyads $A_{ij}$ are mutually independent
+$$
+\forall_{i,j} P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)=P_\theta(A_{ij}=1) 
+$$
+where $A_{ij}^c$ represents adjacency matrix $A$ without element $A_{ij}$. With that assumption the model is identical to a logistic regression and could be solved using standard techniques. The pseudolikelihood estimator is identical to MLE when ERGM is a dyadic independence model, that means when value of $g(a)$ for a single dyad could be computed without information about the rest of the network. For example an ERMG with number of edges and homophily effect is a dyadic independence model. However, in other cases the statistical properties of pseudolikelihood estimators are not well studied and their use is discouraged.
+
+
+### Examples/basics
+
+#### Network probabilities
+
+As mentioned, ERGMs assign probabilities to all networks with given size (number of nodes) according to some statistic (measure/attribute). To see how it works let's consider undirected network of size 4. There are 64 such networks in total, but some of them differ only in node permutation, so there are only 11 topologically different networks.
+
+Assume we have three models: null model, model with one parameter (number of edges) and with two parameters (number of edges and 2-stars/twopaths). Parameters are equal $\theta_1=-0.5$ for number of edges (both models) and $\theta_2 = 0.2$ for number of twopaths. We will calculate probability of each type of network under all three models.
+
+First we need to generate all possible networks of size 4 and select one representative for each canonical form.
+
+```{r, fig.width=5, fig.height=5, fig.align='center'}
+# all 4-node networks
+adj <- as.matrix(expand.grid(0:1, 0:1, 0:1, 0:1, 0:1, 0:1))
+full_edgelist <- subset(expand.grid(1:4, 1:4), Var1 > Var2)
+nets <- lapply(seq(nrow(adj)), function(i) {
+  network.edgelist(full_edgelist[as.logical(adj[i,]), ],
+                   network.initialize(4, directed = FALSE))
+})
+nets <- nets[order(sapply(nets, network.edgecount))]
+
+# unique canonical permutation (based on degree sequence, works for 4 nodes)
+degrees <- as.data.frame(t(sapply(nets, function(net) summary(net ~ degree(0:3)))))
+degrees <- data.frame(degrees, id = apply(degrees, 1, paste, collapse = ""))
+canonical_count <- table(degrees$id)
+nets_unique <- nets[match(unique(degrees$id), degrees$id)]
+```
+
+Now we calculate the numerator in equation for probability for every canonical form and each model. Under null model every network is equally probable, so we don't have to compute anything. For other functions small function will come in handy.
+
+```{r}
+model0 <- rep(1, 11)
+
+prob <- function(net, coeff) {
+  form <- as.formula(paste("net ~", paste(names(coeff), collapse = "+"), collapse =" "))
+  z <- summary(form)
+  exp(sum(z * coeff))
+}
+model1 <- sapply(nets_unique, prob, coeff = c(edges = -0.5))
+model2 <- sapply(nets_unique, prob, coeff = c(edges = -0.5, twopath = 0.2))
+```
+
+Next step is calculating proper probabilities. To do so we sum numerators over all canonical forms taking the size of each group into account.
+
+```{r}
+model0 <- model0 / sum(model0 * canonical_count)
+model1 <- model1 / sum(model1 * canonical_count)
+model2 <- model2 / sum(model2 * canonical_count)
+```
+
+And plot them.
+
+```{r, echo=FALSE, fig.width=6, fig.height=5, fig.align='center'}
+library("RColorBrewer")
+pal <- brewer.pal(3, "Set2")
+
+par(mfrow = c(6,4), mar = c(2, 1, 1, 1))
+for (i in c(1,7,2,8,3,9,4,10,5,11,6)) {
+  plot(nets_unique[[i]], coord = matrix(c(0,0,1,1,0,1,0,1), ncol = 2), pad = 0, 
+       jitter = FALSE)
+  barplot(rev(c(model0[i], model1[i], model2[i])), horiz = TRUE, col = rev(pal),
+          xlim = c(0, 0.06))
+}
+plot.new()
+plot.new()
+legend("center", legend = c("Null model", "Edges only", "Edges and twopaths"),
+       fill = pal)
+par(mfrow = c(1, 1))
+```
+
+All networks has the same probabilities under null model obviously. It is also clear that under model with edges only probability is decreasing as density (or edge count) is increasing. This is caused by negative edge parameter - less dense networks are preferable. Last model is the most interesting one - we could notice that probability decreases in the beginning as density increases, but afterwards it starts to increase again. Edge parameter is still negative so dense networks are penalised. However, second parameter is positive and number of twopath (2-stars) increases more or less faster than number of edges. Therefore probabilities of dense networks are increasing. 
+
+
+
+#### Conditional edges probabilities
+
+The model could be equivalently described by conditional probabilities that an edge exists given the rest of the network. Conditional log-odds could be easily derived from the general form of the model
+
+$$
+\frac{P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)}{P_\theta(A_{ij}=0|A_{ij}^c=a_{ij}^c)}=\exp\{\theta^T \delta[g(a)]_{ij}\} 
+$$
+
+where $\delta[g(a)]_{ij}$ is the change of $g(a)$ when $a_{ij}$ is changed from 0 to 1. So the probability of an edge is equal to
+
+$$
+\begin{array} 
+ P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c) & = & \frac{\exp\{\theta^T \delta[g(a)]_{ij}\}}{1+\exp\{\theta^T \delta[g(a)]_{ij}\}} \nonumber\\
+ & = & (1 + \exp\{-\theta^T \delta[g(a)]_{ij}\})^{-1} ,
+\end{array}
+$$
+
+Coming back to 4-nodes networks. Let's say we have a model with two statistics defined above: number of edges and number of 2-stars (twopaths) with corresponding parameters $\theta_1=-0.5$ and $\theta_2 = 0.2$.
+
+```{r, echo=FALSE, fig.width=8, fig.height=5, fig.align='center'}
+source("function_compute_prob.R")
+coeff <- c(edges = -0.5, twopath = 0.2)
+probs <- lapply(nets_unique, function(net) {
+  p <- compute_prob(net, coeff)
+  p[upper.tri(p)]
+})
+
+par(mfrow = c(3, 4), mar = rep(1,4))
+for (i in seq_along(nets_unique)) {
+  plot(nets_unique[[i]], coord = matrix(c(0,0,1,1,0,1,0,1), ncol = 2), pad = 0.3, 
+       jitter = FALSE)
+  text(x = c(-0.2, 0.5, 0.3, 0.3, 0.5, 1.2), 
+       y = c(0.5, -0.1, 0.15, 0.85, 1.1, 0.5),
+       zapsmall(probs[[i]], digits = 2))
+}
+par(mfrow = c(1, 1))
+```
+
+Look close on 7th network. Where has probability $0.73$ come from? So assume that we create an edge between top two nodes. Then number of edges is obviously increased by 1, but number of twopaths is increased by 3 - new edge creates twopath with every other edges. Now we have change statictics so we could compute probability from equation
+$$
+ \frac{\exp\{-0.5 * 1 + 0.2 * 3\}}{1+\exp\{-0.5 * 1 + 0.2 * 3\}} = `r exp(-0.5+0.6)/(1+exp(-0.5+0.6))`
+$$
+
+
+#### Dyadic independence ERGMs
+
+Dyadic independence ERGMS are the simplest class of ERGMs. They assume that every dyad is independent from each other. This is very strong assumption which rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat every dyad as a single object, independent from its surrounding. Therefore in such models we could use only such measures, that are dyadic independent. That means that we could calculate change statistic knowing only the state of a given dyad and maybe some attributes of nodes (in this dyad). For instance number of edges is dyadic independent - if we toggle an edges from 0 to 1 we are sure that number of edges will increase by 1, no matter how the rest of the network looks. Another example is homophily effect -- we could compute change in the number of edges between nodes of the same type knowing only attributes of these two specific nodes in a dyad. On the other hand, number of 2-stars is dyadic dependent - we need two know structure of neighborhood network if we want to calculate the change in the number of twopaths.
+
+Assuming that our statistics are dyadic independent we could rewrite edge probability to logit form:
+
+$$
+logit (P_\theta(A_{ij}=1))  = \theta^T \delta[g(a)]_{ij}
+$$
+
+which looks exactly as logistic regression. Indeed, dyadic independence ERGMs are simply logistic regression, where dependent variable are dyads (1 if edge exists, 0 otherwise) and independent variables are change statistics (one for each term). 
+
+Look on the following example to see that it's true. We will use `faux.mesa.high` network provided with `ergm` package. It is in-school friendship network, undirected, with 205 nodes and 203 vertices.
+
+First we need to estimate ergm model, with two parameters -- number of edges and number of edges between students of the same sex.
+
+```{r}
+data(faux.mesa.high)
+faux <- faux.mesa.high
+model <- ergm(faux ~ edges + nodematch("Sex"))
+summary(model)
+```
+
+Further we need to prepare data for logistic regression. It is a bit cumbersome, because we need to take into account all possible dyads in network. We will keep them as a vector.
+```{r}
+y <- faux[upper.tri(faux[,])]
+```
+
+Calculating change statistic vector for number of edges is straightforward as it is always 1.
+```{r}
+edge_change <- rep(1, length(y))
+```
+
+Calculating change statistics for homophily effect is a bit more complicated, but we do it by preparing a logical matrix with `TRUEs` when both vertices have the same sex.
+```{r}
+tmp <- outer(faux %v% "Sex", faux %v% "Sex", `==`)
+nodematch_change <- as.integer(tmp[upper.tri(tmp)])
+```
+
+Last part -- logistic regression
+```{r}
+model2 <- glm(y ~ edge_change + nodematch_change - 1, family = "binomial")
+summary(model2)
+```
+
+We could see that both models give exactly the same results, as expected.
+```{r}
+all.equal(model$coef, model2$coefficients, check.attributes = FALSE)
+```
+
+But how to interpret these coefficients? Let's say we want to know what is the probability of a friendship between students of the same sex. If an edge occurs between such students then both total number of edges and numbef of same-sex edges will icrease by one. So we could calculate probality from equation
+```{r}
+coef <- model$coef
+exp(1 * coef[1] + 1 * coef[2]) / (1 + exp(1 * coef[1] + 1 * coef[2]))
+```
+
+To double-check we could calculate the frequency of same-sex edges amongst all same-sex dyads.
+```{r}
+sum(diag(mixingmatrix(faux, "Sex")$matrix)) / sum(nodematch_change)
+```
+
+
+
+#### Some more sophisticated ERGMs
+
+*********

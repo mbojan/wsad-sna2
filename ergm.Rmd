@@ -4,12 +4,27 @@ output: html_document
 bibliography: references.bib
 ---
 
-### Technical note
+### Technical introduction
 In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` graphs. You could use both frameworks at the same time, however we recommend to use only one at a time, to avoid duplicated function names. You could easily swith between `igraph` and `network` objects using `asIgraph` and `asNetwork` functions from `intergraph` package.
 
 ```{r, message=FALSE}
 library("statnet")
 ```
+
+The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
+```{r}
+data(faux.magnolia.high)
+summary(faux.magnolia.high ~ edges + triangle + nodematch("Sex"))
+```
+
+We could also estimate ERGM:
+```{r, message=FALSE}
+model <- ergm(faux.magnolia.high ~ edges + nodematch("Sex"))
+summary(model)
+```
+
+We will discuss what is happening here later.
+
 
 ## Exponential Random Graph Models
 
@@ -245,4 +260,5 @@ $$
 #### Dyad independent ERGMs
 
 #### Some more sophisticated ERGMs
+
 *********

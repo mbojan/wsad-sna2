@@ -6,10 +6,9 @@ output:
     toc: true
 bibliography: references.bib
 ---
+# Introduction
+The idea of cohesion has been widely studied in contemporary social science. Researchers from diverse backgrounds are trying to identify factors encouraging individuals to keep dense and tight relations embedded in larger structures e.g. firms, local communities, societies. In this chapter we focus on the idea of cohesive subgroup developed in social network analysis. We begin with general definition of cohesion and than introduce clique and community measures of cohesion.
 
-
-Jakiś wstępik...
-=======
 # Cohesion
 Cohesion is one of few elementary properties of social networks. Cohesiveness is a property of tightly connected actors within the larger network structure. Actors with strong, intense, frequent, direct or positive relations may compose cohesive subgroups. Therefore, in social network analysis the definition of cohesion is based on certain properties of the ties among the actors. In social science literature, definition of cohesion often overlaps with definitions of social group [Wasserman, Faust 1994: 250]. There are numerous ways to conceptualize or define subgroups in social science. To avoid theoretical pitfalls, Wasserman and Faust identified four general properties of cohesive subgroups. They assumed that these properties allow to develop methods that focus on social network features [Ibidem 1994: 252]. Those properties are:
 <<<<<<< HEAD
@@ -93,40 +92,19 @@ The Louvain method is another algorithm based on the optimization of modularity.
 ### 2.2.4. Spinglass community
 Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008]. This algorithm is available in R igraph package.
 
-- Newman: granularity.
-  - `igraph::granularity`, `igraph::optimal.community`, `igraph::fastgreedy.community`
-- Louvain method.
-- Inne metody community detection (te co w igraph)
-
-
-
-## 3.Two-mode networks
+## 3. Two-mode networks
 Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data refelcting relations between different classes of actors. [When using igraph package search for bipartie graphs to deal with two-mode networks].Two-mode networks
 
 ### 3.1. Cohesive subgroups in two-mode networks
 Detecting cohesive subgroups in two-mode networks is a bit more complicated than in ordinary networks. There are couple of methods to do that. The easiest way is to convert two-mode data into one-mode. When data is converted methods designed for one-mode networks can be used to detect communities. Further in this chapter we will focus on the projection procedure used in two-mode networks and multidimensional scaling techniques to detect similarities or dissimilarites among nodes.
 
-#### 3.1.1. Projection procedure
+### 3.2. Projection procedure
 As we mentioned above, to conduct certain types of analysis researchers transform two-mode data into one-mode. One of few transformation techniques is called projection. In the projection procedure one type of nodes are removed from the two-mode network. Then connections between nodes belonging to one set are then reconstructed. For exmaple, in the network made of two three-elemantary sets of nodes x(a,b,c) and y(1,2,3) relations are as follow: a is connected with 1 and 2, b is linked to 1 and 3 and c is connected to 3. If we remove nodes y(1,2,3) and apply the projection procedure, relations in x(a,b,c) set of nodes will look like: a is connected to b and b is connected to c.
 
-#### 3.1.2. Multidimensional scaling
+### 3.3. Multidimensional scaling
 Multidimensional scaling (MDS) techniques are used to identify similarities or dissimilarites among nodes in a network. MDS locate points in space to catch distances between actors. Therefore, Researchers may specify the number of dimensions needed to get similarities or dissimilarites. However, it is more difficult to interpret results if many dimensions are introduced better fit is returned. Metric and non-metric approaches in MDS can be used to indetify the proximities between the nodes. To get more information on MDS techniques in social network analysis we recommend Joseph Kruskal and Myron Wish calssical book "Multidimensional Scaling" [1978]. There are several packages in R offering function based on MDS techniques. In the igraph package there is a function 'layout.mds'. In this case igraph uses the shortest path matrix as the distances between nodes [See more. igraph: 207-208].
 
-
-
-
-
-
-
-
-
-
-
-
-# $k$-cores
-
-
-`sna::kcores`
+# References
 
 General:
 [@denooy_etal_2011, Section 3.5]
@@ -137,124 +115,4 @@ Details:
 [@batagelj_zaversnik_2002]
 
 
-
-# Groups
-
-`igraph::cohesive.blocks`
-
 [@moody_white_2003]
-
-
-
-
-
-
-
-# Two-mode networks (affiliation)
-=======
-
-1. The mutuality of ties.
-2. The closeness or reachability of subgroup members.
-3. The frequency of ties among members.
-4. The relative frequency of ties among subgroup members compared to non-members [Ibidem: 251-252].
-
-Methods of detection of cohesive groups in social networks vary accord to: a) type of network (one-mode vs. two-mode), type of relation (directed vs. undirected).
-
-## 1. The idea of cliques
-Clique is a basic concept to study cohesive subgroups in social networks [Ibidem: 254]. Its root can be traced back to the research initiated by W. Lloyd Warner and Elton Mayo during the 1930s and 1940s [Scott 2001: 16-26]. Generally, clique is a sub-structure of a network made by actors that are more intensely and closely tied to each other. In real life, cliques are often formed on a basis of gender, age, race, ethnicity, religion, knowledge etc. 
->>>>>>> 72d9ac77f224029cd68bacc71284f3dd2b5e2383
-
-In social network analysis, clique is understood as maximal complete subgraph of three or more nodes. All members of a clique are adjacent to each other. Dyads are not considered as a clique structure. Furthermore, cliques identified in a network may overlap. Node or set of nodes often belong to many cliques [Wasserman & Faust 1994: 254]. It is not possible that one clique can fully cover another clique. In such a case we have just one clique.
-
-There are various algorithms available to identify cliques or subgraphs in social networks. Further in this chapter we will focus on methods that can be found in R igraph package. To go through choosen algorithms of community detection we will use ... data.
-
-### 1.1. Cliques
-The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subrgaphs in a larger structure is one of simplest method to trace cliques in social networks. In the igraph package there is a function "cliques" that is based directly on this method. To get some more information on that function, its usage and arguments the documentation of igraph package should be explored [see: Package 'igrap': 42-43].
-
-Question: How many cliques of minimal size = 5, function cliques from igraph package detects in Datafile?
-```{r}
-
-
-
-```
-Q! Answer: 
-g <- load("......../Datafile.rda")
-cliques(g, min=5)
-
-### 1.2. N-cliques
-As we mentioned above, the geodesic distances among memebers of cohesive groups should be small. To make the idea of clique more flexible it is possible to specify the cutoff value n as the maxium length of geodesic distance linking pairs of actors within the cohesive subgroup [Wasserman & Faust 1994: 254]. Thus, the n-clique is a subgraph with paths of n length as maxium value allowed between pairs of actors. Formmally, n-clique is made of geodesics d(i,j) =< n equal or lesser than n value. When n=1 identified subgroup is a complete subgraph.
-
-### 1.3. N-clans
-The idea of n-cliques has its limitations that led to the idea of n-clans. Two problems might arise when we deal with n-cliques:
-1. It may happen that the diameter of n-clique is greater than n value.
-2. It may also happen that n-clique is disconnected as n-path connecting two nodes in analyzed n-clique goes through nodes outside of that n-clique.
-The soultion to the first problem send us to the idea of n-clans. A n-clan is a n-clique in which the geodesic distance between all nodes is no greater than n [Ibidem: 260]. All n-clans in a subgraph are n-cliques, but not all n-cliques are n-clans.
-
-### 1.4. K-plexes
-Cohesive subgroups are often identified on adjacency of subgroup members. Such a subgroup is made of actors being adjacent to relatively numerous other members of the subgroup. In other words, all subgroup members must be adjacent to some minimum k number of other members belonging to that subgroup. If k=1 the subgraph is a clique. As k is getting greater than 1, each node is allowed to have more missing ties within the subgroup.
-
-## 2. Communities
-The idea of cliques is based on rigid formal assumptions (see above). It is quite complicated to detect cliques in real life social networks. Thus, in more recent works the idea of cliques has been replaced by more flexible but still very formal concept of 'community'. So, what is the community structure? Newman and Girvan spoke of "property that seems to be common to many networks is community structure, the division of network nodes into groups within which the network connections are dense, but between which they are sparser" [Newman & Girvan 2004: 1]. There are many algorithms availale to detect communities in social networks. They can be grouped into one of three types of algorithms: a) divisive algorithms, b) agglomerative algorithms, c) optimization methods [see: Blondel, Guillaume, Lambiotte, Lefebvre 2008]. Some of them are briefly presented below:
-
-### 2.1. Edge betweenness
-One of the most popular algorithms detecting communities in a social networks has been given by  Michelle Girvan and Mark Newman. The Girvan-Newman algorithm is a hierarchical method used in complex systems. Progressive removing of edges from the original network leads to the connected components of the remaining network which are the communities. This algorithms does not search for the most central edges of the whole structure. It focuses on the edge that is the most between and removes it. The most between edge is defined by the highest number of shortests paths running through the pair of nodes. The algorithm can be summarized by the following steps:
-- Betweenness of all edges is calculated as a first.
-- Edge with the highest betweenness level is removed.
-- Betweenness of all remaining edges is recalculated.
-- Steps 2 and 3 are repeated until no edges remain in a network.
-The Girvan-Newman algorithm is based on the divisive apporach in finding communities in network structures. In igraph package the function 'edge.betweenness.community'is based on this algorithm.
-
-Exmaple...
-
-```{r}
-
-```
-
-### 2.2. Modularity
-Modularitty can be refered to the quality of divisions that can be turned into communities within a network. Clauset, Newman and Moore explain that "Modularity is a property of a network and a specific proposed division of that network into communities" [Caluset, Newman, Moore 2004]. There are many specific algorithms basead on the modularity maximization method. Further in this chapter we will focus on greedy optimization, random walks, statistical mechanics, and Louvain method. 
-
-#### 2.2.1. Greedy optimization
-The greedy optimization algorithm, designed to detect communities in very large networks, has been proposed by Clauset, Newman and Moore [Caluset, Newman, Moore 2004]. The greedy algorithm selects the best solution at every step without regard to possible future. It starts with any node and connect it to the node nearest to it. Than, to connected set of nodes, unconnected node that is nearest to one in the connected set is added. Procedure continues until all nodes are linked. This algorithm has been included in R igraph package.
-
-```{r}
-
-```
-
-#### 2.2.2. Walktrap community
-The idea behind this algorithm is that "partition P = {C1, . . . , Ck} of the vertices of a graph G = (V, E) represents a good community structure if the proportion of edges inside the Ci (internal edges) is high compared to the proportion of edges between them" [Pons, Latapy 2005: 1].  This algorithm is based on assumption that random walker tends to be trapped in a dense part of a network structure related to communities. The walktrap community algorithm can be found in igraph package.
-
-```{r}
-
-```
-
-#### 2.2.3. Louvain method
-The Louvain method is another algorithm based on the optimization of modularity. It's designed to find communities in large networks. In first step, communities are assigned to each node in the network. Thus, there are as many communities as nodes in a graph. Then for each node neigborhood with other node is considered. Nodes are left in the neighborhood with the maximum gain of modularity. If gain is not positive node is not assign to neighborhood. The process is repeated until not further improvement can be achieved (when no individual move can improve modularity). Second phase starts as all nodes are in the communities. Weights of the links between nodes help to build a new network. Weights of the links bentween new nodes are identified on the sum of the weight of the links between nodes in the corresponding two communities. When second phase is finished, it is possible to apply first and then second phases again and again until maximum modularity is achieved [Blondel, Guillaume, Lambiotte, Lefebvre 2008].
-
-### 2.2.4. Spinglass community
-Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008]. This algorithm is available in R igraph package.
-
-## 3.Two-mode networks
-Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data refelcting relations between different classes of actors. [When using igraph package search for bipartie graphs to deal with two-mode networks].Two-mode networks
-
-### 3.1. Cohesive subgroups in two-mode networks
-Detecting cohesive subgroups in two-mode networks is a bit more complicated than in ordinary networks. There are couple of methods to do that. The easiest way is to convert two-mode data into one-mode. When data is converted methods designed for one-mode networks can be used to detect communities. Further in this chapter we will focus on the projection procedure used in two-mode networks and multidimensional scaling techniques to detect similarities or dissimilarites among nodes.
-
-#### 3.1.1. Projection procedure
-As we mentioned above, to conduct certain types of analysis researchers transform two-mode data into one-mode. One of few transformation techniques is called projection. In the projection procedure one type of nodes are removed from the two-mode network. Then connections between nodes belonging to one set are then reconstructed. For exmaple, in the network made of two three-elemantary sets of nodes x(a,b,c) and y(1,2,3) relations are as follow: a is connected with 1 and 2, b is linked to 1 and 3 and c is connected to 3. If we remove nodes y(1,2,3) and apply the projection procedure, relations in x(a,b,c) set of nodes will look like: a is connected to b and b is connected to c.
-
-#### 3.1.2. Multidimensional scaling
-Multidimensional scaling (MDS) techniques are used to identify similarities or dissimilarites among nodes in a network. MDS locate points in space to catch distances between actors. Therefore, Researchers may specify the number of dimensions needed to get similarities or dissimilarites. However, it is more difficult to interpret results if many dimensions are introduced better fit is returned. Metric and non-metric approaches in MDS can be used to indetify the proximities between the nodes. To get more information on MDS techniques in social network analysis we recommend Joseph Kruskal and Myron Wish calssical book "Multidimensional Scaling" [1978]. There are several packages in R offering function based on MDS techniques. In the igraph package there is a function 'layout.mds'. In this case igraph uses the shortest path matrix as the distances between nodes [See more. igraph: 207-208].
-
-<<<<<<< HEAD
-* "having something in common"
-* projections
-
-
-
-
-
-
-
-# References
-=======
->>>>>>> 72d9ac77f224029cd68bacc71284f3dd2b5e2383

@@ -62,7 +62,7 @@ friendship_paradox <- function(graph){
   mean(avg > degs)
 }
 
-coauthorship <- readRDS("coauthorship.RDS")
+coauthorship <- readRDS("data/coauthorship.RDS")
 friendship_paradox(coauthorship)
 
 # if we focus on giant component only

@@ -22,6 +22,11 @@ See how assortativity coefficient behaves on following undirected networks consi
 
 IDEAS FOR EXAMPLES
 ```{r, echo = FALSE}
+library("igraph")
+library("isnar")
+data(IBE121)
+playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
+
 g <- graph.empty(4, directed = FALSE)
 types <- rep(c("blue", "green"), each = 2)
 layout <- matrix(c(0,0, 0,1, 1,0, 1,1), ncol = 2, byrow = TRUE)

@@ -6,13 +6,23 @@ output:
     toc: true
 bibliography: references.bib
 ---
+# Introduction
+The idea of cohesion has been widely studied in contemporary social science. Researchers from diverse backgrounds are trying to identify factors encouraging individuals to keep dense and tight relations embedded in larger structures e.g. firms, local communities, societies. In this chapter we focus on the idea of cohesive subgroup developed in social network analysis. We begin with general definition of cohesion and than introduce clique and community measures of cohesion.
+
+In our analysis we will use network of judges -- there is an edge between two judges if they were judging at least one case together.
+```{r, message=FALSE, fig.align='center', fig.height=4, fig.width=4}
+library("igraph")
+graph <- readRDS("data/legnica.RDS")
+set.seed(12345)
+graph <- set.graph.attribute(graph, "layout", 
+                             layout.fruchterman.reingold(graph, params = list(repulserad = vcount(graph)^2)))
+par(mar = rep(0,4))
+plot(graph, vertex.label = NA, margin = 0)
+```
 
 
-Jakiś wstępik...
-=======
 # Cohesion
 Cohesion is one of few elementary properties of social networks. Cohesiveness is a property of tightly connected actors within the larger network structure. Actors with strong, intense, frequent, direct or positive relations may compose cohesive subgroups. Therefore, in social network analysis the definition of cohesion is based on certain properties of the ties among the actors. In social science literature, definition of cohesion often overlaps with definitions of social group [Wasserman, Faust 1994: 250]. There are numerous ways to conceptualize or define subgroups in social science. To avoid theoretical pitfalls, Wasserman and Faust identified four general properties of cohesive subgroups. They assumed that these properties allow to develop methods that focus on social network features [Ibidem 1994: 252]. Those properties are:
-<<<<<<< HEAD
 
 1. The mutuality of ties.
 2. The closeness or reachability of subgroup members.
@@ -26,23 +36,54 @@ Clique is a basic concept to study cohesive subgroups in social networks [Ibidem
 
 In social network analysis, clique is understood as maximal complete subgraph of three or more nodes. All members of a clique are adjacent to each other. Dyads are not considered as a clique structure. Furthermore, cliques identified in a network may overlap. Node or set of nodes often belong to many cliques [Wasserman & Faust 1994: 254]. It is not possible that one clique can fully cover another clique. In such a case we have just one clique.
 
-There are various algorithms available to identify cliques or subgraphs in social networks. Further in this chapter we will focus on methods that can be found in R igraph package. To go through choosen algorithms of community detection we will use ... data.
 
 ### 1.1. Cliques
-The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subrgaphs in a larger structure is one of simplest method to trace cliques in social networks. In the igraph package there is a function "cliques" that is based directly on this method. To get some more information on that function, its usage and arguments the documentation of igraph package should be explored [see: Package 'igrap': 42-43].
+The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subrgaphs in a larger structure is one of simplest method to trace cliques in social networks. 
 
-Question: How many cliques of minimal size = 5, function cliques from igraph package detects in Datafile?
+An `igraph` package provides a few useful functions for detecting clique. The main function is `cliques` which returns a list (as a vector of vertex id's) of all cliques found in the graph. We could set `min` argument to 3 to remove vertices and edges.
 ```{r}
-
-
-
+cliques <- cliques(graph, min = 3)
+length(cliques)
+table(sapply(cliques, length))
 ```
-Q! Answer: 
-g <- load("......../Datafile.rda")
-cliques(g, min=5)
+
+We could see that there are a lot of cliques even in rather small network. However we must remember that those cliques could overlap. In particular, a clique of size $N$ includes $N-1$ cliques of size $N-1$, $N \choose 2$ cliques of size $N-2$ and so on. Usually we are more interested in cliques, that are not part of some bigger ones. To find them we may use function `maximal.clique`.
+```{r}
+maximal.cliques.count(graph, min = 3)
+max_cliques <- maximal.cliques(graph, min = 3)
+table(sapply(max_cliques, length))
+```
+
+Now there are only `r length(max_cliques)` cliques. Some of them may overlap, but not completely. We could also directly find the largest cliques in the graph. Function `clique.number(graph)` gives us a size of the largest clique.
+```{r}
+clique.number(graph)
+largest.cliques(graph)
+```
+
+On the figure below maximal cliques of size at least 5 are highlighted.
+```{r, fig.width=4, fig.height=4, fig.align='center'}
+groups <- maximal.cliques(graph, min = 5)
+par(mar = rep(0,4))
+plot(graph, mark.groups = groups, vertex.label = NA, margin = 0)
+```
+
+Two cliques of size 5 (yellow and red) are patially included in cliques of size 6 (blue), while the largest clique (violet) forms isolated group.
+
+In package `network` there is a function `clique.census`, which finds all maximal cliques and additionally returns clique count and comembership matrix for vertices. It also performs symmetrization step for undirected graphs.
 
 ### 1.2. N-cliques
 As we mentioned above, the geodesic distances among memebers of cohesive groups should be small. To make the idea of clique more flexible it is possible to specify the cutoff value n as the maxium length of geodesic distance linking pairs of actors within the cohesive subgroup [Wasserman & Faust 1994: 254]. Thus, the n-clique is a subgraph with paths of n length as maxium value allowed between pairs of actors. Formmally, n-clique is made of geodesics d(i,j) =< n equal or lesser than n value. When n=1 identified subgroup is a complete subgraph.
+
+```{r, include=FALSE, eval=FALSE}
+source("http://bioconductor.org/biocLite.R")
+biocLite("RBGL")
+library("RBGL")
+tmp <- get.adjacency(graph, sparse = FALSE)
+colnames(tmp)[is.na(rownames(tmp))] <- "NA"
+rownames(tmp)[is.na(rownames(tmp))] <- "NA"
+tmp <- graphAM(tmp, "undirected")
+kCliques(tmp)
+```
 
 ### 1.3. N-clans
 The idea of n-cliques has its limitations that led to the idea of n-clans. Two problems might arise when we deal with n-cliques:
@@ -51,82 +92,151 @@ The idea of n-cliques has its limitations that led to the idea of n-clans. Two p
 The soultion to the first problem send us to the idea of n-clans. A n-clan is a n-clique in which the geodesic distance between all nodes is no greater than n [Ibidem: 260]. All n-clans in a subgraph are n-cliques, but not all n-cliques are n-clans.
 
 ### 1.4. K-plexes
-Cohesive subgroups are often identified on adjacency of subgroup members. Such a subgroup is made of actors being adjacent to relatively numerous other members of the subgroup. In other words, all subgroup members must be adjacent to some minimum k number of other members belonging to that subgroup. If k=1 the subgraph is a clique. As k is getting greater than 1, each node is allowed to have more missing ties within the subgroup.
+Cohesive subgroups are often identified on adjacency of subgroup members. Such a subgroup is made of actors being adjacent to relatively numerous other members of the subgroup. In other words, all subgroup members must be adjacent to some minimum `k` number of other members belonging to that subgroup. If `k=N-1`, where `N` is the size of the subgraph, the subgraph is a clique. As `k` is getting smaller, each node is allowed to have more missing ties within the subgroup.
 
 ## 2. Communities
 The idea of cliques is based on rigid formal assumptions (see above). It is quite complicated to detect cliques in real life social networks. Thus, in more recent works the idea of cliques has been replaced by more flexible but still very formal concept of 'community'. So, what is the community structure? Newman and Girvan spoke of "property that seems to be common to many networks is community structure, the division of network nodes into groups within which the network connections are dense, but between which they are sparser" [Newman & Girvan 2004: 1]. There are many algorithms availale to detect communities in social networks. They can be grouped into one of three types of algorithms: a) divisive algorithms, b) agglomerative algorithms, c) optimization methods [see: Blondel, Guillaume, Lambiotte, Lefebvre 2008]. Some of them are briefly presented below:
 
+It makes sense to study communities on connencted components of a graph -- most algorithms (NIE JESTEM TEGO PEWIEN!?!?) won't create community, that connectts nodes from two components. Therefore we will restrict following analyses to the largest connected component in our graph.
+```{r, fig.height=3, fig.width=3, fig.align='center'}
+cl <- clusters(graph)
+graph_c <- induced.subgraph(graph, cl$membership == which.max(cl$csize))
+graph_c <- set.graph.attribute(graph_c, "layout", 
+                             layout.fruchterman.reingold(graph_c, params = list(repulserad = vcount(graph_c)^2)))
+par(mar = rep(0, 4))
+plot(graph_c, vertex.label = NA, margin = 0)
+```
+
+In `igraph` there are a few community--detection algorithms implemented. Every function returns an object of class `communities`, which offers some useful methods. Amongst others you could easily plot communities structure on a given graph, calculate modularity score or plot step of algorithm as dendrogram.
+
 ### 2.1. Edge betweenness
 One of the most popular algorithms detecting communities in a social networks has been given by  Michelle Girvan and Mark Newman. The Girvan-Newman algorithm is a hierarchical method used in complex systems. Progressive removing of edges from the original network leads to the connected components of the remaining network which are the communities. This algorithms does not search for the most central edges of the whole structure. It focuses on the edge that is the most between and removes it. The most between edge is defined by the highest number of shortests paths running through the pair of nodes. The algorithm can be summarized by the following steps:
-- Betweenness of all edges is calculated as a first.
-- Edge with the highest betweenness level is removed.
-- Betweenness of all remaining edges is recalculated.
-- Steps 2 and 3 are repeated until no edges remain in a network.
-The Girvan-Newman algorithm is based on the divisive apporach in finding communities in network structures. In igraph package the function 'edge.betweenness.community'is based on this algorithm.
 
-Exmaple...
+1. Betweenness of all edges is calculated as a first.
+2. Edge with the highest betweenness level is removed.
+3. Betweenness of all remaining edges is recalculated.
+4. Steps 2 and 3 are repeated until no edges remain in a network.
+
+The Girvan-Newman algorithm is based on the divisive approach in finding communities in network structures. In `igraph` package the function `edge.betweenness.community` is based on this algorithm.
 
 ```{r}
+edge_comm <- edge.betweenness.community(graph_c)
+plot(edge_comm, graph_c, vertex.label = NA)
+```
 
+You could see how graph division looks through algorithm with `dendPlot` function.
+```{r, fig.width=5, fig.height=7, fig.align='center'}
+dendPlot(edge_comm)
 ```
 
 ### 2.2. Modularity
 Modularitty can be refered to the quality of divisions that can be turned into communities within a network. Clauset, Newman and Moore explain that "Modularity is a property of a network and a specific proposed division of that network into communities" [Caluset, Newman, Moore 2004]. There are many specific algorithms basead on the modularity maximization method. Further in this chapter we will focus on greedy optimization, random walks, statistical mechanics, and Louvain method. 
 
+```{r, fig.align='center'}
+modularity(edge_comm)
+plot(edge_comm$modularity)
+abline(v = which.max(edge_comm$modularity))
+```
+
+
 #### 2.2.1. Greedy optimization
-The greedy optimization algorithm, designed to detect communities in very large networks, has been proposed by Clauset, Newman and Moore [Caluset, Newman, Moore 2004]. The greedy algorithm selects the best solution at every step without regard to possible future. It starts with any node and connect it to the node nearest to it. Than, to connected set of nodes, unconnected node that is nearest to one in the connected set is added. Procedure continues until all nodes are linked. This algorithm has been included in R igraph package.
+The greedy optimization algorithm, designed to detect communities in very large networks, has been proposed by Clauset, Newman and Moore [Caluset, Newman, Moore 2004]. The greedy algorithm selects the best solution at every step without regard to possible future. It starts with any node and connect it to the node nearest to it. Than, to connected set of nodes, unconnected node that is nearest to one in the connected set is added. Procedure continues until all nodes are linked. 
+This algorithm has been implemented in `fastgreedy.community` function.
 
 ```{r}
-
+greed_comm <- fastgreedy.community(graph_c)
 ```
 
 #### 2.2.2. Walktrap community
-The idea behind this algorithm is that "partition P = {C1, . . . , Ck} of the vertices of a graph G = (V, E) represents a good community structure if the proportion of edges inside the Ci (internal edges) is high compared to the proportion of edges between them" [Pons, Latapy 2005: 1].  This algorithm is based on assumption that random walker tends to be trapped in a dense part of a network structure related to communities. The walktrap community algorithm can be found in igraph package.
+The idea behind this algorithm is that "partition P = {C1, . . . , Ck} of the vertices of a graph G = (V, E) represents a good community structure if the proportion of edges inside the Ci (internal edges) is high compared to the proportion of edges between them" [Pons, Latapy 2005: 1].  This algorithm is based on assumption that random walker tends to be trapped in a dense part of a network structure related to communities. 
+The walktrap community could be calculated with `walktrap.community` function.
 
 ```{r}
-
+walktrap_comm <- walktrap.community(graph_c)
 ```
 
 #### 2.2.3. Louvain method
 The Louvain method is another algorithm based on the optimization of modularity. It's designed to find communities in large networks. In first step, communities are assigned to each node in the network. Thus, there are as many communities as nodes in a graph. Then for each node neigborhood with other node is considered. Nodes are left in the neighborhood with the maximum gain of modularity. If gain is not positive node is not assign to neighborhood. The process is repeated until not further improvement can be achieved (when no individual move can improve modularity). Second phase starts as all nodes are in the communities. Weights of the links between nodes help to build a new network. Weights of the links bentween new nodes are identified on the sum of the weight of the links between nodes in the corresponding two communities. When second phase is finished, it is possible to apply first and then second phases again and again until maximum modularity is achieved [Blondel, Guillaume, Lambiotte, Lefebvre 2008].
 
-### 2.2.4. Spinglass community
-Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008]. This algorithm is available in R igraph package.
+This algorithm is implemented under different name in `multilevel.community` function.
+```{r}
+multim_comm <- multilevel.community(graph_c)
+```
 
-- Newman: granularity.
-  - `igraph::granularity`, `igraph::optimal.community`, `igraph::fastgreedy.community`
-- Louvain method.
-- Inne metody community detection (te co w igraph)
+#### 2.2.4. Spinglass community
+Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008].
+`spinglass.community` is an implementation of this algorithm.
+```{r}
+spinglass_comm <- spinglass.community(graph_c)
+```
 
 
+#### 2.2.5. Comparison of different algorithms.
 
-## 3.Two-mode networks
-Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data refelcting relations between different classes of actors. [When using igraph package search for bipartie graphs to deal with two-mode networks].Two-mode networks
+```{r, fig.width=5, fig.height=5, fig.align='center'}
+par(mfrow = c(2,2), mar = c(1,0,1,0))
+plot(greed_comm, graph_c, vertex.label = NA, 
+     main = paste("Greedy", round(modularity(greed_comm), dig = 4)))
+plot(walktrap_comm, graph_c, vertex.label = NA, 
+     main = paste("Walktrap", round(modularity(walktrap_comm), dig = 4)))
+plot(multim_comm, graph_c, vertex.label = NA, 
+     main = paste("Multilevel", round(modularity(multim_comm), dig = 4)))
+plot(spinglass_comm, graph_c, vertex.label = NA,
+     main = paste("Spinglass", round(modularity(spinglass_comm), dig = 4)))
+```
+
+We could see that all four algorithms return almost the same results. Only difference is that spinglass and walktrap divided the smallest community into two triads and obtained lower modularity score than two other algorithms.
+
+## 3. Two-mode networks
+Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data reflecting relations between different classes of actors.
+
+`igraph` recognizes bipartite graphs and provides some special functionalities. Bipartite graphs are stored simply as normal (one--mode) graphs, but with `type` argument indicating which nodes belong to which group. Unfortunately `igraph` wants type to be logical, or is coercing them to logical, which could be sometimes annoying as you couldn't explicitly use names of classes as types. 
+
+Below you could see a bipartite network, which was a source network for a graph used in previous chapters. There are two class of nodes -- judges and judgments. Nodes are connected if a given judge was judging at a given case. 
+```{r}
+graph_bip <- readRDS("data/legnica_bip.RDS")
+graph_bip
+table(V(graph_bip)$type)
+```
+
+A __B__ in __UN-B__ indicates that we are dealing with bipartite graph. We could see that there are a lot more judgments (`FALSE`) than judges (`TRUE`). 
+There is a special layout for plotting bipartite graphs, where classes are clearly separated. 
+```{r, fig.width=5, fig.height=5, fig.align='center'}
+par(mar = rep(0,4))
+plot(graph_bip, layout = layout.bipartite,
+     vertex.label = NA,
+     vertex.color = V(graph_bip)$type + 2, 
+     edge.color = rgb(0.2,0.2,0.2,0.3),
+     margin = 0)
+```
+
+Although our network is too big to plotted in any sensible way, it could be seen that some judges ruled in a huge number of judgments. Quick look at degrees confirms that.
+```{r}
+table(degree(graph_bip)[V(graph_bip)$type])
+```
+
 
 ### 3.1. Cohesive subgroups in two-mode networks
 Detecting cohesive subgroups in two-mode networks is a bit more complicated than in ordinary networks. There are couple of methods to do that. The easiest way is to convert two-mode data into one-mode. When data is converted methods designed for one-mode networks can be used to detect communities. Further in this chapter we will focus on the projection procedure used in two-mode networks and multidimensional scaling techniques to detect similarities or dissimilarites among nodes.
 
-#### 3.1.1. Projection procedure
+### 3.2. Projection procedure
 As we mentioned above, to conduct certain types of analysis researchers transform two-mode data into one-mode. One of few transformation techniques is called projection. In the projection procedure one type of nodes are removed from the two-mode network. Then connections between nodes belonging to one set are then reconstructed. For exmaple, in the network made of two three-elemantary sets of nodes x(a,b,c) and y(1,2,3) relations are as follow: a is connected with 1 and 2, b is linked to 1 and 3 and c is connected to 3. If we remove nodes y(1,2,3) and apply the projection procedure, relations in x(a,b,c) set of nodes will look like: a is connected to b and b is connected to c.
 
-#### 3.1.2. Multidimensional scaling
+Projection procedure is fortunately implemented `igraph` in `bipartite.projection`. Firstly we could check how the result of projection will look without constructing it.
+```{r}
+bipartite.projection.size(graph_bip)
+```
+
+We are more interested in a network between judges, therefore we could restrict projection procedure to construct network only between `TRUEs`. We want binary graph, so we set `multiplicity` argument to `FALSE` to simplify multiple edges. The resulting network is exactly our co--judging network.
+```{r}
+graph_proj <- bipartite.projection(graph_bip, multiplicity = FALSE, which = "true")
+graph_proj
+```
+
+### 3.3. Multidimensional scaling --> TO DOTYCZY TROCHĘ CZEGO INNEGO
 Multidimensional scaling (MDS) techniques are used to identify similarities or dissimilarites among nodes in a network. MDS locate points in space to catch distances between actors. Therefore, Researchers may specify the number of dimensions needed to get similarities or dissimilarites. However, it is more difficult to interpret results if many dimensions are introduced better fit is returned. Metric and non-metric approaches in MDS can be used to indetify the proximities between the nodes. To get more information on MDS techniques in social network analysis we recommend Joseph Kruskal and Myron Wish calssical book "Multidimensional Scaling" [1978]. There are several packages in R offering function based on MDS techniques. In the igraph package there is a function 'layout.mds'. In this case igraph uses the shortest path matrix as the distances between nodes [See more. igraph: 207-208].
 
-
-
-
-
-
-
-
-
-
-
-
-# $k$-cores
-
-
-`sna::kcores`
+# References
 
 General:
 [@denooy_etal_2011, Section 3.5]
@@ -137,124 +247,4 @@ Details:
 [@batagelj_zaversnik_2002]
 
 
-
-# Groups
-
-`igraph::cohesive.blocks`
-
 [@moody_white_2003]
-
-
-
-
-
-
-
-# Two-mode networks (affiliation)
-=======
-
-1. The mutuality of ties.
-2. The closeness or reachability of subgroup members.
-3. The frequency of ties among members.
-4. The relative frequency of ties among subgroup members compared to non-members [Ibidem: 251-252].
-
-Methods of detection of cohesive groups in social networks vary accord to: a) type of network (one-mode vs. two-mode), type of relation (directed vs. undirected).
-
-## 1. The idea of cliques
-Clique is a basic concept to study cohesive subgroups in social networks [Ibidem: 254]. Its root can be traced back to the research initiated by W. Lloyd Warner and Elton Mayo during the 1930s and 1940s [Scott 2001: 16-26]. Generally, clique is a sub-structure of a network made by actors that are more intensely and closely tied to each other. In real life, cliques are often formed on a basis of gender, age, race, ethnicity, religion, knowledge etc. 
->>>>>>> 72d9ac77f224029cd68bacc71284f3dd2b5e2383
-
-In social network analysis, clique is understood as maximal complete subgraph of three or more nodes. All members of a clique are adjacent to each other. Dyads are not considered as a clique structure. Furthermore, cliques identified in a network may overlap. Node or set of nodes often belong to many cliques [Wasserman & Faust 1994: 254]. It is not possible that one clique can fully cover another clique. In such a case we have just one clique.
-
-There are various algorithms available to identify cliques or subgraphs in social networks. Further in this chapter we will focus on methods that can be found in R igraph package. To go through choosen algorithms of community detection we will use ... data.
-
-### 1.1. Cliques
-The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subrgaphs in a larger structure is one of simplest method to trace cliques in social networks. In the igraph package there is a function "cliques" that is based directly on this method. To get some more information on that function, its usage and arguments the documentation of igraph package should be explored [see: Package 'igrap': 42-43].
-
-Question: How many cliques of minimal size = 5, function cliques from igraph package detects in Datafile?
-```{r}
-
-
-
-```
-Q! Answer: 
-g <- load("......../Datafile.rda")
-cliques(g, min=5)
-
-### 1.2. N-cliques
-As we mentioned above, the geodesic distances among memebers of cohesive groups should be small. To make the idea of clique more flexible it is possible to specify the cutoff value n as the maxium length of geodesic distance linking pairs of actors within the cohesive subgroup [Wasserman & Faust 1994: 254]. Thus, the n-clique is a subgraph with paths of n length as maxium value allowed between pairs of actors. Formmally, n-clique is made of geodesics d(i,j) =< n equal or lesser than n value. When n=1 identified subgroup is a complete subgraph.
-
-### 1.3. N-clans
-The idea of n-cliques has its limitations that led to the idea of n-clans. Two problems might arise when we deal with n-cliques:
-1. It may happen that the diameter of n-clique is greater than n value.
-2. It may also happen that n-clique is disconnected as n-path connecting two nodes in analyzed n-clique goes through nodes outside of that n-clique.
-The soultion to the first problem send us to the idea of n-clans. A n-clan is a n-clique in which the geodesic distance between all nodes is no greater than n [Ibidem: 260]. All n-clans in a subgraph are n-cliques, but not all n-cliques are n-clans.
-
-### 1.4. K-plexes
-Cohesive subgroups are often identified on adjacency of subgroup members. Such a subgroup is made of actors being adjacent to relatively numerous other members of the subgroup. In other words, all subgroup members must be adjacent to some minimum k number of other members belonging to that subgroup. If k=1 the subgraph is a clique. As k is getting greater than 1, each node is allowed to have more missing ties within the subgroup.
-
-## 2. Communities
-The idea of cliques is based on rigid formal assumptions (see above). It is quite complicated to detect cliques in real life social networks. Thus, in more recent works the idea of cliques has been replaced by more flexible but still very formal concept of 'community'. So, what is the community structure? Newman and Girvan spoke of "property that seems to be common to many networks is community structure, the division of network nodes into groups within which the network connections are dense, but between which they are sparser" [Newman & Girvan 2004: 1]. There are many algorithms availale to detect communities in social networks. They can be grouped into one of three types of algorithms: a) divisive algorithms, b) agglomerative algorithms, c) optimization methods [see: Blondel, Guillaume, Lambiotte, Lefebvre 2008]. Some of them are briefly presented below:
-
-### 2.1. Edge betweenness
-One of the most popular algorithms detecting communities in a social networks has been given by  Michelle Girvan and Mark Newman. The Girvan-Newman algorithm is a hierarchical method used in complex systems. Progressive removing of edges from the original network leads to the connected components of the remaining network which are the communities. This algorithms does not search for the most central edges of the whole structure. It focuses on the edge that is the most between and removes it. The most between edge is defined by the highest number of shortests paths running through the pair of nodes. The algorithm can be summarized by the following steps:
-- Betweenness of all edges is calculated as a first.
-- Edge with the highest betweenness level is removed.
-- Betweenness of all remaining edges is recalculated.
-- Steps 2 and 3 are repeated until no edges remain in a network.
-The Girvan-Newman algorithm is based on the divisive apporach in finding communities in network structures. In igraph package the function 'edge.betweenness.community'is based on this algorithm.
-
-Exmaple...
-
-```{r}
-
-```
-
-### 2.2. Modularity
-Modularitty can be refered to the quality of divisions that can be turned into communities within a network. Clauset, Newman and Moore explain that "Modularity is a property of a network and a specific proposed division of that network into communities" [Caluset, Newman, Moore 2004]. There are many specific algorithms basead on the modularity maximization method. Further in this chapter we will focus on greedy optimization, random walks, statistical mechanics, and Louvain method. 
-
-#### 2.2.1. Greedy optimization
-The greedy optimization algorithm, designed to detect communities in very large networks, has been proposed by Clauset, Newman and Moore [Caluset, Newman, Moore 2004]. The greedy algorithm selects the best solution at every step without regard to possible future. It starts with any node and connect it to the node nearest to it. Than, to connected set of nodes, unconnected node that is nearest to one in the connected set is added. Procedure continues until all nodes are linked. This algorithm has been included in R igraph package.
-
-```{r}
-
-```
-
-#### 2.2.2. Walktrap community
-The idea behind this algorithm is that "partition P = {C1, . . . , Ck} of the vertices of a graph G = (V, E) represents a good community structure if the proportion of edges inside the Ci (internal edges) is high compared to the proportion of edges between them" [Pons, Latapy 2005: 1].  This algorithm is based on assumption that random walker tends to be trapped in a dense part of a network structure related to communities. The walktrap community algorithm can be found in igraph package.
-
-```{r}
-
-```
-
-#### 2.2.3. Louvain method
-The Louvain method is another algorithm based on the optimization of modularity. It's designed to find communities in large networks. In first step, communities are assigned to each node in the network. Thus, there are as many communities as nodes in a graph. Then for each node neigborhood with other node is considered. Nodes are left in the neighborhood with the maximum gain of modularity. If gain is not positive node is not assign to neighborhood. The process is repeated until not further improvement can be achieved (when no individual move can improve modularity). Second phase starts as all nodes are in the communities. Weights of the links between nodes help to build a new network. Weights of the links bentween new nodes are identified on the sum of the weight of the links between nodes in the corresponding two communities. When second phase is finished, it is possible to apply first and then second phases again and again until maximum modularity is achieved [Blondel, Guillaume, Lambiotte, Lefebvre 2008].
-
-### 2.2.4. Spinglass community
-Last algorithm we focus on can be applied to directed and weighted networks. In this model, each element of the network (node) can be in one of N spin states. Interactions between elements (the edges of the graph) define which pairs of nodes would stay in the same spin state and which have different spin states. In the end the spin states of elements define the communities in a network. The number of communities is never greater than N. Some spin states might be empty, so the number of communities in a network is often lesser than N [Reichardt, Bornholdt 2008]. This algorithm is available in R igraph package.
-
-## 3.Two-mode networks
-Two-mode (two-dimensional) networks are specific types of networks made of two different sets of actors or set of actors and set of events (firms, states). They are often called affiliation networks [Nooy, Mrvar, Batagelj 2005: 103]. Consider directors sitting on corporate boards (interlocking directorate). Some of them are members of many boards. Thus, it's possible to reconstruct network of relations between comapnies and its directors. Directors are example of one type of actros, while comapnies belong to second type of actors. In terms of social network analysis, in two-mode networks rows and columns are different sets of entities. In other words, two-mode networks appear when researchers collect data refelcting relations between different classes of actors. [When using igraph package search for bipartie graphs to deal with two-mode networks].Two-mode networks
-
-### 3.1. Cohesive subgroups in two-mode networks
-Detecting cohesive subgroups in two-mode networks is a bit more complicated than in ordinary networks. There are couple of methods to do that. The easiest way is to convert two-mode data into one-mode. When data is converted methods designed for one-mode networks can be used to detect communities. Further in this chapter we will focus on the projection procedure used in two-mode networks and multidimensional scaling techniques to detect similarities or dissimilarites among nodes.
-
-#### 3.1.1. Projection procedure
-As we mentioned above, to conduct certain types of analysis researchers transform two-mode data into one-mode. One of few transformation techniques is called projection. In the projection procedure one type of nodes are removed from the two-mode network. Then connections between nodes belonging to one set are then reconstructed. For exmaple, in the network made of two three-elemantary sets of nodes x(a,b,c) and y(1,2,3) relations are as follow: a is connected with 1 and 2, b is linked to 1 and 3 and c is connected to 3. If we remove nodes y(1,2,3) and apply the projection procedure, relations in x(a,b,c) set of nodes will look like: a is connected to b and b is connected to c.
-
-#### 3.1.2. Multidimensional scaling
-Multidimensional scaling (MDS) techniques are used to identify similarities or dissimilarites among nodes in a network. MDS locate points in space to catch distances between actors. Therefore, Researchers may specify the number of dimensions needed to get similarities or dissimilarites. However, it is more difficult to interpret results if many dimensions are introduced better fit is returned. Metric and non-metric approaches in MDS can be used to indetify the proximities between the nodes. To get more information on MDS techniques in social network analysis we recommend Joseph Kruskal and Myron Wish calssical book "Multidimensional Scaling" [1978]. There are several packages in R offering function based on MDS techniques. In the igraph package there is a function 'layout.mds'. In this case igraph uses the shortest path matrix as the distances between nodes [See more. igraph: 207-208].
-
-<<<<<<< HEAD
-* "having something in common"
-* projections
-
-
-
-
-
-
-
-# References
-=======
->>>>>>> 72d9ac77f224029cd68bacc71284f3dd2b5e2383

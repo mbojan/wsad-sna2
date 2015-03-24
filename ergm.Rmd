@@ -9,17 +9,18 @@ In this tutorial we will use `network` objects from `statnet` suite of packages 
 
 ```{r, message=FALSE}
 library("statnet")
+library("methods")
 ```
 
 The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
 ```{r}
-data(faux.magnolia.high)
-summary(faux.magnolia.high ~ edges + triangle + nodematch("Sex"))
+data(faux.mesa.high)
+summary(faux.mesa.high ~ edges + triangle + nodematch("Sex"))
 ```
 
 We could also estimate ERGM:
 ```{r, message=FALSE}
-model <- ergm(faux.magnolia.high ~ edges + nodematch("Sex"))
+model <- ergm(faux.mesa.high ~ edges + nodematch("Sex"))
 summary(model)
 ```
 

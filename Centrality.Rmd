@@ -1,10 +1,16 @@
 ---
 title: "Centrality"
-author: "Kami Filipek"
-date: "Monday, March 23, 2015"
-output: html_document
 ---
-The aim of many researches is to identify the most important actors in the network. The most important actors exercise control over others or inlfuence their behaviours to achieve private goals. However, the notion "important" has many differnet meanings in social life. It can be also measured in many different ways in social network analysis. At this stage we assume that important actors hold central position in networks that allow them influence behaviours of other actors.  
+The aim of many researches is to identify the most important actors in the network. The most important actors exercise control over others or inlfuence their behaviours to achieve private goals. However, the notion "important" has many differnet meanings in social life. It can be also measured in many different ways in social network analysis. At this stage we assume that important actors hold central position in networks that allow them influence behaviours of other actors.
+
+In this chapter we will focus on different meanings and measures of centrality in social networks. Three concepts of centrlity will be discussed further: a) degree centrality, b) closenness centrality, c) betweenness centrality.
+
+## 1. Degree centrality
+
+
+
+
+
 
 In many researches, it is a goal of primary importance to identify the most important actors in the network. The most important actor holds the great power, inlfuence, 
 

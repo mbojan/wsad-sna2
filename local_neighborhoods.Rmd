@@ -9,6 +9,7 @@ library("isnar")
 library("knitr")
 ```
 
+
 The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
 
 There are multiple approaches in studying social networks. In this chapter we will focus on basic properties of ego-networks extensively used in many social studies. Ego-networks are often sampled from large structures and used as a basis of statistically significant conclusions on whole population [@everett_borgatti2005]. Empirical studies of ego-networks include: social support, knowledge sharing or disease spread. More recently, some ego measures can be found on the popular social network sites [e.g. relationship at LinkedIn].

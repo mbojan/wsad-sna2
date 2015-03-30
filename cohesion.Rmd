@@ -13,9 +13,6 @@ In our analysis we will use network of judges -- there is an edge between two ju
 ```{r, message=FALSE, fig.align='center', fig.height=4, fig.width=4}
 library("igraph")
 graph <- readRDS("data/legnica.RDS")
-set.seed(12345)
-graph <- set.graph.attribute(graph, "layout", 
-                             layout.fruchterman.reingold(graph, params = list(repulserad = vcount(graph)^2)))
 par(mar = rep(0,4))
 plot(graph, vertex.label = NA, margin = 0)
 ```
@@ -154,29 +151,29 @@ g$layout <- layout.auto(g)
 par(mfrow=c(1, 6), mar = rep(0, 4))
 
 plot(g, vertex.color = c(1, 2, 3, 2, 3, 2, 1) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 2, 3, 2, 3, 2, 1)), 3))
+text(0, -1.2, round(modularity(g, c(1, 2, 3, 2, 3, 2, 1)), 3))
 
 plot(g, vertex.color = c(1, 2, 2, 1, 2, 1, 2) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 2, 2, 1, 2, 1, 2)), 3))
+text(0, -1.2, round(modularity(g, c(1, 2, 2, 1, 2, 1, 2)), 3))
 
 plot(g, vertex.color = c(1, 1, 1, 1, 1, 1, 1) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 1, 1, 1, 1, 1, 1)), 3))
+text(0, -1.2, round(modularity(g, c(1, 1, 1, 1, 1, 1, 1)), 3))
 
 plot(g, vertex.color = c(1, 1, 2, 1, 2, 2, 2) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 1, 2, 1, 2, 2, 2)), 3))
+text(0, -1.2, round(modularity(g, c(1, 1, 2, 1, 2, 2, 2)), 3))
 
 plot(g, vertex.color = c(1, 1, 1, 3, 2, 2, 2) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 1, 1, 3, 2, 2, 2)), 3))
+text(0, -1.2, round(modularity(g, c(1, 1, 1, 3, 2, 2, 2)), 3))
 
 plot(g, vertex.color = c(1, 1, 1, 1, 2, 2, 2) + 1, vertex.label = NA)
-text(0, -1, round(modularity(g, c(1, 1, 1, 1, 2, 2, 2)), 3))
+text(0, -1.2, round(modularity(g, c(1, 1, 1, 1, 2, 2, 2)), 3))
 ```
 
-We could see that the modularity score is lowest if there is no edge within any community. On the other hand the highest modularity is obtained for reasonable division, with only one edge between communities. However, when there is only one community, modularity is always $0$.
+We could see that the modularity score is the lowest if there is no edge within any community. On the other hand the highest modularity is obtained for reasonable division, with only one edge between communities. However, when there is only one community, modularity is always $0$.
 
 We could see how modularity score was changing throughout the Girvan-Newman algorithm applied to our network of judges.
 ```{r, fig.align='center'}
-plot(edge_comm$modularity)
+plot(edge_comm$modularity, xlab = "Step", ylab = "Modularity")
 abline(v = which.max(edge_comm$modularity))
 text(10, 0.4, paste("max modularity = ", round(modularity(edge_comm), 3)))
 ```
@@ -280,14 +277,15 @@ g <- graph.bipartite(c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE),
                      c(1,5, 1,6, 2,5, 2,7, 3,7, 4,5, 4,7))
 V(g)$name <- c("a", "b", "c", "d", "1", "2", "3")
 par(mar = rep(0,4))
-plot(g, layout = layout.bipartite)
+plot(g, layout = layout.bipartite, vertex.size = 20)
 ```
 
 If we remove nodes $B$ and apply the projection procedure, relations in $A$ set of nodes will look like: $a$ is connected to $\{b,d\}$, $b$ is connected to $\{a,c,d\}$, $c$ to $\{b,d\}$ and $d$ to $\{a,b,c\}$. We could analogically remove nodes $A$ and obtain second projection. Both are show below.
 ```{r, fig.height=2,fig.width=4,fig.align='center'}
 par(mar = rep(0,4), mfrow=c(1,2))
-plot(graph.data.frame(data.frame(c("a","a","b","b","c"), c("b","d","c","d","d")), directed = FALSE))
-plot(graph(c(1,2, 1,3), directed = FALSE))
+plot(graph.data.frame(data.frame(c("a","a","b","b","c"), c("b","d","c","d","d")), directed = FALSE),
+     vertex.size = 20)
+plot(graph(c(1,2, 1,3), directed = FALSE), vertex.size = 20)
 ```
 
 Projection procedure is fortunately implemented `igraph` in `bipartite.projection`. Firstly we could check how the result of projection will look without constructing it.
@@ -299,8 +297,8 @@ We want projection to be binary graphs, so we set `multiplicity` argument to `FA
 ```{r, fig.height=2,fig.width=4,fig.align='center', echo=FALSE}
 g_proj <- bipartite.projection(g, multiplicity = FALSE)
 par(mar = rep(0,4), mfrow=c(1,2))
-plot(g_proj$proj1)
-plot(g_proj$proj2)
+plot(g_proj$proj1, vertex.size = 20)
+plot(g_proj$proj2, vertex.size = 20)
 ```
 
 We see that these networks are exactly the same as we've constructed by hand.

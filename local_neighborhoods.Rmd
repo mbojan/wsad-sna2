@@ -1,6 +1,9 @@
 ---
 title: Ego-networks and local neighborhood
-output: html_document
+output: 
+  html_document:
+    theme: united
+    toc: true
 bibliography: references.bib
 ---
 ```{r, echo=FALSE}
@@ -9,28 +12,25 @@ library("isnar")
 library("knitr")
 ```
 
+## 1. Introduction 
 
 The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
 
 There are multiple approaches in studying social networks. In this chapter we will focus on basic properties of ego-networks extensively used in many social studies. Ego-networks are often sampled from large structures and used as a basis of statistically significant conclusions on whole population [@everett_borgatti2005]. Empirical studies of ego-networks include: social support, knowledge sharing or disease spread. More recently, some ego measures can be found on the popular social network sites [e.g. relationship at LinkedIn].
 
-In the subject literature, the ego-networks are also analyzed as the neighbourhood networks [@everett_borgatti2005]. In order to understand the variation across actors embedded in their "local" environments we need to introduce some beasic definitions.
+In the subject literature, the ego-networks are also analyzed as the neighborhood networks [@everett_borgatti2005]. In order to understand the variation across actors embedded in their "local" environments we need to introduce some basic definitions.
 
-a) Ego.
-"Ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a sinlge node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to ego, and measurements on the ties among these alters" [@everett_borgatti2005: 42].
+a) __Ego__:
+"ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a single node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to ego, and measurements on the ties among these alters" [@wasserman_faust_1994: 42].
 
-b) Neighborhood.
-A single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes).Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The size of neighborhood is expaneded by connections of N-step and all the connections between actors identified at a path length of N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations.
+b) __Neighborhood__:
+a single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes).Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The neighborhood is expanded by N-step connections and all the connections between actors identified at a path of length N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations. 
 
-<<<<<<< HEAD
+The definition of neighborhood is a bit more complicated in case of directed graph. We could distinguish "in" and "out" and other kinds of neighborhoods. An "out" neighborhood would include all the actors to whom ties are directed from ego. Similarly an "in" neighborhood would include all the actors who sent ties directly to ego. We might also want to define a neighborhood of only those actors to whom ego had reciprocated ties. Choice of neighborhood typ should depend on research question.
 
-The following picture illustrates the idea of ego-networks in undirected graph.
+The following picture illustrates the idea of ego-networks and neighborhoods in undirected graph.
 
-```{r, echo = FALSE}
-igraph.options(vertex.label = NA)
-
-old.par <- par(no.readonly = TRUE)
-par(mfrow = c(2, 3), mar = rep(3, 4))
+```{r, echo = FALSE, fig.align='center', fig.height=4, fig.width=7}
 
 set.seed(123)
 g <- random.graph.game(20, 0.2, directed = FALSE)
@@ -45,103 +45,136 @@ titles <- c("Ego (0-step neighborhood)",
             "3-step neighborhood",
             "4-step neighborhood (full network)")
 
+par(mfrow = c(2, 3), mar = c(1,2,1,2))
 for (i in seq_along(neighborhoods)) {
   neighborhood <- neighborhoods[[i]]
   V(g)$color[neighborhood] <- "red"
   V(g)$size[neighborhood] <- 12
   E(g)[neighborhood %--% neighborhood] $color <- "red"
-  plot(g, main = titles[i])
+  plot(g, main = titles[i], vertex.label = NA, margin = -0.05)
 }
-
-par(old.par)
-igraph.options(vertex.label = NULL)
 ```
 
-To find neighborhoods in `igraph` you can use a variety of functions. The simplest one is `neighbors`, which returns neighbors of a given vertex (without that vertex).
+To find neighborhoods in `igraph`, both for directed and undirected graphs, you can use a variety of functions. We will demonstrate them using two networks -- directed and undirected, both shown below. 
 
-```{r, fig.width=5, fig.height=5, fig.align='center'}
+```{r, fig.width=6, fig.height=3, fig.align='center', echo=1:2}
 g <- graph.famous("Frucht")
+g_d <- graph(c(1,2, 1,3, 2,1, 2,4, 3,4, 4,3, 1,5, 5,4, 6,3, 4,6, 5,7))
+par(mfrow = c(1,2), mar = rep(0,4))
 plot(g)
-neighbors(g, 5)
+plot(g_d)
 ```
 
-Function `neighborhood` is a bit more advanced, as it allows to chose the order of the neighborhood to be returned. It returns a list of neighborhoods (IDs) for all given vertices. Note that, differently than `neighbors`, `neighborhood` contains also the ego vertex.
+The simplest function is `neighbors`, which returns neighbors of a given vertex (without that vertex). For directed graph we could specify what type of neighborhood we want. Note that in last neighborhoods vertex 3 occurs twice, because an edge between 3 and 4 is reciprocated.
+```{r}
+neighbors(g, 5)
+neighbors(g_d, 4, mode = "in")
+neighbors(g_d, 4, mode = "out")
+neighbors(g_d, 4, mode = "all")
+```
+
+Function `neighborhood` is a bit more advanced, as it allows to chose the order of the neighborhood to be returned. It returns a list of neighborhoods (IDs) for all given vertices. Again, we could specify type of the neighborhood. Note that, differently than `neighbors`, `neighborhood` contains also the ego vertex.
 
 ```{r}
-g <- graph.famous("Frucht")
 neighborhood(g, order = 0, nodes = 5)
 neighborhood(g, order = 1, nodes = 5)
 neighborhood(g, order = 2, nodes = 5)
 neighborhood(g, order = 1, nodes = 1:5)
+neighborhood(g_d, order = 1, nodes = 4, mode = "out")
+neighborhood(g_d, order = 2, nodes = 4, mode = "in")
 ```
 
-You could also directly create ego-network based on the `graph.neighborhood` function.
-
+If you want to know only the size of the neighborhood instead of all nodes in ti, you could use `neighborhood.size` function.
 ```{r}
+neighborhood.size(g, order = 2, nodes = 5)
+neighborhood.size(g_d, order = 2, nodes = 4, mode = "in")
+```
+
+Another possibility is to generate neighborhoods through adjacency list. There is a function `get.adjlist` that returns list of neighbors for all vertices. Again, ego node is skipped.
+```{r}
+get.adjlist(g_d, mode = "in")
+get.adjlist(g_d, mode = "out")
+```
+
+You could also directly create ego-network based on the `graph.neighborhood` function. We set letters as vertex names so as it is clear which vertices are in which ego-network.
+
+```{r, fig.align='center', fig.height=5, fig.width=8, echo=-5}
 V(g)$name <- letters[1:vcount(g)]
 
 ego_networks <- graph.neighborhood(g, order = 1, nodes = 1:5)
 
-old.par <- par(no.readonly = TRUE)
 par(list(mfrow = c(2, 3), mar = rep(0.1, 4)))
+plot(g, vertex.size = 25, vertex.label.cex = 1.8)
+for (graph in ego_networks) plot(graph, vertex.size = 25, vertex.label.cex = 1.8)
+```
 
-plot(g)
-for (graph in ego_networks) plot(graph)
+```{r, fig.align='center', fig.height=7, fig.width=7, echo=-5}
+V(g_d)$name <- letters[1:vcount(g_d)]
 
-par(old.par)
+ego_networks <- graph.neighborhood(g_d, order = 1, mode = "in")
+
+par(list(mfrow = c(3, 3), mar = rep(0.1, 4)))
+plot(g_d, vertex.size = 25, vertex.label.cex = 1.8)
+for (graph in ego_networks) plot(graph, vertex.size = 25, vertex.label.cex = 1.8)
 ```
 
 For objects of class `network` from `statnet` you could use `get.neighborhood` function.
 
-## 1. Ego-network properties
+## 2. Ego-network properties
 There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) compositional measures, b) structural measures. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. Degree of a vertex represents the structural property. John workmates from LinkedIn are computer geeks and he often ask them for computer help. It means that John have a good access to computer knowledge. Knowledge reosurces are example of the compositional property.
 Further in this chapter we will focus on both compositional and structural properties of ego-networks.
 
-### 1.1. Compositional properties
+### 2.1. Compositional properties
 As we mentioned above, ego-network is a set of nodes who have ties to ego. Thus, ego-networks can be characterized through attributes of ego and its neighbors. Variability within and between ego and neighbors contributes to different network compositions. Below, we will consider some basic properties shaping network composition.
 
-#### 1.1.1. Ego characteristic
+#### 2.1.1. Ego characteristic
 Depending on type of research, subjectivity of ego may vary. Individual, group, organization, corporation, state etc. may be the focal point of ego-network. If we assume that ego is a person it can be characterized by socio-demographic attributes e.g. sex, race, occupation, ethnicity. It is simple to recognize and deal with these attributes when one-mode networks are analyzed. When two-mode networks (see further in this course) are considered it is necessary to choose type of actor around which  ego-network is build.
 Article of Paul Nieuwbeerta and Henk Falp shows how ego charactersitics can be used [@nieuwbeerta_flap_2000]
 
-#### 1.1.2. Resources
+#### 2.1.2. Resources
 Resources owned by ego's neighbours have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Reource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@webber_huxley_2007].
 
-#### 1.1.3. Homophily
+#### 2.1.3. Homophily
 Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of atribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
 
-Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex.
+Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex. As we are interested in ego's preference towards others and not the other way round, we will analyses out-neighborhood.
 
-```{r}
+```{r, fig.align='center', fig.width=4, fig.height=4, echo=-4}
 data(IBE121)
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-
-degree(playnet, mode = "out")
-degree(playnet, mode = "in")
-degree(playnet, mode = "all")
-
-neighborhood.size(playnet, 1)
+V(playnet)$color <- ifelse(V(playnet)$female, "blue", "red")
+par(mar = rep(0,4))
+plot(playnet, vertex.label = NA)
 ```
 
+We create explicit vector with sex, for clarity.
 ```{r}
-# prepare vector with explicit sex names for clarity
 gender <- ifelse(V(playnet)$female, "female", "male")
+```
 
-# find fractions of sexes in ego-networks and choose fraction corresponding
-# to ego's sex
-frac <- sapply(seq(vcount(playnet)), function(i) {
-  neigh <- neighbors(playnet, i)
-  s <- gender[neigh]
-  t <- prop.table(table(s))
-  t[gender[i]]
+Now actual computation. We want to inspect alters of every node, so an adjacency list will be useful.
+```{r}
+adj <- get.adjlist(playnet, mode = "out")
+```
+
+For each node, we calculate proportions of sex amongst its alters (we use factor to preserve genders with zero-share).
+```{r}
+props <- lapply(adj, function(alters) {
+  s <- factor(gender[alters], levels = c("male", "female"))
+  prop.table(table(s))
 })
+```
 
-mean(frac, na.rm = TRUE)
-
-# histogram of fractions   --> RYSUNKI DO DOPRACOWANIA
-hist(frac)
+Finally we compare our proportions to ego's sex.
+```{r, fig.align='center', fig.height=3, fig.width=4, echo=1}
+frac <- sapply(seq_along(props), function(i) props[[i]][gender[i]])
+par(mar = c(5,2,1,2))
+hist(frac, xlab = "Proportion of alters with the same sex as ego", main = "")
 abline(v = mean(frac, na.rm = TRUE))
+```
+The vertical line indicates the average in whole network.
 
+```{r, include = FALSE, eval=FALSE}
 # histogram of fractions with respect to gender
 hist(frac[gender == "male"], col = rgb(0,0,1,0.5))
 hist(frac[gender == "female"], add = TRUE, col = rgb(1,0,0,0.5))
@@ -149,27 +182,28 @@ abline(v = mean(frac[gender == "male"], na.rm = TRUE), col = rgb(0,0,1,0.5))
 abline(v = mean(frac[gender == "female"], na.rm = TRUE), col = rgb(1,0,0,0.5))
 ```
 
-Our simple analysis suggests that children indeed prefer to play with same-sex colleagues. Almost all play ONLY within their own gender.
+Our simple analysis suggests that children indeed prefer to play with same-sex colleagues. Almost all choose playmates ONLY from their own gender.
 
-Another question we may ask is whether socioeconomic status of parents influence choice of playmates. We have information about status of every parent, so to obtain one value we'll calculate mean. Algorithm is almost the same as above, but this time we don't compare fractions but calculate root-mean-square difference.
-
+Another question we may ask is whether socioeconomic status of parents influence choice of playmates. We have information about status of every parent, so to obtain one value we'll calculate mean. 
 ```{r}
 status <- matrix(c(V(playnet)$isei08_m, V(playnet)$isei08_f), ncol = 2)
 status <- rowMeans(status, na.rm = TRUE)
+```
 
-rmsd <- sapply(seq(vcount(playnet)), function(i) {
-  neigh <- neighbors(playnet, i)
-  s <- status[neigh]
-  diff <- abs(s - status[i])
+Algorithm is almost the same as above, but this time we don't compare fractions but calculate root-mean-square difference.
+```{r, fig.align='center', fig.height=3, fig.width=4, echo=1:2}
+alters_status <- lapply(adj, function(alters) s <- status[alters])
+rmsd <- sapply(seq_along(alters_status), function(i){
+  diff <- abs(alters_status[[i]] - status[i])
   sqrt(mean(diff^2, na.rm = TRUE))
 })
-
 summary(rmsd)
-
-# histogram
-hist(rmsd)
+par(mar = c(5,2,1,2))
+hist(rmsd, xlab = "Root mean squared difference between \nsocioeconomic status of ego and its alters", 
+     main = "")
 abline(v = mean(rmsd, na.rm = TRUE))
-
+```
+```{r, include = FALSE, eval=FALSE}
 # histogram of fractions with respect to gender
 hist(rmsd[gender == "male"], col = rgb(0,0,1,0.5))
 hist(rmsd[gender == "female"], add = TRUE, col = rgb(1,0,0,0.5))
@@ -177,11 +211,20 @@ abline(v = mean(rmsd[gender == "male"], na.rm = TRUE), col = rgb(0,0,1,0.5))
 abline(v = mean(rmsd[gender == "female"], na.rm = TRUE), col = rgb(1,0,0,0.5))
 ```
 
-### 1.2. Structural properties
-Variability of connections between ego and alters produce different structures of ego-networks. Those structures have certain properties (structural properties) that are measured in social network analysis. 
-In this section, we will focus on some basic structural properties of ego-networks: a) degree, b) effective size, c) efficiency, d) constraint, e) dyadic constraint.
+We see that it varies more than in case of gender. It could suggest that children don't choose their playmates according to their parents socioeconomic status, at least not in this class and not comapred to sex criterion.
 
-#### 1.2.1. Degree 
+
+### 2.2. Structural properties
+Variability of connections between ego and alters produce different structures of ego-networks. Those structures have certain properties (structural properties) that are measured in social network analysis. 
+In this section, we will focus on some basic structural properties of ego-networks: 
+
+a) degree, 
+b) effective size, 
+c) efficiency, 
+d) constraint, 
+e) dyadic constraint.
+
+#### 2.2.1. Degree 
 In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks (directed graphs), degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
 
 ```{r, eval=FALSE, include=FALSE}
@@ -199,9 +242,6 @@ degree(g, mode="all")
 To calculate degree use function called `degree`. You could also use `neighborhood.size` to directly calculate size of ego-network.
 
 ```{r}
-data(IBE121)
-playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-
 degree(playnet, mode = "out")
 degree(playnet, mode = "in")
 degree(playnet, mode = "all")
@@ -211,46 +251,48 @@ neighborhood.size(playnet, 1)
 
 For networks of class `network` there is a function also called `degree` in package `sna`.
 
-#### 1.2.2. Effective size of the network
-The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatii_1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). See more in: [@burt_1992], [@borgatti_1997].
+#### 2.2.2. Effective size of the network
+The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that an ego is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatti simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatti_1997: 35]. The average degree of ego's alters is 2. So, the effective size of the network is 1 ( 3 (ego's network size) - 2 (average degree of ego's alters)). See more in: [@burt_1992], [@borgatti_1997].
 
-To feel how effective size works consider two extreme cases of John's ego-network.
+There is no function in `igraph` to calculate effective size of the network, but it is easy to write it by ourselves.
 
+```{r}
+effective_size <- function(g, v) {
+  degree(g, v) - mean(degree(delete.vertices(g, v)))
+}
+```
+
+We will calculate it on small artificial network.
 ```{r}
 g <- graph.edgelist(matrix(c(1,2, 1,3, 1,4, 3,4), ncol = 2, byrow = TRUE),
                     directed = FALSE)
 V(g)$name <- c("John", "Lara", "Peter", "Sara")
-plot(g)
-```
-
-```{r, echo=FALSE}
-effective_size <- function(g, v) {
-  degree(g, v) - mean(degree(delete.vertices(g, v)))
-}
-par(mfrow = c(1,2))
-
-g1 <- delete.edges(g, E(g)[4])
-plot(g1, main = paste("Effective size = ", effective_size(g1, "John")))
-
-g1 <- add.edges(g, c(2,3, 2,4))
-plot(g1, main = paste("Effective size = ", effective_size(g1, "John")))
-
-par(mfrow = c(1,1))
-```
-
-Effective size of the left network is 3, because alters couldn't communicae with each other at all. On the other hand, effective size of the right network is 1, although John still has three alters. However, this time alters could communicate with each other, therefore links from John redundant - if we remove two of them, information from John could still diffuse on the whole network.
-
-There are no function in `igraph` to calculate effective size of the network, but it is easy to write it by ourselves.
-
-```{r}
-effective_size <- function(g, v) {
-  degree(g, v) - mean(degree(delete.vertices(g, v)))
-}
 effective_size(g, "John")
 ```
 
-#### 1.2.3. Efficiency
-Efficiency send us to effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [@hanneman_riddle_2005: 138]
+To feel how effective size works consider three versions of John's ego-network.
+
+```{r, fig.align='center', fig.width=8, fig.height=3, echo=FALSE}
+g$layout <- matrix(c(0.5,0.5, 0.5,1, 0,0, 1,0), ncol = 2, byrow = TRUE)
+par(mfrow = c(1,3), mar = c(1,2,2,1))
+
+g1 <- delete.edges(g, E(g)[4])
+plot(g1, main = paste("Effective size = ", effective_size(g1, "John")),
+     vertex.size = 40, vertex.label.cex = 1.5)
+
+plot(g, main = paste("Effective size = ", round(effective_size(g, "John"), 2)), 
+     vertex.size = 40, vertex.label.cex = 1.5)
+
+g1 <- add.edges(g, c(2,3, 2,4))
+plot(g1, main = paste("Effective size = ", effective_size(g1, "John")),
+     vertex.size = 40, vertex.label.cex = 1.5)
+```
+
+Effective size of the left network is 3, because alters couldn't communicate with each other at all. On the other hand, effective size of the right network is 1, although John still has three alters. However, this time alters could communicate with each other, therefore links from John are redundant - if we remove two of them, information from John could still diffuse on the whole network.
+
+
+#### 2.2.3. Efficiency
+Efficiency weighs effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [@hanneman_riddle_2005: 138]
 
 Again there is no explicit function to calculate efficiency, but we could write our own function.
 ```{r}
@@ -260,10 +302,11 @@ efficiency <- function(g, v) {
 efficiency(g, "John")
 ```
 
-See how efficiency and effective size are distributed in kinship network.?
-```{r kable}
+See how efficiency and effective size are distributed in kinship network.
+```{r kable, echo=FALSE, fig.align='center', fig.height=4, fig.width=5}
 data(Wnet)
-plot(Wnet)
+par(mar = rep(0,4))
+plot(Wnet, vertex.size = 20, vertex.label.cex = 0.8)
 
 tmp <- lapply(V(Wnet)$name, function(name) {
   g <- graph.neighborhood(Wnet, 1, name)[[1]]
@@ -271,26 +314,30 @@ tmp <- lapply(V(Wnet)$name, function(name) {
              eff_size = effective_size(g, name),
              eff = efficiency(g, name))
 })
-kable(do.call(rbind, tmp))
+kable(do.call(rbind, tmp), digits = 2, align = rep("c", 3),
+      col.names = c("Size of ego network", "Effective size", "Efficiency"))
 ```
 
-Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't that high.  
+Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't the highest. On the other hand sister's husband has the hidhest possible efficiency, but she communicates only with two persons, so she is not effective.
 
-#### 1.2.4. Constraint (aggregate constraint)
-Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides of links to A, A is not constrained. The idea of constrain send us to the important paradox. It happens that people who have many connections may lose autonomy of action. 
-
-```{r, echo=FALSE, fig.width=4, fig.height=4, fig.align='center'}
-plot(g)
-```
+#### 2.2.4. Constraint (aggregate constraint)
+Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides links to A, A is not constrained. The idea of constrain sends us to the important paradox. It happens that people who have many connections may lose autonomy of action. 
 
 In our simple example John is constrained by a link between Sara and Peter. 
+```{r, echo=FALSE, fig.width=2, fig.height=2, fig.align='center'}
+par(mar=rep(0,4))
+plot(g, vertex.size = 40)
+```
 
-In R package igraph there is a function `constraint` that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
+In `igraph` there is a function `constraint` that helps us to calculate aggregated constraint of the actors. The higher number, the more constrained the actor is in his action.
+```{r}
+constraint(g)
+```
 
-In the subject literature there are many works where structural measures of ego-network were applied. To get some more details on presented measures it worth to see: Roberts et all, Exploring variation in active network size: Constraints and ego characteristics [@roberts_etal_2009].
+In the subject literature there are many works where structural measures of ego-network were applied. To get some more details on presented measures it is worth to see [@roberts_etal_2009].
 
-#### 1.2.5. Dyadic constraint
-Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [@burt_1992].
+#### 2.2.5. Dyadic constraint
+Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [@burt_1992]. Nice explanation could be found in [@denooy_etal_2011].
 
 There is no function for calculating dyadic constraint in `igraph`, so we have to implement our own.
 
@@ -307,6 +354,14 @@ dyadic_constraint <- function(g) {
   # multiply by A to zero-out non-existent links
   result * A
 }
-
-kable(zapsmall(dyadic_constraint(Wnet), 3))
 ```
+
+Below we could see a matrix of dyadic constraints between actors in the kinship network.
+```{r, echo=FALSE}
+kable(dyadic_constraint(Wnet), digits = 3)
+```
+
+We could see that sister is strongly constrained by father, because father is connected to all sister's alters and to other nodes as well. 
+
+*******************
+## References

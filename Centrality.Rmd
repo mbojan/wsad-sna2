@@ -3,110 +3,165 @@ title: "Centrality"
 output: html_document
 bibliography: references.bib
 ---
-The aim of many researches is to identify the most important actors in the network. The most important actors exercise control over others or inlfuence their behaviours to achieve private goals. However, the notion "important" may have many differnet meanings in social life. It can be also measured in many different ways in social network analysis. In general, actors that face minimal number of constraints and have many opportunities to act, are at unique, important positions. At this stage we assume that important actors hold "central" (see defintions of centrality below) position in networks if they are involved in many ties [@wasserman_faust_1994: 173].
+  The aim of many researches is to identify the most important actors in the network. The most important actors exercise control over others or influence their behaviours to achieve private goals. However, the notion "important" may have many different meanings in social life. It can be also measured in many different ways in social network analysis. In general, actors, that face minimal number of constraints and have many opportunities to act, are at unique, important positions. At this stage we assume that important actors hold "central" (see definitions of centrality below) position in networks if they are involved in many ties [@wasserman_faust_1994: 173].
 
-In this chapter we will focus on different meanings and measures of centrality in social networks. Three concepts of centrlity will be discussed further: a) degree centrality, b) closenness centrality, c) betweenness centrality and d)eigenvector centrality.
+In this chapter we will focus on different meanings and measures of centrality in social networks. Three concepts of centrality will be discussed further: a) degree centrality, b) closeness centrality, c) betweenness centrality and d)eigenvector centrality.
 
 ### 1. Degree centrality
 The simplest measure of centrality is degree centrality. In undirected graphs, actors having more ties have better opportunities to act as they have more choices. In directed graph indegree and outdegree needs to be considered to interpret properly actor's network position. 
 
 Look and analyze pictures below.
 ```{r, echo=FALSE}
-library(igraph)
+library("igraph")
 m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0),nrow=4,ncol=4)
 rownames(m1) <- c("John", "Lara", "Peter", "Sara")
 colnames(m1) <- c("John", "Lara", "Peter", "Sara")
 
-g1=graph.adjacency(m1, mode="undirected")
-plot(g1, main="Degree centrality - undirected graph")
+g1 <- graph.adjacency(m1, mode="undirected")
+plot(g1, main="Degree centrality - undirected graph", vertex.size = 30)
 ```
 
-In undirected graph g1 the most central actor has the highest degree value.
+In undirected graph the most central actor has the highest degree value.
 
-```{r, echo=FALSE}
+```{r}
 degree(g1)
 ```
-Lara is the most central actor in graph g1. She has degree number 3 which is the highest value for that graph.
 
-Now, consider directed graphs g2.
+Lara is the most central actor. She has degree number 3 which is the highest value for that graph.
+
+Now, consider directed graph.
+
 ```{r, echo=FALSE}
 m2 <- matrix(c(0,1,0,1,0,0,1,0,0,1,0,0,0,1,0,0),nrow=4,ncol=4)
 rownames(m2) <- c("John", "Lara", "Peter", "Sara")
 colnames(m2) <- c("John", "Lara", "Peter", "Sara")
 
-g2=graph.adjacency(m2, mode="directed")
-plot(g2, main="Degree centrality - directed graph")
+graph <- graph.adjacency(m2, mode="directed")
+plot(graph, main="Degree centrality - directed graph", vertex.size = 30)
 ```
-In graph g2 relations between actors have directions. In this case it's necessary to analyze indegree and outdegree to interpret centrality of actors.
-```{r, echo=FALSE}
-degree(g2)
-degree(g2, mode="out")
-degree(g2, mode="in")
-```
-First measure inform us about summed number relations (out and in) for each actor. Sara with summed degree (indegree + outdegree) of 4 is the most central actor in the graph g2. Sara has also the highest value of outdegree 3. But she is not the most central actor if we take into acount indegree results. Thus, how to interpret this results?
 
-In social science literature value of indegree is often treated as indicator of popularity or prestige. For example, in IT Department actors having high indegree value might be treated as mentors or worthy employees. They share knowledge or skills with other employees asking them for help. On the other side, outdegree can be treated as indicator of power or influence. Actors with high value of outdegree influence behaviors of other nodes in a network. For example, managing staff give its subordinates instructuions and commands on how to fill up various tasks. It is worth to mention, that under optimal conditions the most worthy managers have both high value of in and outdegree.
+In this graph relations between actors have directions. In this case it's necessary to analyze in--degree and out--degree to interpret centrality of actors.
+```{r}
+degree(graph)
+degree(graph, mode = "out")
+degree(graph, mode = "in")
+```
+
+First measure inform us about summed number relations (out and in) for each actor. Lara with summed degree (indegree + outdegree) of 4 is the most central actor in the graph. Lara has also the highest value of out--degree 3. But she is not the most central actor if we take into acount in--degrees. Thus, how to interpret this results?
+
+In social science literature value of in--degree is often treated as indicator of popularity or prestige. For example, in IT Department actors having high in--degree value might be treated as mentors or worthy employees. They share knowledge or skills with other employees asking them for help. On the other side, out--degree can be treated as indicator of power or influence. Actors with high value of out--degree influence behaviors of other nodes in a network. For example, managing staff give its subordinates instructuions and commands on how to fill up various tasks. It is worth to mention, that under optimal conditions the most worthy managers have both high value of in-- and out--degree.
 
 ### 2. Closeness centrality
 Basic assumption behind closeness centrality is that all pairs of actors in a network are separated by measurable distances. Actor with the shortest paths to all other nodes in a graph occupy central position measured by closeness centrality. The most evident example of actor being closer to other actors is a node located in the centre of a star network. To get more information on centrality measures see Wasserman and Faust chapter 5.
 
-Look at the graph g3 made of six actros. 
+Look at the graph made of six actors. 
 
 ```{r, echo=FALSE}
 m3 <- matrix(c(0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0),nrow=6,ncol=6)
 rownames(m3) <- c("Lara", "John", "Peter", "Sara", "Mary", "Tom")
 colnames(m3) <- c("Lara", "John", "Peter", "Sara", "Mary", "Tom")
 
-g3=graph.adjacency(m3, mode="directed")
-plot(g3, main="Closeness centrality")
-
-degree(g3)
-degree(g3, mode="out")
-degree(g3, mode="in")
+graph <- graph.adjacency(m3, mode="directed")
+plot(graph, main="Closeness centrality", vertex.size = 30)
 ```
 
-When we apply the degree centrality measure (outdegree + indegree), the most central actors in a network are John, Peter and Sara. So, let's aplly closeness cetrality function. Higher value means that actor is closer to others in a network. Our function tests the closeness of actors with regard to direction of ties.
-
-```{r, echo=FALSE}
-degree(g3)
-
-closeness(g3, mode="all")
+```{r}
+degree(graph)
+degree(graph, mode = "out")
+degree(graph, mode = "in")
 ```
 
-We see that the most central actor is John. John occupies structural position that allows him to reach other nodes through the shortest geodesic distance. Thus, John has a strutural oppportunity to reach all nodes in a network much quicker than others.
+When we apply the degree centrality measure (out--degree + in--degree), the most central actors in a network are John, Peter and Sara. So, let's apply closeness cetrality function. Higher value means that actor is closer to others in a network. Our function calculates the closeness of actors without regard to direction of ties.
+
+```{r}
+closeness(graph, mode = "all")
+```
+
+We see that the most central actor is John. John occupies structural position that allows him to reach other nodes through the shortest geodesic distance. Thus, John has a strutural opportunity to reach all nodes in a network much quicker than others.
 
 ### 3. Betweenness centrality
-Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties actor has or how close is he to other nodes in a network. It is rather crucial how many times he mediates in relations between others. This measure has been explained by Linton Freeman [@freeman_1979]. 
+Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties actor has or how close is he to other nodes in a network. Rather it is crucial how many times he mediates in relations between others. This measure has been explained in [@freeman_1979]. 
 
-Now, look at the graph g4 made of six actros. 
+Now, look at the graph made of six actors. 
 
 ```{r, echo=FALSE}
 m4 <- matrix(c(0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0),nrow=6,ncol=6)
 rownames(m4) <- c("John", "Lara", "Peter", "Sara", "Mary", "Tom")
 colnames(m4) <- c("John", "Lara", "Peter", "Sara", "Mary", "Tom")
 
-g4=graph.adjacency(m4, mode="undirected")
-plot(g4, main="Betweenness centrality")
+graph <- graph.adjacency(m4, mode="undirected")
+plot(graph, main="Betweenness centrality", vertex.size = 30)
 ```
 
 Let's apply betweenness centrality measure.
 
-```{r, echo=FALSE}
-betweenness(g4)
+```{r}
+betweenness(graph)
 ```
 
-Actor who mediates most often in relations between other nodes in graph g4 is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.
+Actor who mediates most often in relations between other nodes is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.
 
 ### 4. Eigenvector centrality
-In general, eigenvector centrality measures the influence of nodes in a given network. This measure is based on the idea that actors who are connected to well-connected actors have better structural positions in a grpah. In other words, it is beneficial to be a big fish connected with other big fishes in a pond. Eigenvector centrality shows how well connected an actor is to the areas of a network with the high connectivity. Actor A with high eigenvector score have many connections (B to Z). Actors B to Z have many connections to other actros, etc. When the end of a netwrok is reached the eigenvector measures are calculated. More details on eigenvector centrality can be found in works of Philip Bonacich who invented this measure [@bonacich_2007].
+In general, eigenvector centrality measures the influence of nodes in a given network. This measure is based on the idea that actors who are connected to well-connected actors have better structural positions in a graph. In other words, it is beneficial to be a big fish connected to other big fishes in a pond. Eigenvector centrality shows how well connected an actor is to the areas of a network with the high connectivity. Actor A with high eigenvector score have many connections (B to Z). Actors B to Z have many connections to other actors, etc. When the end of a network is reached the eigenvector measures are calculated. More details on eigenvector centrality can be found in works of Philip Bonacich who invented this measure [@bonacich_2007].
 
-Glance at netwrok...
-```{r, echo=FALSE}
-library(isnar)
-
-
-
-
+Let's calcualte eigenvector centrality on the same network as above.
+```{r}
+evcent <- evcent(graph)
+evcent$vector
 ```
 
+As in betwenness centrality, Lara is the most central person in the graph, followed by Sara. However, now Mary is third most central person in a graph, while previously she was the least central, alongside John and Tom. The reason for this difference is that in a sense Mary lies outside main "route", thus she is not a part of any of the shortest paths, but she is connected to the cental persons of this "route" and therefore achieves high eigenvector centrality.
 
+
+### 5. Real--network example
+
+Consider the network of judges from polish regional court -- two judges are connected, if they've ruled at least once together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the greatest component of this network, because it is unclear how to compare for example closeness for unconnected components.
+
+```{r}
+graph <- readRDS("~/wsad-sna2/data//legnica.RDS")
+cl <- clusters(graph)
+graph <- induced.subgraph(graph, cl$membership == which.max(cl$csize))
+graph$layout <- layout.fruchterman.reingold(graph)
+
+deg <- degree(graph)
+close <- closeness(graph)
+between <- betweenness(graph)
+evcent <- evcent(graph)$vector
+```
+
+Below you could see our network with nodes coloured according to their (normalised) centrality score -- the most central nodes are red and the least central are blue, together with the distribution of (unnormalised) centralities.
+
+```{r, fig.height=9, fig.width=7, fig.align='center', echo=FALSE}
+library("scales")
+
+pal <- function(x) {
+  x <- (x - min(x)) / (max(x) - min(x))
+  gradient_n_pal(c("blue", "red"))(x)
+}
+
+par(mfrow = c(4,2))
+par(mar = rep(0,4))
+plot(graph, vertex.color = pal(deg), vertex.label = NA)
+par(mar = rep(2, 4))
+hist(deg, main = "Degree centrality")
+par(mar = rep(0,4))
+plot(graph, vertex.color = pal(close), vertex.label = NA)
+par(mar = rep(2, 4))
+hist (close, main = "Closeness centrality")
+par(mar = rep(0,4))
+plot(graph, vertex.color = pal(between), vertex.label = NA)
+par(mar = rep(2, 4))
+hist(between, main = "Betweenness centrality")
+par(mar = rep(0,4))
+plot(graph, vertex.color = pal(evcent), vertex.label = NA)
+par(mar = rep(2, 4))
+hist(evcent, main = "Eigenvector centrality")
+```
+
+You could see that each measure marks different nodes as the most central. Nodes in the centres of two clusters have clearly the highest degrees. In closeness centrality the most central nodes lie in the "visual" center of the network, between two bigger clusters. They are reasonably close to all other vertices, while vertices from each cluster always have longer path to the other cluster. Also betweenness centrality marks those nodes central, but unlike closeness it is more rigid -- only nodes forming the bridge between two clusters are central. The one that is connected to both of them, but none of the others, has betweenness score 0. Looking on the histograms you could say that closeness centrality is more uniformly distributed, while betweenness centrality resembles more power--law distribution. Eventually eigenvector centrality completely ignores one cluster and treats nodes is the second cluster as central, even though it is smaller.
+
+To sump up, you must remember that various centrality measures take into accoutn different properties. Therefore in the first place you should decide what properties you are interested in and then find appropiate centrality measure, and not the other way round
+
+
+*******************
+### References

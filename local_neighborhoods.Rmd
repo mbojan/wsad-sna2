@@ -105,7 +105,7 @@ Depending on type of research, subjectivity of ego may vary. Individual, group, 
 Article of Paul Nieuwbeerta and Henk Falp shows how ego charactersitics can be used [@nieuwbeerta_flap_2000]
 
 #### 1.1.2. Resources
-Resources owned by ego's neighbours have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Reource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@weber_huxley_2007].
+Resources owned by ego's neighbours have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Reource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@webber_huxley_2007].
 
 #### 1.1.3. Homophily
 Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of atribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
@@ -212,7 +212,7 @@ neighborhood.size(playnet, 1)
 For networks of class `network` there is a function also called `degree` in package `sna`.
 
 #### 1.2.2. Effective size of the network
-The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatii_1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). See more in: [@burt_1992], [@borgatii_1997].
+The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatii_1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). See more in: [@burt_1992], [@borgatti_1997].
 
 To feel how effective size works consider two extreme cases of John's ego-network.
 
@@ -260,7 +260,7 @@ efficiency <- function(g, v) {
 efficiency(g, "John")
 ```
 
-See how efficiency and effective size are distributed in kinship network.†
+See how efficiency and effective size are distributed in kinship network.?
 ```{r kable}
 data(Wnet)
 plot(Wnet)
@@ -287,7 +287,7 @@ In our simple example John is constrained by a link between Sara and Peter.
 
 In R package igraph there is a function `constraint` that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
 
-In the subject literature there are many works where structural measures of ego-network were applied. To get some more details on presented measures it worth to see: Roberts et all, Exploring variation in active network size: Constraints and ego characteristics [@roberts_etall_2009].
+In the subject literature there are many works where structural measures of ego-network were applied. To get some more details on presented measures it worth to see: Roberts et all, Exploring variation in active network size: Constraints and ego characteristics [@roberts_etal_2009].
 
 #### 1.2.5. Dyadic constraint
 Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [@burt_1992].

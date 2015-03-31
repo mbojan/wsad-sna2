@@ -4,81 +4,135 @@ output: html_document
 bibliography: references.bib
 ---
 
-Why you friends have on average more friends than you do?
+Why your friends have on average more friends than you do? Why your co-workers have usually more co-workers than you do? Why you Tweeter followers have on average more followers than you do? Answer to all these questions lies in a phenomenon called the friendship paradox, firstly described by [@feld_1991]. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. 
 
+Let's check whether this paradox holds also in case of network from Polish school, where pupils picked out children with whom they wanted to play. This is a directed network, so the question is how often children picked up by me were picked up more often by others, on average.
 
-Źródła:
-
-* [Wikipedia](http://en.wikipedia.org/wiki/Friendship_paradox)
-* [The Economist](http://www.economist.com/blogs/economist-explains/2013/04/economist-explains-why-friends-more-popular-paradox)
-* [Feld](http://www.jstor.org/discover/10.2307/2781907?sid=21105509656851&uid=4&uid=3738840&uid=2)
-* [NYT](http://opinionator.blogs.nytimes.com/2012/09/17/friends-you-can-count-on/?_r=0)
-* [Strogatz](http://blogs.cornell.edu/info2040/2012/10/03/the-friendship-paradox-why-your-friends-have-more-friends-than-you-do/)
-
-
-
-
-Ilustracja na przykładowych danych:
-
-```{r }
-library(igraph)
-library(isnar)
+```{r, fig.align='center', fig.height=5, fig.width=5}
+library("igraph")
+library("isnar")
 data(IBE121)
-# "Z kim chciałbyś się bawić?"
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-# degrees
-degs <- degree(playnet, mode="in")
 plot(playnet, vertex.size=3, vertex.label=NA, edge.arrow.size=.5, edge.curved=.2)
-# adjacency list
-al <- get.adjlist(playnet, mode="out")
-# substituting IDs with degrees
-aldegs <- lapply(al, function(id) degs[id])
-# compute averages
-avg <- sapply(aldegs, mean)
-avg[ is.na(avg) ] <- 0
-
-# Compare ego degree with average degree of alters
-plot(degs, avg, xlab="In-degree", ylab="Avg in-degree of alters")
-abline(a=0, b=1)
-# Proporcja osób, których znajomi mają przeciętnie więcej znajomych niż oni sami
-mean(avg > degs)
 ```
+
+Firstly we have to calculate in--degrees of all nodes.
+```{r}
+degrees <- degree(playnet, mode = "in")
+```
+
+Further we obtain an adjacency list, i. e. the list of all children picked up by each node,
+```{r}
+adjacency_list <- get.adjlist(playnet, mode="out")
+```
+
+and replace vertex ID with corresponding in--degree
+```{r}
+friends_degrees <- lapply(adjacency_list, function(id) degrees[id])
+``` 
+
+Now we could calculate average friends' in--degree (mean number of friends' friends) for every node.
+```{r}
+averages <- sapply(friends_degrees, mean)
+```
+
+We skip those who didn't pick up anyone, because you cannot calculate number of friends of their friends because there are none.
+```{r}
+degrees <- degrees[!is.na(averages)]
+averages <- averages[!is.na(averages)]
+```
+
+Finally, the mean number of children, whose friends have more friends than they do is
+```{r}
+mean(averages > degrees)
+```
+
+We've confirmed that the friendship paradox holds for our network.
+
+```{r, fig.align='center', fig.height=5, fig.width=5, echo=FALSE}
+plot(degrees, averages, xlab="In-degree", ylab="Avg in-degree of alters")
+abline(a=0, b=1)
+```
+
+*******************
 
 Second example - on coauthorship network. This network is undirected and quite big (over 10 thousand nodes), but friendship paradox still holds, so your coauthors have usually more coauthors then you have.
 
-In the folowing function we skip isolates, because you cannot calculate number of friends of their friends because there are none.
+Beforehand we write a function to calculate "friendship paradox index" (name created solely for this tutorial), i. e. the fraction of nodes, that have less friends than their friends have on average. 
 
 ```{r}
-# simple helper function
 friendship_paradox <- function(graph){
-  degs <- degree(graph)
-  al <- get.adjlist(graph)
-  aldegs <- lapply(al, function(id) degs[id])
-  avg <- sapply(aldegs, mean)
-  # skip isolates
-  avg <- avg[!is.na(avg)]
-  degs <- degs[degs > 0]
-#   avg[ is.na(avg) ] <- 0
-  mean(avg > degs)
+  degrees <- degree(graph, mode = "in")
+  adjacency_list <- get.adjlist(graph, mode="out")
+  friends_degrees <- lapply(adjacency_list, function(id) degrees[id])
+  averages <- sapply(friends_degrees, mean)
+  degrees <- degrees[!is.na(averages)]
+  averages <- averages[!is.na(averages)]
+  mean(averages > degrees)
 }
+```
 
+And actual computations
+```{r}
 coauthorship <- readRDS("data/coauthorship.RDS")
 friendship_paradox(coauthorship)
+```
 
-# if we focus on giant component only
+So we see that again the friendship paradox holds.
+
+We could focus only on the largest component.
+```{r}
 clusters <- clusters(coauthorship)
 giant_component <- induced.subgraph(coauthorship, 
                                     clusters$membership == which.max(clusters$csize))
 friendship_paradox(giant_component)
 ```
 
-Value for giant component is higher because in the complete nework there a lot of isolated dyads and triads of authors, where obviously number of friends is equal to mean number of friends' friends.
+Value for giant component is higher because in the complete network there are a lot of isolated dyads and triads of authors, where obviously number of friends is equal to mean number of friends' friends.
 
-It is important to remember that friendship paradox is not a rule - it is possible that majority of actors have more friends than their friends have on average. It depends on many things like variance of degree distribution and correlation between nodes, see [@feld1991] for more detail. Social networks are usually sparse, but clustered, and degree distribution is right-skewed (that means high variance), so they usually fit to this paradox perfectly.
+**********************
 
-On the figure below you could how "friendship-paradox index" (mean number of nodes, whose friends have more friends) depends on standard deviation of degree distribution, for four different density levels. Every point represents random network with given density, horizantal line indicates mean "friendship-paradox index" in whole sample. It is higher for more varied degree distributions, although the effect is diminishing for denser nets.
+Note the difference between two statements:
 
-```{r, message=FALSE, warning=FALSE}
+1. Mean number of friends of friends is greater than mean number of friends.
+2. For most nodes, mean number of friends' friends is greater than number of friends.
+
+The first statement refers to means in whole network. It could be mathematically proven that the statement is true, unless all degrees are equal, see [@feld_1991] for the proof. On the other hand the second statement considers relation between number of friends and mean number of friend's friends in a single node, than tells that the first number is lower for most nodes. It is not generally true and it is easy to find a network where it goes the other way - most of nodes have more frieds than their friends do on average (that's why it is called paradox not theorem). Look on the following networks
+
+```{r, echo = FALSE, fig.align='center', fig.height=4, fig.width=8}
+n1 <- graph.full(6)
+n2 <- graph(c(1,2, 1,3, 2,3, 2,4, 3,5, 4,5, 4,6, 5,6), directed = FALSE)
+n3 <- graph.star(6, mode = "undirected")
+n4 <- graph(c(1,4, 1,3, 1,6, 2,4, 2,3, 3,5), directed = FALSE)
+par(mfrow = c(1,4), mar = rep(0, 4))
+plot(n1)
+plot(n2)
+plot(n3)
+plot(n4)
+ff_deg <- function(graph){
+  degs <- degree(graph)
+  al <- get.adjlist(graph)
+  aldegs <- lapply(al, function(id) degs[id])
+  avg <- sapply(aldegs, mean)
+  avg
+}
+```
+
+Mean number of friends | Mean number of friend's friends | Fraction of nodes, that have less friends than their friends do on average
+-------|---------|-------
+`r mean(degree(n1))` | `r mean(ff_deg(n1))` | `r mean(ff_deg(n1) > degree(n1))`
+`r mean(degree(n2))` |`r mean(ff_deg(n2))` |`r mean(ff_deg(n2) > degree(n2))`
+`r mean(degree(n3))` |`r mean(ff_deg(n3))` |`r mean(ff_deg(n3) > degree(n3))`
+`r mean(degree(n4))` |`r mean(ff_deg(n4))` |`r mean(ff_deg(n4) > degree(n4))`
+
+We see that the number in second column column is larger than one in first column, apart from full network, where all nodes have the same degree -- that is statement 1. Statement 2 (friendship paradox) is true only for the third and fourth networks. In the third network only the first node has more friends -- 5 -- than its friends have on average -- 1. In the fourth network nodes 1 and 3 "break" friendship paradox. On the other hand, in the first network all nodes have 5 friends, they always have as many friends as their friends do on average. 
+
+
+It is important to remember that friendship paradox is not a rule. Whether it holds depends on many things like variance of degree distribution and correlation between nodes, see [@feld_1991] for more details. Social networks are usually sparse, but clustered, and degree distribution is right-skewed (that means high variance), so they usually fit to this paradox perfectly.
+
+On the figure below you could see how "friendship-paradox index" depends on standard deviation of degree distribution, for four different density levels. Every point represents random network with given density, horizantal line indicates mean "friendship-paradox index" in whole sample. It is higher for more varied degree distributions, although the effect is diminishing for denser nets.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.align='center', fig.width=5, fig.height=5}
 library("dplyr")
 library("ggplot2")
 set.seed(123)
@@ -93,14 +147,23 @@ data <- lapply(seq(0.1, 0.4, by = 0.1), function(density) {
 })
 data <- bind_rows(data)
 data <- data[complete.cases(data), ]
+data$name <- paste("Density ", data$density)
 
 ggplot(data, aes(x = var, y = frnd)) +
   geom_point(color = rgb(0,0,0,0.5)) +
   geom_smooth(method = "gam") +
-  geom_hline(data = summarise(group_by(data, density), m = mean(frnd)),
+  geom_hline(data = summarise(group_by(data, name), m = mean(frnd)),
              aes(yintercept = m)) +
-  facet_wrap( ~density, nrow = 2, ncol = 2, , scales = "free_x") +
+  facet_wrap( ~name, nrow = 2, ncol = 2, , scales = "free_x") +
   ylim(c(0, 1)) +
-  theme_bw()
+  theme_bw() +
+  labs(x = "Standard deviation of degree distribution",
+       y = "Value of 'friendship paradox index'")
 ```
 
+********
+
+Some applications of the friendship paradox could be found in [@christakis_fowler_2010], [@hodas_etal_2014] and [@eom_jo_2014].
+
+**********************
+### References

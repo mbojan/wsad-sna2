@@ -9,6 +9,7 @@ library("isnar")
 library("knitr")
 ```
 
+
 The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
 
 There are multiple approaches in studying social networks. In this chapter we will focus on basic properties of ego-networks extensively used in many social studies. Ego-networks are often sampled from large structures and used as a basis of statistically significant conclusions on whole population [@everett_borgatti2005]. Empirical studies of ego-networks include: social support, knowledge sharing or disease spread. More recently, some ego measures can be found on the popular social network sites [e.g. relationship at LinkedIn].
@@ -16,11 +17,12 @@ There are multiple approaches in studying social networks. In this chapter we wi
 In the subject literature, the ego-networks are also analyzed as the neighbourhood networks [@everett_borgatti2005]. In order to understand the variation across actors embedded in their "local" environments we need to introduce some beasic definitions.
 
 a) Ego.
-"Ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a sinlge node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to eg, and measurements on the ties among these alters [1994: 42"
+"Ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a sinlge node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to ego, and measurements on the ties among these alters" [@everett_borgatti2005: 42].
 
 b) Neighborhood.
 A single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes).Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The size of neighborhood is expaneded by connections of N-step and all the connections between actors identified at a path length of N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations.
 
+<<<<<<< HEAD
 
 The following picture illustrates the idea of ego-networks in undirected graph.
 
@@ -55,7 +57,6 @@ par(old.par)
 igraph.options(vertex.label = NULL)
 ```
 
-
 To find neighborhoods in `igraph` you can use a variety of functions. The simplest one is `neighbors`, which returns neighbors of a given vertex (without that vertex).
 
 ```{r, fig.width=5, fig.height=5, fig.align='center'}
@@ -74,7 +75,7 @@ neighborhood(g, order = 2, nodes = 5)
 neighborhood(g, order = 1, nodes = 1:5)
 ```
 
-You could also directly creates ego-network thanks to `graph.neighborhood` function.
+You could also directly create ego-network based on the `graph.neighborhood` function.
 
 ```{r}
 V(g)$name <- letters[1:vcount(g)]
@@ -92,28 +93,24 @@ par(old.par)
 
 For objects of class `network` from `statnet` you could use `get.neighborhood` function.
 
-## Properties of ego and ego-networks
+## 1. Ego-network properties
+There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) compositional measures, b) structural measures. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. Degree of a vertex represents the structural property. John workmates from LinkedIn are computer geeks and he often ask them for computer help. It means that John have a good access to computer knowledge. Knowledge reosurces are example of the compositional property.
+Further in this chapter we will focus on both compositional and structural properties of ego-networks.
 
-There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) ego properties, b) ego-network properties. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. At the same time, only two of his LinkedIn friends have a direct connection (omitting John). So, the density of John's LinkedIn network is 0.4 [for details see below]. In this case, degree of a vertex represents the ego property, while density refers to the ego-network property. Further in this chapter we will focus on following properties of ego-networks:
+### 1.1. Compositional properties
+As we mentioned above, ego-network is a set of nodes who have ties to ego. Thus, ego-networks can be characterized through attributes of ego and its neighbors. Variability within and between ego and neighbors contributes to different network compositions. Below, we will consider some basic properties shaping network composition.
 
+#### 1.1.1. Ego characteristic
+Depending on type of research, subjectivity of ego may vary. Individual, group, organization, corporation, state etc. may be the focal point of ego-network. If we assume that ego is a person it can be characterized by socio-demographic attributes e.g. sex, race, occupation, ethnicity. It is simple to recognize and deal with these attributes when one-mode networks are analyzed. When two-mode networks (see further in this course) are considered it is necessary to choose type of actor around which  ego-network is build.
+Article of Paul Nieuwbeerta and Henk Falp shows how ego charactersitics can be used [@nieuwbeerta_flap_2000]
 
-### Ego-network properties
-#### 1. Degree 
-In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks (directed graphs), degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
+#### 1.1.2. Resources
+Resources owned by ego's neighbours have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Reource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@weber_huxley_2007].
 
-```{r, eval=FALSE, include=FALSE}
-m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,1,0),nrow=4,ncol=4)
-rownames(m1) <- c("John", "Lara", "Peter", "Sara")
-colnames(m1) <- c("John", "Lara", "Peter", "Sara")
-class(m1)
+#### 1.1.3. Homophily
+Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of atribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
 
-g=graph.adjacency(m1, mode="directed")
-degree(g, mode="out")
-degree(g, mode="in")
-degree(g, mode="all")
-```
-
-To calculate degree use function called `degree`. You could also use `neighborhood.size` to directly calculate size of ego-network.
+Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex.
 
 ```{r}
 data(IBE121)
@@ -125,73 +122,6 @@ degree(playnet, mode = "all")
 
 neighborhood.size(playnet, 1)
 ```
-
-For networks of class `network` there is a function also called `degree` in package `sna`.
-
-#### 2. Geodesic distance --> DO USUNIECIA?
-Geodesic distance between two nodes in a network is the number of edges in the shortest path linking them. It may happend that there is more then one shortest paths between two nodes in a network. In a symmetric, connected network there is always a path linking random pair of nodes. It is just a simple sum of edges between two nodes. However, the analytical potential of a network grows if relations are directional. To calculate a geodesic distance between pair of nodes in the asymmetric graph directions of the arcs need to be considered. Thus, in the assymetric graph the geodesic distance between pair of nodes is the number of edges on the route determined by the directions of the arcs. It is possible there is no path between two nodes in a connceted, asymmetric network. The average geodesic distance in a network is the average number of edges along the shortest paths for all pairs of vertices in a graph. Thus, the godesic distance is a property of pair of nodes, while the average geodesic distance is a property of whole network. [MAM JEDNAK WATPLIWOSCI CZY ZOSTAWIC TEN PODPUNKT TUTAJ]
-
-* Question 2: What is the longest path between pair of two nodes in network m1?
-* Question 3: What is the average path length in the network m1 (use igraph package)?
-
-```{r, eval=FALSE}
-geodist(m1, count.paths=FALSE)
-
-library(igraph)
-g=graph.adjacency(m1, mode="directed")
-round(average.path.length(g, directed=TRUE), digits=2)
-```
-
-* Answer Q2: >geodist(m1, count.paths=FALSE)
-* Answer Q3: >library(igraph)
->g=graph.adjacency(m1, mode="directed")
->round(average.path.length(g, directed=TRUE), digits=2)
-
-#### 3. Diameter --> DO USUNIECIA?
-Diameter of a network (ego-network) is the length of the longest path between two actors. In other word, it is the largest geodesic distance in the network. Diameter shows the span or scale of the network. In the asymmetric networks diameter is the largest geodesic distance between connected actors.
-
-* Question 4: What is the diameter of the network m1 (in igraph m1 has been transformed to g)?
-
-```{r, eval=FALSE}
-diameter(g, directed=TRUE)
-```
-
-* Answer Q4: >diameter(g, directed=TRUE)
-
-#### 4. Density
-Density can be calculated for both symmetric and asymmetric networks. It also used to measure properties of ego-networks. The density of a network is expressed as a proportion of existing and potential ties. Thus, to calculate the density of a symmetric graph the number of exisiting ties needs to be divided by the number of potential ties. The number of existing ties can be easily read from the matrix. How can we then calculate the number of potential ties? In a symmetric network the number of potential (Pn) ties expressed by following fomula: 
-* Pn = N x (N-1)/2
-* where, N is a number of nodes of a network.
-
-When the density in an assymetric networks is checked the directions of arcs need to be considered. The formula for density in an asymmertric networks is as follows:
-
-* Pn = N x (N-1)
-
-* Question 5: What is the density of the network m1 (in igraph m1 has been transformed to g)?
-
-```{r}
-graph.density(playnet, loop=FALSE)
-```
-
-Density could be calculated for every ego-network in a graph.
-
-```{r}
-ego_networks <- graph.neighborhood(playnet, order = 1)
-densities <- sapply(ego_networks, graph.density)
-hist(densities)
-lines(density(densities, na.rm = TRUE))
-```
-
-In `sna` equivalent function is called `gden`.
-
-* Answer Q4: >gden(m1) or >graph.density(g, loop=FALSE)
-
-
-#### 5. Homophily --> AKAPIT PRZENIESIONY DO segregation.Rmd, tutaj skupiamy się na lokalnym podobieństwie
-
-Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of atribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
-
-Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex.
 
 ```{r}
 # prepare vector with explicit sex names for clarity
@@ -247,51 +177,44 @@ abline(v = mean(rmsd[gender == "male"], na.rm = TRUE), col = rgb(0,0,1,0.5))
 abline(v = mean(rmsd[gender == "female"], na.rm = TRUE), col = rgb(1,0,0,0.5))
 ```
 
-WNIOSKI?
+### 1.2. Structural properties
+Variability of connections between ego and alters produce different structures of ego-networks. Those structures have certain properties (structural properties) that are measured in social network analysis. 
+In this section, we will focus on some basic structural properties of ego-networks: a) degree, b) effective size, c) efficiency, d) constraint, e) dyadic constraint.
 
-#### 6. Heterogeneity
+#### 1.2.1. Degree 
+In symmetric networks (undirected graphs) degree of a vertex is a number of vertices adjacent to that vertex. In non-symmetric networks (directed graphs), degree of a vertex is divided into in-degree and out-degree. In-degree of a vertex is a number of received ties, while out-degree is a number of ties sent by a vertex. Degree (in-degree, out-degree) may inform us about popularity, power or influence of the ego.
 
->Generally, an idea of heterogeneity is the opposite to the homophily concept. Individuals connect to each other for love of dissimilarity and diversity. They bring various, diverse proporties composing or dynamizing the network structures. 
-TU CHODZI O COŚ TROCHĘ INNEGO. PONIŻEJ MÓJ (Bartek) KRÓTKI OPIS
+```{r, eval=FALSE, include=FALSE}
+m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,1,0),nrow=4,ncol=4)
+rownames(m1) <- c("John", "Lara", "Peter", "Sara")
+colnames(m1) <- c("John", "Lara", "Peter", "Sara")
+class(m1)
 
-Heterogeneity in ego-networks refers to differences across ego's neighbors. If ego's alters are very similar to each other, thay are homogeneous. If they varies significantly they are heterogeneous. Term heterogeneity may be seen as similar to homophily, however thay differ in one important aspect - homophily looks on differences between ego and its alters and heterogeneity looks only on differences amongst alters.
-
-As an example we will continue with classroom network example. Let's check if ego-networks are heterogeneous with respect to socioeconomic status of parents. To do so we'll calculate standard devation. Higher the values, more heterogenous the alters are.
-
-```{r}
-status_sd <- sapply(seq(vcount(playnet)), function(i) {
-  neigh <- neighbors(playnet, i)
-  s <- status[neigh]
-  sd(s, na.rm = TRUE)
-})
-
-summary(status_sd)
-
-# histogram with line indicating sd in whole class
-hist(status_sd)
-abline(v = sd(status, na.rm = TRUE))
+g=graph.adjacency(m1, mode="directed")
+degree(g, mode="out")
+degree(g, mode="in")
+degree(g, mode="all")
 ```
 
-When we deal with nominal values we could use maximum share of attribute level in ego-network, although it isn't perfect measure if attribute isn't binary.
+To calculate degree use function called `degree`. You could also use `neighborhood.size` to directly calculate size of ego-network.
 
 ```{r}
-max_share <- sapply(seq(vcount(playnet)), function(i) {
-  neigh <- neighbors(playnet, i)
-  s <- gender[neigh]
-  t <- prop.table(table(s))
-  if (length(t) == 0) { NA } else { max(t, na.rm = TRUE) }
-})
+data(IBE121)
+playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
 
-mean(max_share, na.rm = TRUE)
+degree(playnet, mode = "out")
+degree(playnet, mode = "in")
+degree(playnet, mode = "all")
 
-# histogram
-hist(max_share)
+neighborhood.size(playnet, 1)
 ```
 
-#### 7. Brokerage 
-The idea of brokreage is based on ego mediation between alters. As we mentioed above, in the ego-network ego is adjacent to all alters. If alters are not diretly connected to each other, ego act as a broker. Thus, in the ego-networks a brokreage is always considered between pairs of alters.
+For networks of class `network` there is a function also called `degree` in package `sna`.
 
-Consider this simple graph, that represents ego-network of John.
+#### 1.2.2. Effective size of the network
+The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatii_1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). See more in: [@burt_1992], [@borgatii_1997].
+
+To feel how effective size works consider two extreme cases of John's ego-network.
 
 ```{r}
 g <- graph.edgelist(matrix(c(1,2, 1,3, 1,4, 3,4), ncol = 2, byrow = TRUE),
@@ -300,18 +223,6 @@ V(g)$name <- c("John", "Lara", "Peter", "Sara")
 plot(g)
 ```
 
-Here John serves a broker between Lara and both Peter and Sara, because Sara has no direct connection to them
-
-##### 7.1. Structural holes
-The idea of structural holes is one a few extentions of the brokerage concept. It has been introduced by Ronald Burt [@burt1992]. Generally, structural holes make network structure less dense. Burt defines structural hole as "A relationship of nonredundancy between two contacts. The hole is a buffer, like an insulator in an electric circuit. As a result of the hole between them, the two contacts provide network benefits that are in some degree additive rather than overlapping" [1992: 65]. In other words, there is a structural hole in the ego-network if two of vertex neighbors are not directly connected. 
-
-In our example of John's ego-network there are structural holes between Lara and both Peter and Sara.
-
-
-##### 7.2. Effective size of the network
-The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that A is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatii simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [Borgatti 1997: 35]. Therefore, the average degree of ego's alters is 2. So, the effective size of the network is 1 ((ego's netowrk is 3) - (average degree of ego's alters is 2)). [See more in: Burt 1992; Borgatii 1997].
-
-To feel how effective size works consider two extreme cases of John's ego-network.
 ```{r, echo=FALSE}
 effective_size <- function(g, v) {
   degree(g, v) - mean(degree(delete.vertices(g, v)))
@@ -338,10 +249,8 @@ effective_size <- function(g, v) {
 effective_size(g, "John")
 ```
 
-
-
-##### 7.3. Efficiency
-Efficiency send us to effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [Hanneman & Riddle 2005: 138]
+#### 1.2.3. Efficiency
+Efficiency send us to effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [@hanneman_riddle_2005: 138]
 
 Again there is no explicit function to calculate efficiency, but we could write our own function.
 ```{r}
@@ -351,7 +260,7 @@ efficiency <- function(g, v) {
 efficiency(g, "John")
 ```
 
-See how efficiency and effective size are distributed in kinship network --> TUTAJ JAKAŚ INNA SIEĆ DO WYBRANIA - COAUTHORSHIP PEWNIE BYŁBY DOBRY, TYLKO JAKAŚ W MIARĘ MAŁĄ SIEĆ TRZEBA ZNALEŹĆ
+See how efficiency and effective size are distributed in kinship network.�
 ```{r kable}
 data(Wnet)
 plot(Wnet)
@@ -367,8 +276,7 @@ kable(do.call(rbind, tmp))
 
 Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't that high.  
 
-
-##### 7.4. Constraint (aggregate constraint)
+#### 1.2.4. Constraint (aggregate constraint)
 Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides of links to A, A is not constrained. The idea of constrain send us to the important paradox. It happens that people who have many connections may lose autonomy of action. 
 
 ```{r, echo=FALSE, fig.width=4, fig.height=4, fig.align='center'}
@@ -379,12 +287,10 @@ In our simple example John is constrained by a link between Sara and Peter.
 
 In R package igraph there is a function `constraint` that helps us to calculate aggregated constraint of the actors. The higer number of the actor the more constrained he is in his action.
 
-```{r}
-constraint(g)
-```
+In the subject literature there are many works where structural measures of ego-network were applied. To get some more details on presented measures it worth to see: Roberts et all, Exploring variation in active network size: Constraints and ego characteristics [@roberts_etall_2009].
 
-##### 7.5. Dyadic constraint
-Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [1992].
+#### 1.2.5. Dyadic constraint
+Dyadic constraint highlights the extent of constraint between ego and each of his alters. In other words, the dyadic constraint between actors A and B shows the extent to which A has both more and stronger relations with nodes that are well connected to the actor B. Wider description of the constraint idea can be found in Burt's monographs [@burt_1992].
 
 There is no function for calculating dyadic constraint in `igraph`, so we have to implement our own.
 
@@ -404,37 +310,3 @@ dyadic_constraint <- function(g) {
 
 kable(zapsmall(dyadic_constraint(Wnet), 3))
 ```
-
-
-MOZE INACZEJ TO WIDZICIE. MI SIE JEDNAK WYDAJE ZE IDEA ANGAZOWANIA UCZESTNIKA KURSU NA ETAPIE ZAPOZNAWANIA SIE Z TEORIA JEST DOBRA. ZOSTAWIAM TA CZESC NA RAZIE W TAKIM KSZTALCIE.
-
-Basic properties of ego-networks:
-
-* size, 
-* composition (with respect to node and/or edge attributes),
-* homophily, 
-* heterogeneity. 
-
-Concepts of brokerage:
-
-* effective size,
-* efficiency,
-* Burt’s constraint
-* dyadic con- straint.
-
-Źródła:
-
-* Exploratory SNA with Pajek.
-* Burt
-* W&F
-
-
-Bibliography:
-Everett,M.,Borgatti,S. (2005). Ego network betweenness, "Social Networks" 27. 
-Borgatti,S. (1997). Structural Holes: Unpacking Burt's Redundancy Measures, "CONNECTIONS" 20(1), pp. 35-38.
-Burt,R. (1992). Structural Holes. The Social Structure of Competition, Harvard University Press.
-Hanneman,R.A., Riddle,M. (2005). Introduction to Social Network Methods, http://faculty.ucr.edu/~hanneman/nettext/Introduction_to_Social_Network_Methods.pdf [06.02.2015].
-McPherson M., Smith-Lovin,L., Cook,J.M. (2001), Birds of a Feather: Homophily in Social Networks, "Annual Review of Sociology". 
-Wasserman,S., Faust,K. (1994). Social Network Analysis. Methods and Applications, Cambridge University Press.
-
-# References

@@ -118,7 +118,7 @@ As in betwenness centrality, Lara is the most central person in the graph, follo
 Consider the network of judges from polish regional court -- two judges are connected, if they've ruled at least once together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the greatest component of this network, because it is unclear how to compare for example closeness for unconnected components.
 
 ```{r}
-graph <- readRDS("~/wsad-sna2/data//legnica.RDS")
+graph <- readRDS("data/legnica.RDS")
 cl <- clusters(graph)
 graph <- induced.subgraph(graph, cl$membership == which.max(cl$csize))
 graph$layout <- layout.fruchterman.reingold(graph)

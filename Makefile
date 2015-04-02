@@ -1,4 +1,4 @@
-files:=cohesion ergm friendship_paradox local_neighborhoods segregation small_world
+files:=cohesion ergm friendship_paradox local_neighborhoods segregation small_world Centrality
 
 pandoc=pandoc
 pandoc_flags=-s --toc

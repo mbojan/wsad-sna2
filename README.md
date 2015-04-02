@@ -2,6 +2,22 @@
 
 Samouczek SNA.
 
+## Spis treści
+
+(propozycja, stuby w [`sylabus.md`](sylabus.md))
+
+1. [Local neighborhoods](local_neighborhoods.Rmd)
+2. [Centrality](Centrality.Rmd)
+3. [Friendship paradox](friendship_paradox.Rmd)
+4. [Small world phenomenon](small_world.Rmd)
+5. [Homophily and segregation](segregation.Rmd)
+6. [Cohesion](cohesion.Rmd)
+7. [ERGMs](ergm.Rmd)
+
+
+
+
+
 
 ## Workflow
 

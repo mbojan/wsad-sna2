@@ -1,85 +1,189 @@
 ---
 title: "Centrality"
-output: html_document
+output: 
+  html_document:
+    theme: united
+    toc: true
 bibliography: references.bib
 ---
-  The aim of many researches is to identify the most important actors in the network. The most important actors exercise control over others or influence their behaviours to achieve private goals. However, the notion "important" may have many different meanings in social life. It can be also measured in many different ways in social network analysis. In general, actors, that face minimal number of constraints and have many opportunities to act, are at unique, important positions. At this stage we assume that important actors hold "central" (see definitions of centrality below) position in networks if they are involved in many ties [@wasserman_faust_1994: 173].
 
-In this chapter we will focus on different meanings and measures of centrality in social networks. Three concepts of centrality will be discussed further: a) degree centrality, b) closeness centrality, c) betweenness centrality and d)eigenvector centrality.
-
-### 1. Degree centrality
-The simplest measure of centrality is degree centrality. In undirected graphs, actors having more ties have better opportunities to act as they have more choices. In directed graph indegree and outdegree needs to be considered to interpret properly actor's network position. 
-
-Look and analyze pictures below.
-```{r, echo=FALSE}
-library("igraph")
-m1 <- matrix(c(0,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0),nrow=4,ncol=4)
-rownames(m1) <- c("John", "Lara", "Peter", "Sara")
-colnames(m1) <- c("John", "Lara", "Peter", "Sara")
-
-g1 <- graph.adjacency(m1, mode="undirected")
-plot(g1, main="Degree centrality - undirected graph", vertex.size = 30)
+```{r, setup, echo=FALSE, results="hide"}
+library(knitr)
+opts_chunk$set( fig.width=12, fig.height=8 )
+set.seed(666)
 ```
 
-In undirected graph the most central actor has the highest degree value.
+
+The goal in many studies is to identify the most important actor(s) in the network. The most important actors exercise control over others or influence their behaviors to achieve private goals. However, the notion of "importance" may be defined in very different ways. Consequently, it can also be measured in many different ways in social network analysis. In general, sociological theory posits that important actors are those, who face minimal number of *constraints* and have many *opportunities* to act. Important actors are called "central" in the terminology of SNA.
+
+Historically, being "central" in a network usually referred to being involved in many ties, because it made an actor prominent in a network, more visible to others, and so on [@wasserman_faust_1994: 173]. Over time, many other definitions of being central (or centrality) have been developed. In this chapter we will focus on a couple of different definitions and measures of centrality in social networks. Four concepts of centrality will be discussed further: 
+
+a) Degree centrality
+b) Closeness centrality
+c) Betweenness centrality
+d) Eigenvector centrality
+
+To get more information on centrality measures see [@wasserman_faust_1994, Chapter 5].
+
+
+
+
+
+```{r, packages}
+# Load necessary R packages
+library(igraph)
+```
+
+
+
+
+
+## 1. Degree centrality
+
+The simplest measure of centrality is degree centrality. In undirected graphs, actors having more ties have better opportunities to act as they have more choices. In a directed graph, indegree and outdegree can be considered separately to differentiate between having many incoming relations, i.e. "popularity", and having many outgoing relations, i.e. "sociality".
+
+
+Consider the two simple networks presented below. 
+
+```{r, simple_networks}
+g1 <- graph.formula(Mary ---+ Sara,
+                    Sara ---+ Lara,
+                    Sara ---+ John,
+                    John ---+ Mary,
+                    John ---+ Peter,
+                    Peter ---+ Tom,
+                    Tom ---+ Peter)
+# undirected version
+g1u <- as.undirected(g1)
+```
+
+The network `g1u` is an undirected version of `g1`, where a line is present in `g1u` whenever there is an arc in `g1`.
+
+```{r, simple_networks_plot, echo=FALSE}
+op <- par(mar=c(1,1,2,1))
+lay <- layout.fruchterman.reingold(g1)
+layout(matrix(1:2, 1, 2))
+plot(g1u, main="Undirected", layout=lay, vertex.size=20)
+plot(g1, main="Directed", layout=lay, vertex.size=20, edge.curved=0.1)
+par(op)
+```
+
+
+
+In an undirected graph the most central actors have the highest degree value. In our example these will be John and Sara, both of them have degree 3.
+
+```{r, degree_centrality}
+degree(g1u)
+```
+
+Now, let us consider the directed graph above.
+
+In this graph relations between actors have directions, so we can analyze in-degree and out-degree separately specifying the `mode` argument.
 
 ```{r}
-degree(g1)
+degree(g1)   # total
+degree(g1, mode = "out")
+degree(g1, mode = "in")
 ```
 
-Lara is the most central actor. She has degree number 3 which is the highest value for that graph.
+First measure gives us the total number relations (sum of in- and out-degree) for each actor. Again, Sara and John are actors with the highest total degree of 3. They also score the highest when considering out-degrees, both have 2 outgoing relations. However, it is Peter who has the largest number of incoming relations (in-degree): 2.
 
-Now, consider directed graph.
+Degree centrality has also a relative, or normalized, variant. The degree of each actor is divided by the number of all possible relations he may have in this particular network, so $N - 1$ where $N$ is the number of actors. To calculate normalized version set the argument `normalized` to `TRUE`.  In our example networks the relative degree centrality scores are:
 
-```{r, echo=FALSE}
-m2 <- matrix(c(0,1,0,1,0,0,1,0,0,1,0,0,0,1,0,0),nrow=4,ncol=4)
-rownames(m2) <- c("John", "Lara", "Peter", "Sara")
-colnames(m2) <- c("John", "Lara", "Peter", "Sara")
-
-graph <- graph.adjacency(m2, mode="directed")
-plot(graph, main="Degree centrality - directed graph", vertex.size = 30)
+```{r, normalized_degree_centrality}
+# undirected network
+degree(g1u, normalized=TRUE)
+# directed network, in-degree centrality
+degree(g1, mode="in", normalized=TRUE)
 ```
 
-In this graph relations between actors have directions. In this case it's necessary to analyze in--degree and out--degree to interpret centrality of actors.
+So, for example, normalized in-degree of Peter is 0.4 meaning that he was nominated by 40% of others in this network.
+
+In social science literature value of in-degree is often treated as indicator of popularity or prestige. For example, in IT Department actors having high in-degree value might be treated as mentors or worthy employees. They share knowledge or skills with other employees asking them for help. On the other side, out-degree can be treated as indicator of power or influence. Actors with high value of out-degree might influence behaviors of other actors in a network. For example, managing staff give its subordinates instructuions and commands on how to fill up various tasks. It is worth to mention that under optimal conditions the most worthy managers have both high value of in- and out-degree.
+
+
+
+
+
+
+
+## 2. Closeness centrality
+
+Basic rationale behind closeness centrality is that all pairs of actors in a network are separated by measurable distances. Actor with the shortest paths to all other nodes in a graph occupy central position measured by closeness centrality. The most evident example of actor being closer to other actors is a node located in the center of a star network.
+
+Let us illustrate this concept using the example network from above, and think of the edges as steps of a walks around the network that start from Sara. 
+
+```{r, closeness_figure}
+sp <- get.shortest.paths(g1, from=V(g1)["Sara"], output="epath")$epath
+ecol <- rep("grey", ecount(g1))
+ecol[ unique(sapply(sp, "[", 1)) ] <- "brown"
+ecol[ unique(sapply(sp, "[", 2)) ] <- "red"
+ecol[ unique(sapply(sp, "[", 3)) ] <- "orange"
+plot(g1, main="Walks from Sara to others", layout=lay, vertex.size=20,
+     edge.curved=0.1, edge.color=ecol)
+legend("topright", lty=1, lwd=2, col=c("brown", "red", "orange"),
+       bty="n", legend=1:3, title="Steps from Sara")
+```
+
+For each actor, apart from Sara, we can calculate the length of the walk to that actor starting from Sara:
+
+- Lara and John are 1 step away from Sara
+- Mary and Peter are 2 steps away from Sara
+- Tom is 3 steps away from Sara
+
+
 ```{r}
-degree(graph)
-degree(graph, mode = "out")
-degree(graph, mode = "in")
+# vector of lengths of shortest walks originating from Sara to all others
+d <- shortest.paths(g1, v=V(g1)["Sara"], mode="out")
+d
 ```
 
-First measure inform us about summed number relations (out and in) for each actor. Lara with summed degree (indegree + outdegree) of 4 is the most central actor in the graph. Lara has also the highest value of out--degree 3. But she is not the most central actor if we take into acount in--degrees. Thus, how to interpret this results?
-
-In social science literature value of in--degree is often treated as indicator of popularity or prestige. For example, in IT Department actors having high in--degree value might be treated as mentors or worthy employees. They share knowledge or skills with other employees asking them for help. On the other side, out--degree can be treated as indicator of power or influence. Actors with high value of out--degree influence behaviors of other nodes in a network. For example, managing staff give its subordinates instructuions and commands on how to fill up various tasks. It is worth to mention, that under optimal conditions the most worthy managers have both high value of in-- and out--degree.
-
-### 2. Closeness centrality
-Basic assumption behind closeness centrality is that all pairs of actors in a network are separated by measurable distances. Actor with the shortest paths to all other nodes in a graph occupy central position measured by closeness centrality. The most evident example of actor being closer to other actors is a node located in the centre of a star network. To get more information on centrality measures see Wasserman and Faust chapter 5.
-
-Look at the graph made of six actors. 
-
-```{r, echo=FALSE}
-m3 <- matrix(c(0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0),nrow=6,ncol=6)
-rownames(m3) <- c("Lara", "John", "Peter", "Sara", "Mary", "Tom")
-colnames(m3) <- c("Lara", "John", "Peter", "Sara", "Mary", "Tom")
-
-graph <- graph.adjacency(m3, mode="directed")
-plot(graph, main="Closeness centrality", vertex.size = 30)
-```
+We can sum-up these distances to calculate how far away, in total, Sara is from
+others in this particular network. It is:
 
 ```{r}
-degree(graph)
-degree(graph, mode = "out")
-degree(graph, mode = "in")
+# sum of the shortest walk lengths
+sum(d)
 ```
 
-When we apply the degree centrality measure (out--degree + in--degree), the most central actors in a network are John, Peter and Sara. So, let's apply closeness cetrality function. Higher value means that actor is closer to others in a network. Our function calculates the closeness of actors without regard to direction of ties.
+The sum itself can be interpreted as a measure of "decentrality". Closeness Centrality is defined as
+an inverse of the sum of the distances. For Sara it will be equal to:
 
 ```{r}
-closeness(graph, mode = "all")
+1/sum(d)
 ```
 
-We see that the most central actor is John. John occupies structural position that allows him to reach other nodes through the shortest geodesic distance. Thus, John has a strutural opportunity to reach all nodes in a network much quicker than others.
+We can calculate closeness centralities for all actors in the network using `closeness` function:
 
-### 3. Betweenness centrality
+```{r}
+closeness(g1, mode = "out")
+```
+
+The `mode` argument determines how the distances between actors are calculated. If it is `"out"` or `"in"` the centrality is based on walks, respectively, originating or terminating on a focal actor. If `mode` is `"all"`, than shortest paths are considered (directionality of the ties is ignored). For comparison:
+
+```{r}
+closeness(g1, mode = "in")
+closeness(g1, mode = "all")
+```
+
+To consider possible interpretations, let us assume that the network ties represent knowledge flows, i.e., an arrow from Sara to John represents the fact that John goes often to Sara for advice. As a consequence, advice (knowledge) can be thought to "flow" from Sara to John.
+
+> TODO: poniższe do przemyślenia / poprawy:
+
+Closeness centrality of Sara when considering *incoming ties* (`mode="in"`) could be interpreted as the extent, to which Sara is a "sink" in the overall process of advice flow in the network. In other words, that she tends to receive advice from others, who themselves seek advice from others, who seek advice from others, and so on.
+
+Closeness centrality of Sara when considering *outgoing ties* (`mode="out"`) can be then interpreted as an extent to which she is a "source" of advice for others (directly or indirectly) in the network.
+
+
+
+
+
+
+
+
+
+## 3. Betweenness centrality
+
 Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties actor has or how close is he to other nodes in a network. Rather it is crucial how many times he mediates in relations between others. This measure has been explained in [@freeman_1979]. 
 
 Now, look at the graph made of six actors. 
@@ -101,7 +205,8 @@ betweenness(graph)
 
 Actor who mediates most often in relations between other nodes is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.
 
-### 4. Eigenvector centrality
+## 4. Eigenvector centrality
+
 In general, eigenvector centrality measures the influence of nodes in a given network. This measure is based on the idea that actors who are connected to well-connected actors have better structural positions in a graph. In other words, it is beneficial to be a big fish connected to other big fishes in a pond. Eigenvector centrality shows how well connected an actor is to the areas of a network with the high connectivity. Actor A with high eigenvector score have many connections (B to Z). Actors B to Z have many connections to other actors, etc. When the end of a network is reached the eigenvector measures are calculated. More details on eigenvector centrality can be found in works of Philip Bonacich who invented this measure [@bonacich_2007].
 
 Let's calcualte eigenvector centrality on the same network as above.
@@ -113,7 +218,7 @@ evcent$vector
 As in betwenness centrality, Lara is the most central person in the graph, followed by Sara. However, now Mary is third most central person in a graph, while previously she was the least central, alongside John and Tom. The reason for this difference is that in a sense Mary lies outside main "route", thus she is not a part of any of the shortest paths, but she is connected to the cental persons of this "route" and therefore achieves high eigenvector centrality.
 
 
-### 5. Real--network example
+## 5. Extended example on a real network
 
 Consider the network of judges from polish regional court -- two judges are connected, if they've ruled at least once together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the greatest component of this network, because it is unclear how to compare for example closeness for unconnected components.
 
@@ -163,5 +268,6 @@ You could see that each measure marks different nodes as the most central. Nodes
 To sump up, you must remember that various centrality measures take into accoutn different properties. Therefore in the first place you should decide what properties you are interested in and then find appropiate centrality measure, and not the other way round
 
 
-*******************
-### References
+---
+
+## References

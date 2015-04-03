@@ -12,7 +12,9 @@ The idea of cohesion has been widely studied in contemporary social science. Res
 In our analysis we will use network of judges -- there is an edge between two judges if they were judging at least one case together.
 ```{r, message=FALSE, fig.align='center', fig.height=4, fig.width=4}
 library("igraph")
-graph <- readRDS("data/legnica.RDS")
+library("isnar")
+data(judge_net)
+graph <- judge_net
 par(mar = rep(0,4))
 plot(graph, vertex.label = NA, margin = 0)
 ```
@@ -243,8 +245,8 @@ Two-mode (two-dimensional) networks are specific types of networks made of two d
 
 Below you could see a bipartite network, which was a source network for a graph used in previous chapters. There are two class of nodes -- judges and judgments. Nodes are connected if a given judge was judging at a given case. 
 ```{r}
-graph_bip <- readRDS("data/legnica_bip.RDS")
-graph_bip
+data(judge_net_bp)
+graph_bip <- judge_net_bp
 table(V(graph_bip)$type)
 ```
 

@@ -74,7 +74,7 @@ friendship_paradox <- function(graph){
 
 And actual computations
 ```{r}
-coauthorship <- readRDS("data/coauthorship.RDS")
+data(coauthorship)
 friendship_paradox(coauthorship)
 ```
 

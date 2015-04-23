@@ -181,23 +181,32 @@ Closeness centrality of Sara when considering *outgoing ties* (`mode="out"`) can
 
 # Betweenness centrality
 
-Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties actor has or how close is he to other nodes in a network. Rather it is crucial how many times he mediates in relations between others. This measure has been explained in [@freeman_1979]. 
+Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties an actor has or how close he is to other nodes in a network. Rather, of interest is the extent to which others are indirectly connected to one another through him. This measure has been explained in e.g. [@freeman_1979]. 
 
-Now, look at the graph made of six actors. 
+Let us take a look at the created above:
 
 ```{r, echo=FALSE}
-m4 <- matrix(c(0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0),nrow=6,ncol=6)
-rownames(m4) <- c("John", "Lara", "Peter", "Sara", "Mary", "Tom")
-colnames(m4) <- c("John", "Lara", "Peter", "Sara", "Mary", "Tom")
-
-graph <- graph.adjacency(m4, mode="undirected")
-plot(graph, main="Betweenness centrality", vertex.size = 30)
+plot(g1u)
 ```
 
-Let's apply betweenness centrality measure.
+The most obvious cases are probably Lara and Tom. Both of them have only one connection and reside on a "boundary" of this network. Consequently, they do not mediate any indirect connections between others. Their betweenness scores will be 0. A less obvious case is Mary. She has two connections to Sara and John. However, she is a rather redundant mediator: Sara and John have a direct relationship between one another, so do not need Mary as a mediator. In fact, any shortest path connecting a pair of actors does not go through Mary. For example, if we would like to trace the shortest path between, say, Lara and Tom, we would traverse Sara, John, and Peter. Consequently, Mary's betweenness will be also 0.
+
+All the remaining actors in this network will play a role of mediators, and to a different extent. We may calculate how many pairs of actors and shortest paths between them have to traverse a given actor. Let us take a closer look at Sara. Sara is a true "gate keeper" for Lara: all shortest paths that go to Lara need to pass through Sara. We can see that:
+
+
+1. There are four other actors in the network apart from Lara and Sara.
+2. These four actors (Mary, John, Peter, and Tom) can reach each other directly or indirectly without Sara being involved.
+
+Therefore, Sara lies on four shortest paths: Lara-Mary, Lara-John, Lara-Peter, and Lara-Tom.
+
+Betweenness Centrality of an actor is a number of shortest paths in the network involving that actor.
+
+Betweenness Centrality can be calculated using function `betweenness`.
+
 
 ```{r}
-betweenness(graph)
+betweenness(g1u)
+graph <- g1u
 ```
 
 Actor who mediates most often in relations between other nodes is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.

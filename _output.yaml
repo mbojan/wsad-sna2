@@ -1,0 +1,5 @@
+html_document:
+  theme: united
+  highlight: pygment
+  toc: true
+  pandoc_args: ["--number-sections"]

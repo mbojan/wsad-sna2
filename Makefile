@@ -16,7 +16,7 @@ endef
 default: html
 
 
-$(files:=.html) $(files:=.pdf): references.bib
+$(files:=.html) $(files:=.pdf): references.bib _output.yaml
 
 ifeq ($(use_rmarkdown),1) 
 %.html: %.Rmd

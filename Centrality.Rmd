@@ -1,9 +1,5 @@
 ---
 title: "Centrality"
-output: 
-  html_document:
-    theme: united
-    toc: true
 bibliography: references.bib
 ---
 
@@ -39,7 +35,7 @@ library(isnar)
 
 
 
-## 1. Degree centrality
+# Degree centrality
 
 The simplest measure of centrality is degree centrality. In undirected graphs, actors having more ties have better opportunities to act as they have more choices. In a directed graph, indegree and outdegree can be considered separately to differentiate between having many incoming relations, i.e. "popularity", and having many outgoing relations, i.e. "sociality".
 
@@ -108,7 +104,7 @@ In social science literature value of in-degree is often treated as indicator of
 
 
 
-## 2. Closeness centrality
+# Closeness centrality
 
 Basic rationale behind closeness centrality is that all pairs of actors in a network are separated by measurable distances. Actor with the shortest paths to all other nodes in a graph occupy central position measured by closeness centrality. The most evident example of actor being closer to other actors is a node located in the center of a star network.
 
@@ -183,7 +179,7 @@ Closeness centrality of Sara when considering *outgoing ties* (`mode="out"`) can
 
 
 
-## 3. Betweenness centrality
+# Betweenness centrality
 
 Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties actor has or how close is he to other nodes in a network. Rather it is crucial how many times he mediates in relations between others. This measure has been explained in [@freeman_1979]. 
 
@@ -206,7 +202,7 @@ betweenness(graph)
 
 Actor who mediates most often in relations between other nodes is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.
 
-## 4. Eigenvector centrality
+# Eigenvector centrality
 
 In general, eigenvector centrality measures the influence of nodes in a given network. This measure is based on the idea that actors who are connected to well-connected actors have better structural positions in a graph. In other words, it is beneficial to be a big fish connected to other big fishes in a pond. Eigenvector centrality shows how well connected an actor is to the areas of a network with the high connectivity. Actor A with high eigenvector score have many connections (B to Z). Actors B to Z have many connections to other actors, etc. When the end of a network is reached the eigenvector measures are calculated. More details on eigenvector centrality can be found in works of Philip Bonacich who invented this measure [@bonacich_2007].
 
@@ -219,7 +215,7 @@ evcent$vector
 As in betwenness centrality, Lara is the most central person in the graph, followed by Sara. However, now Mary is third most central person in a graph, while previously she was the least central, alongside John and Tom. The reason for this difference is that in a sense Mary lies outside main "route", thus she is not a part of any of the shortest paths, but she is connected to the cental persons of this "route" and therefore achieves high eigenvector centrality.
 
 
-## 5. Extended example on a real network
+# Extended example on a real network
 
 Consider the network of judges from polish regional court -- two judges are connected, if they've ruled at least once together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the greatest component of this network, because it is unclear how to compare for example closeness for unconnected components.
 
@@ -246,23 +242,27 @@ pal <- function(x) {
   gradient_n_pal(c("blue", "red"))(x)
 }
 
-par(mfrow = c(4,2))
-par(mar = rep(0,4))
-plot(graph, vertex.color = pal(deg), vertex.label = NA)
-par(mar = rep(2, 4))
-hist(deg, main = "Degree centrality")
-par(mar = rep(0,4))
-plot(graph, vertex.color = pal(close), vertex.label = NA)
-par(mar = rep(2, 4))
-hist (close, main = "Closeness centrality")
-par(mar = rep(0,4))
-plot(graph, vertex.color = pal(between), vertex.label = NA)
-par(mar = rep(2, 4))
-hist(between, main = "Betweenness centrality")
-par(mar = rep(0,4))
-plot(graph, vertex.color = pal(evcent), vertex.label = NA)
-par(mar = rep(2, 4))
-hist(evcent, main = "Eigenvector centrality")
+h <- function(x, ...) {
+  op <- par( mar=rep(2,4))
+  hist(x, col="lightskyblue", border="white", ...) 
+  par(op)
+}
+
+p <- function(x) {
+  op <- par(mar = rep(0, 4))
+  plot(graph, vertex.color = pal(x), vertex.label = NA)
+  par(op)
+}
+
+layout(matrix(1:8, 4, 2, byrow=TRUE))
+p(deg)
+h(deg, main="Degree centrality")
+p(close)
+h(close, main = "Closeness centrality")
+p(between)
+h(between, main = "Betweenness centrality")
+p(evcent)
+h(evcent, main = "Eigenvector centrality")
 ```
 
 You could see that each measure marks different nodes as the most central. Nodes in the centres of two clusters have clearly the highest degrees. In closeness centrality the most central nodes lie in the "visual" center of the network, between two bigger clusters. They are reasonably close to all other vertices, while vertices from each cluster always have longer path to the other cluster. Also betweenness centrality marks those nodes central, but unlike closeness it is more rigid -- only nodes forming the bridge between two clusters are central. The one that is connected to both of them, but none of the others, has betweenness score 0. Looking on the histograms you could say that closeness centrality is more uniformly distributed, while betweenness centrality resembles more power--law distribution. Eventually eigenvector centrality completely ignores one cluster and treats nodes is the second cluster as central, even though it is smaller.
@@ -272,4 +272,4 @@ To sump up, you must remember that various centrality measures take into accoutn
 
 ---
 
-## References
+# References

@@ -19,7 +19,7 @@ b) Closeness centrality
 c) Betweenness centrality
 d) Eigenvector centrality
 
-To get more information on centrality measures see [@wasserman_faust_1994, Chapter 5].
+To get more information on centrality measures see @wasserman_faust_1994 [Chapter 5].
 
 
 
@@ -29,6 +29,7 @@ To get more information on centrality measures see [@wasserman_faust_1994, Chapt
 # Load necessary R packages
 library(igraph)
 library(isnar)
+library(scales)
 ```
 
 
@@ -181,7 +182,7 @@ Closeness centrality of Sara when considering *outgoing ties* (`mode="out"`) can
 
 # Betweenness centrality
 
-Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties an actor has or how close he is to other nodes in a network. Rather, of interest is the extent to which others are indirectly connected to one another through him. This measure has been explained in e.g. [@freeman_1979]. 
+Structural advantage in a network is often based on opportunity to mediate between others. Some actors depend on others as they are connected through them with distant nodes. Betweenness centrality returns the number of times an actor acts as a bridge along the shortest path between pairs of nodes. Thus, sometimes it is not important how many ties an actor has or how close he is to other nodes in a network. Rather, of interest is the extent to which others are indirectly connected to one another through him. This measure has been explained in e.g. @freeman_1979. 
 
 Let us take a look at the created above:
 
@@ -201,47 +202,86 @@ Therefore, Sara lies on four shortest paths: Lara-Mary, Lara-John, Lara-Peter, a
 
 Betweenness Centrality of an actor is a number of shortest paths in the network involving that actor.
 
-Betweenness Centrality can be calculated using function `betweenness`.
+Betweenness Centrality can be calculated using function `betweenness()`.
 
 
 ```{r}
 betweenness(g1u)
+```
+
+We can show betweenness scores on the picture by making more central nodes bigger. As raw betweenness scores are from 0 to 6, we need to rescale them somewhat so that they work well as node sizes. Default node size (`vertex.size`) is 15, so let's rescale them to the interval [15; 30]:
+
+```{r, show_betweenness}
+# Rescale betweenness  using rescale() from package "scales"
+b <- rescale(betweenness(g1u), c(15, 30))
+range(b)
+plot( g1u, vertex.size=b )
+```
+
+
+
+In directed networks we have an option whether or not to take tie directionality into account. In other words, when should we calculate the number of shortest *paths* (undirected) or shortest *walks* (directed). Using the directed network created earlier:
+
+```{r, show_betweenness_directed}
+betweenness(g1, directed=FALSE) # identical to undirected above
+betweenness(g1, directed=TRUE)
+plot(g1, vertex.size=rescale(betweenness(g1), c(15, 30)),
+     edge.curved=0.1 )
+```
+
+We can see that, for example, Mary now has a betweenness of 2 because:
+
+1. She lies on a shortest walk from John to Sara (John -> Mary -> Sara).
+2. She lies on a shortest walk from John to Lara (John -> Mary -> Sara -> Lara).
+
+It may make sense to analyze shortest walks if the directionality of the ties reflects some sort of flow (e.g. knowledge as described in the section on closeness centrality).
+
+For more details see e.g. @borgatti_2005 for a comparison of different network centrality measures vis a vis some paradigmatic dynamic processes of network flow.
+
+```{r, delete_me}
+# TODO delete me
 graph <- g1u
 ```
 
-Actor who mediates most often in relations between other nodes is Lara. She is the most between other actors in a network. In other words, she may act as a "broker" or "middleman" controling the flow of material or nonmaterial goods in a graph. Control over some of the paths in a network may be related to power or influence.
-
 # Eigenvector centrality
 
-In general, eigenvector centrality measures the influence of nodes in a given network. This measure is based on the idea that actors who are connected to well-connected actors have better structural positions in a graph. In other words, it is beneficial to be a big fish connected to other big fishes in a pond. Eigenvector centrality shows how well connected an actor is to the areas of a network with the high connectivity. Actor A with high eigenvector score have many connections (B to Z). Actors B to Z have many connections to other actors, etc. When the end of a network is reached the eigenvector measures are calculated. More details on eigenvector centrality can be found in works of Philip Bonacich who invented this measure [@bonacich_2007].
+Eigenvector centrality was developed by Bonacich [-@bonacich_2007]. The basic rationale behind this measure is an actor is more central the more central are his network neighbors. More precisely, actor's centrality is proportional to centrality scores of his/her network peers. This seemingly circular definition has an exact solution in that such defined actors' centralities are equal to the values of the first [eigenvector](http://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors) of the graph's adjacency matrix. Actors with high eigenvector centralities are those which are connected to many other actors which are, in turn, connected to many others, and so on.
 
-Let's calcualte eigenvector centrality on the same network as above.
+Eigenvector centralities can be calculated with the function `evcent()`. The value returned is a list containing more details regarding the eigenvalue decomposition, but the centrality scores themselves are stored in a component `vector`:
+
 ```{r}
-evcent <- evcent(graph)
-evcent$vector
+ecent <- evcent(g1u)
+ecent$vector
+plot(g1u, vertex.size=rescale(ecent$vector, c(15, 30)))
 ```
 
-As in betwenness centrality, Lara is the most central person in the graph, followed by Sara. However, now Mary is third most central person in a graph, while previously she was the least central, alongside John and Tom. The reason for this difference is that in a sense Mary lies outside main "route", thus she is not a part of any of the shortest paths, but she is connected to the cental persons of this "route" and therefore achieves high eigenvector centrality.
+As in betwenness centrality, John is the most central person in the graph, followed by Sara. However, now Mary is third most central person in a graph, while previously she was one of the least central. The reason for this difference is that Mary is directly connected to most central actors (according to this measure) in the network.
+
 
 
 # Extended example on a real network
 
-Consider the network of judges from polish regional court -- two judges are connected, if they've ruled at least once together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the greatest component of this network, because it is unclear how to compare for example closeness for unconnected components.
+Let us now calculate all the measures defined above on a real network. Consider the network of judges from a Polish regional court. Two judges are connected, if they have ruled on at least one case together. We want to find the most important, most central judges in the network according to previously shown measures. Our analysis will be limited to the largest component of a bigger network because it is unclear how to compare, for example, closeness scores for unconnected components.
+
+First, we extract the largest connected component:
 
 ```{r}
 data(judge_net)
-graph <- judge_net
-cl <- clusters(graph)
-graph <- induced.subgraph(graph, cl$membership == which.max(cl$csize))
-graph$layout <- layout.fruchterman.reingold(graph)
-
-deg <- degree(graph)
-close <- closeness(graph)
-between <- betweenness(graph)
-evcent <- evcent(graph)$vector
+cl <- clusters(judge_net)
+gj <- induced.subgraph(judge_net, cl$membership == which.max(cl$csize))
+gj$layout <- layout.fruchterman.reingold(gj)
 ```
 
-Below you could see our network with nodes coloured according to their (normalised) centrality score -- the most central nodes are red and the least central are blue, together with the distribution of (unnormalised) centralities.
+Second, we calculate values of different centrality measures:
+
+```{r}
+deg <- degree(gj)
+cl <- closeness(gj)
+between <- betweenness(gj)
+ecent <- evcent(gj)$vector
+```
+
+Below you could see our network with nodes colored according to their (normalized) centrality scores. The most central nodes are red and the least central are blue. Next to that, we show distributions of (unnormalized) centralities.
 
 ```{r, fig.height=9, fig.width=7, fig.align='center', echo=FALSE}
 library("scales")
@@ -259,26 +299,25 @@ h <- function(x, ...) {
 
 p <- function(x) {
   op <- par(mar = rep(0, 4))
-  plot(graph, vertex.color = pal(x), vertex.label = NA)
+  plot(gj, vertex.color = pal(x), vertex.label = NA)
   par(op)
 }
 
 layout(matrix(1:8, 4, 2, byrow=TRUE))
 p(deg)
 h(deg, main="Degree centrality")
-p(close)
-h(close, main = "Closeness centrality")
+p(cl)
+h(cl, main = "Closeness centrality")
 p(between)
 h(between, main = "Betweenness centrality")
-p(evcent)
-h(evcent, main = "Eigenvector centrality")
+p(ecent)
+h(ecent, main = "Eigenvector centrality")
 ```
 
-You could see that each measure marks different nodes as the most central. Nodes in the centres of two clusters have clearly the highest degrees. In closeness centrality the most central nodes lie in the "visual" center of the network, between two bigger clusters. They are reasonably close to all other vertices, while vertices from each cluster always have longer path to the other cluster. Also betweenness centrality marks those nodes central, but unlike closeness it is more rigid -- only nodes forming the bridge between two clusters are central. The one that is connected to both of them, but none of the others, has betweenness score 0. Looking on the histograms you could say that closeness centrality is more uniformly distributed, while betweenness centrality resembles more power--law distribution. Eventually eigenvector centrality completely ignores one cluster and treats nodes is the second cluster as central, even though it is smaller.
+You could see that each measure marks different nodes as the most central. Nodes in the centers of two clusters have clearly the highest degrees. In closeness centrality the most central nodes lie in the "visual" center of the network, between two bigger clusters. They are reasonably close to all other nodes, while nodes from each cluster always have longer path to the other cluster. Also betweenness centrality marks those nodes central, but unlike closeness it is more rigid -- only nodes forming the bridge between two clusters are central. The one that is connected to both of them, but none of the others, has betweenness score 0. Looking on the histograms you could say that closeness centrality is more uniformly distributed, while betweenness centrality resembles more power--law distribution. Eventually eigenvector centrality completely ignores one cluster and treats nodes is the second cluster as central, even though it is smaller.
 
-To sump up, you must remember that various centrality measures take into accoutn different properties. Therefore in the first place you should decide what properties you are interested in and then find appropiate centrality measure, and not the other way round
+To sump up, you must remember that various centrality measures take into account different properties. Therefore in the first place you should decide what properties you are interested in and then find appropriate centrality measure, and not the other way round.
 
 
----
 
 # References

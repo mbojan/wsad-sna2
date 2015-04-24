@@ -1,10 +1,14 @@
 ---
-title: Friendship paradox in social networks
-output: html_document
+title: "Friendship paradox in social networks"
 bibliography: references.bib
 ---
 
-Why your friends have on average more friends than you do? Why your co-workers have usually more co-workers than you do? Why you Tweeter followers have on average more followers than you do? Answer to all these questions lies in a phenomenon called the friendship paradox, firstly described by [@feld_1991]. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. 
+# Introduction
+
+Why your friends have on average more friends than you do? Why your co-workers have usually more co-workers than you do? Why you Tweeter followers have on average more followers than you do? Answer to all these questions lies in a phenomenon called the friendship paradox, firstly described by @feld_1991. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. 
+
+
+# Example: school network
 
 Let's check whether this paradox holds also in case of network from Polish school, where pupils picked out children with whom they wanted to play. This is a directed network, so the question is how often children picked up by me were picked up more often by others, on average.
 
@@ -13,7 +17,7 @@ library("igraph")
 library("isnar")
 data(IBE121)
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-plot(playnet, vertex.size=3, vertex.label=NA, edge.arrow.size=.5, edge.curved=.2)
+plot(playnet, vertex.size=5, vertex.label=NA, edge.arrow.size=.5, edge.curved=.1)
 ```
 
 Firstly we have to calculate in--degrees of all nodes.
@@ -54,7 +58,9 @@ plot(degrees, averages, xlab="In-degree", ylab="Avg in-degree of alters")
 abline(a=0, b=1)
 ```
 
-*******************
+
+# Example: Co-authorship network
+
 
 Second example - on coauthorship network. This network is undirected and quite big (over 10 thousand nodes), but friendship paradox still holds, so your coauthors have usually more coauthors then you have.
 
@@ -90,7 +96,10 @@ friendship_paradox(giant_component)
 
 Value for giant component is higher because in the complete network there are a lot of isolated dyads and triads of authors, where obviously number of friends is equal to mean number of friends' friends.
 
-**********************
+
+
+
+# Final notes
 
 Note the difference between two statements:
 
@@ -119,6 +128,7 @@ ff_deg <- function(graph){
 ```
 
 Mean number of friends | Mean number of friend's friends | Fraction of nodes, that have less friends than their friends do on average
+
 -------|---------|-------
 `r mean(degree(n1))` | `r mean(ff_deg(n1))` | `r mean(ff_deg(n1) > degree(n1))`
 `r mean(degree(n2))` |`r mean(ff_deg(n2))` |`r mean(ff_deg(n2) > degree(n2))`
@@ -161,9 +171,7 @@ ggplot(data, aes(x = var, y = frnd)) +
        y = "Value of 'friendship paradox index'")
 ```
 
-********
 
-Some applications of the friendship paradox could be found in [@christakis_fowler_2010], [@hodas_etal_2014] and [@eom_jo_2014].
+Some applications of the friendship paradox could be found in @christakis_fowler_2010, @hodas_etal_2014, and @eom_jo_2014.
 
-**********************
-### References
+# References

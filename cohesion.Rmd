@@ -3,6 +3,10 @@ title: Cohesion in Social Networks
 bibliography: references.bib
 ---
 
+```{r, setup, echo=FALSE, results="hide"}
+set.seed(666)
+```
+
 # Introduction
 
 The idea of cohesion has been widely studied in contemporary social science. Researchers from diverse backgrounds are trying to identify factors encouraging individuals to keep dense and tight relations embedded in larger structures e.g. firms, local communities, societies. In this chapter we focus on the idea of cohesive subgroup developed in social network analysis. We begin with general definition of cohesion and than introduce clique and community measures of cohesion.

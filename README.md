@@ -6,13 +6,13 @@ Samouczek SNA.
 
 (propozycja, stuby w [`sylabus.md`](sylabus.md))
 
-1. [Local neighborhoods](local_neighborhoods.Rmd)
-2. [Centrality](Centrality.Rmd)
-3. [Friendship paradox](friendship_paradox.Rmd)
-4. [Small world phenomenon](small_world.Rmd)
-5. [Homophily and segregation](segregation.Rmd)
-6. [Cohesion](cohesion.Rmd)
-7. [ERGMs](ergm.Rmd)
+1. [Local neighborhoods](https://rawgit.com/mbojan/wsad-sna2/master/local_neighborhoods.html)
+2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/Centrality.html)
+3. Friendship paradox
+4. Small world phenomenon
+5. Homophily and segregation
+6. Cohesion
+7. ERGMs
 
 
 

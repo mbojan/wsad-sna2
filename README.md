@@ -4,17 +4,18 @@ Samouczek SNA.
 
 ## Spis treści
 
-(propozycja, stuby w [`sylabus.md`](sylabus.md))
+Linki prowadzą do skompilowanych gotowych części.
 
 1. [Local neighborhoods](https://rawgit.com/mbojan/wsad-sna2/master/local_neighborhoods.html)
 2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/Centrality.html)
 3. Friendship paradox
 4. Small world phenomenon
 5. Homophily and segregation
-6. Cohesion
+6. [Cohesion](https://rawgit.com/mbojan/wsad-sna2/master/cohesion.html)
 7. ERGMs
 
 
+(stuby w [`sylabus.md`](sylabus.md))
 
 
 

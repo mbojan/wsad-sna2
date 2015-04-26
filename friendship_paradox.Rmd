@@ -3,9 +3,65 @@ title: "Friendship paradox in social networks"
 bibliography: references.bib
 ---
 
+```{r, setup, echo=FALSE, results="hide", cache=FALSE}
+library(knitr)
+library(methods)
+library(igraph)
+set.seed(666)
+options(warn=2)
+opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
+               cache=TRUE)
+igraph.options(vertex.size=20)
+```
+
+
 # Introduction
 
-Why your friends have on average more friends than you do? Why your co-workers have usually more co-workers than you do? Why you Tweeter followers have on average more followers than you do? Answer to all these questions lies in a phenomenon called the friendship paradox, firstly described by @feld_1991. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. 
+In many, if not in most situations people build their knowledge about society as a whole primarily through their direct experiences from interacting with other individuals. For example:
+
+a) You may asses your professional successfulness by comparing your career to careers of your friends from high school or university. Many people observe that somehow friends tend to be more successful.
+b) If you use social media, like Facebook or Twitter, you may have noticed to your discontent, that your Facebook friends, or Twitter followers, seem to have more friends/followers than you do.
+
+In all these cases knowledge learned by observing our immediate social environment, i.e. friends, leads to rather pessimistic conclusions regarding our "status" vis a vis others.
+
+In this chapter we will give you some comfort. Social Network Analysis explains why it actually happens to almost all of us. The reason is the so-called *friendship paradox*, first described by @feld_1991. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. We also briefly show how this phenomenon, seemingly pessimistic from an individual perspective, can be leveraged to do some good.
+
+
+
+
+
+
+# Friendship paradox: an anatomy
+
+The most important feature of networks necessary to understand the friendship paradox is degree. In particular, we will need to calculate degrees for individual nodes and compare them to degrees of *friends* of individual nodes.
+
+Consider the following three simple networks:
+
+```{r, examples, fig.width=8, fig.height=8/3}
+library(igraph)
+dyads <- graph.formula(A -- B, C -- D, E)
+star <- graph.formula(A -- B:C:D:E)
+stemleaf <- graph.formula(A:B:C -- A:B:C, C -- D, D -- E)
+layout(matrix(1:3, 1, 3))
+plot(dyads, main="Dyads")
+plot(star, main="Star")
+plot(stemleaf, main="Stem-and-leaf")
+```
+
+In the `dyads` network nodes A, B, C, and D have all 1 friend each. Node E is an isolate. Average degree is equal to $(4 \times 1 + 0) / 5 = 0.8$. If we now look at the number of connections of friends (the number of friends of friends) we will see that:
+
+- A has one friend, B, who has one connection.
+- B has one friend, A, who has one connection.
+- C has one friend, D, who has one connection.
+- D has one friend, C, who has one connection.
+- E has no connections.
+
+In consequence, average degree of friends is $(4 \times 1 + 0) / 5$ so again 0.8.
+
+
+
+
+
 
 
 # Example: school network
@@ -99,6 +155,8 @@ Value for giant component is higher because in the complete network there are a 
 
 
 
+
+
 # Final notes
 
 Note the difference between two statements:
@@ -170,6 +228,8 @@ ggplot(data, aes(x = var, y = frnd)) +
   labs(x = "Standard deviation of degree distribution",
        y = "Value of 'friendship paradox index'")
 ```
+
+
 
 
 Some applications of the friendship paradox could be found in @christakis_fowler_2010, @hodas_etal_2014, and @eom_jo_2014.

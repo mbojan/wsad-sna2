@@ -67,56 +67,53 @@ $$
 
 Different ERG models can be specified by choosing different network statistics. A set of network statistics is chosen on the basis of theoretical premises concerning a particular research problem at hand. However, there are a few basic configurations often included in the model. Example of network statistics include:
 
-1. Number of edges in the network
+1. Number of edges in the network (`edges`)
 $$
 S_1(a) = \sum_{1\leq i\leq j\leq n}a_{ij},
 $$
 
-2. Number of _k_-stars (for $k\geq2$). A _k_-star consists of a central node and $k$ neighbors.
+2. Number of _k_-stars (for $k\geq2$). A _k_-star consists of a central node and $k$ neighbors. (`kstar`).
 $$
 S_k(a) = \sum_{1\leq i\leq n}\binom{k_i}{k}.
 $$
 
-3. Number of triangles
+3. Number of triangles (`triangles`).
 $$
 T(a) = \sum_{1\leq i < j < h\leq n}a_{ij}a_{ih}a_{jh}.
 $$
 
 ERGMs could easily incorporate additional information about actors attributes. To indicate extra information function $g(a)$ could be replaced with $g(a,X)$, where $X$ is a matrix containing attributes. This leads to another statistics, which measure the effect of actor's attributes. $y_i$ denotes value of an attribute $y$ of the $i$-th node:
 
-4. Attribute-based activity
+4. Attribute-based activity (`nodeofactor`)
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}(y_i + y_j),
 $$
 
-5. Homophily (binary attribute)
+5. Homophily (binary attribute) (`nodematch`).
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}y_i  y_j,
 $$
 
-6. Homophily (continuous attribute)
+6. Homophily (continuous attribute) (`absdif`)
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
 $$
 
 
 
+## Calculating network statistics
 
-```{r, message=FALSE}
-library(statnet)
-```
+The workhorse for estimating ERG models is the `ergm` function from the `ergm` package. We will described in detail later. Function `ergm` uses a formula interface to specify the network statistics, or `terms`. See `?ergm.terms` for the whole list. If you simply want to calculate the values of network statistics in a given network you can use function `summary`.
 
-
-
-
-
-
-The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
+For example taking `faux.mesa.high` network, below we calculate number of edges, number of triangles, and number of edges between students of the same sex you can:
 
 ```{r}
+library(statnet)
 data(faux.mesa.high)
 summary(faux.mesa.high ~ edges + triangle + nodematch("Sex"))
 ```
+
+
 
 We could also estimate ERGM:
 ```{r, message=FALSE}
@@ -128,9 +125,7 @@ We will discuss what is happening here later.
 
 
 
-### Examples/basics
-
-#### Network probabilities
+## Network probabilities
 
 As mentioned, ERGMs assign probabilities to all networks with given size (number of nodes) according to some statistic (measure/attribute). To see how it works let's consider undirected network of size 4. There are 64 such networks in total, but some of them differ only in node permutation, so there are only 11 topologically different networks.
 

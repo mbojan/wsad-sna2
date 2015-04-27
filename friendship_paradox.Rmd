@@ -3,6 +3,7 @@ title: "Friendship paradox in social networks"
 bibliography: references.bib
 ---
 
+
 ```{r, setup, echo=FALSE, results="hide", cache=FALSE}
 library(knitr)
 library(methods)
@@ -10,8 +11,21 @@ library(igraph)
 set.seed(666)
 options(warn=2)
 opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
-               cache=TRUE)
+               cache=FALSE)
 igraph.options(vertex.size=20)
+
+.small_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=c(1, 1, 1, 3))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+knit_hooks$set( small.mar = .small_mar )
 ```
 
 
@@ -22,7 +36,9 @@ In many, if not in most situations people build their knowledge about society as
 a) You may asses your professional successfulness by comparing your career to careers of your friends from high school or university. Many people observe that somehow friends tend to be more successful.
 b) If you use social media, like Facebook or Twitter, you may have noticed to your discontent, that your Facebook friends, or Twitter followers, seem to have more friends/followers than you do.
 
-In all these cases knowledge learned by observing our immediate social environment, i.e. friends, leads to rather pessimistic conclusions regarding our "status" vis a vis others.
+First, isn't it paradoxical? Should not the number of friends of friends be, on average, equal to the average number of friends people have? 
+
+Second, in all these cases knowledge learned by observing our immediate social environment, i.e. friends, leads to rather pessimistic conclusions regarding our "status" vis a vis others.
 
 In this chapter we will give you some comfort. Social Network Analysis explains why it actually happens to almost all of us. The reason is the so-called *friendship paradox*, first described by @feld_1991. He observed that in friendship networks from US high schools majority of students have less friends than their friends have on average. We also briefly show how this phenomenon, seemingly pessimistic from an individual perspective, can be leveraged to do some good.
 
@@ -34,6 +50,12 @@ In this chapter we will give you some comfort. Social Network Analysis explains 
 # Friendship paradox: an anatomy
 
 The most important feature of networks necessary to understand the friendship paradox is degree. In particular, we will need to calculate degrees for individual nodes and compare them to degrees of *friends* of individual nodes.
+
+
+
+
+
+## Simple examples
 
 Consider the following three simple networks:
 
@@ -59,98 +81,252 @@ In the `dyads` network nodes A, B, C, and D have all 1 friend each. Node E is an
 In consequence, average degree of friends is $(4 \times 1 + 0) / 5$ so again 0.8.
 
 
+In the `star` network A has degree of 4 while B, C, D, and E have degree 1. Average degree is equal to $(4 + 4 \times 1) / 5 = 1.6$. If we look at connections of friends we will see that:
+
+- All four friends of A (B, C, D and E) have degree 1.
+- B has one friend, A, with degree 4.
+- C has one friend, A, with degree 4.
+- D has one friend, A, with degree 4.
+- E has one friend, A, with degree 4.
+
+Consequently, average degree of friends is $(4 \times 1 + 4 \times 4) / 8 = 20 / 8$ so $2.5$, which is greater than average degree of individuals ($1.6$).
+
+
+
+
+Finally, in the `stemleaf` network:
+
+- C has degree 3
+- A, B, and D have degree 2
+- E has degree 1
+
+So average degree is equal to $(3 + 2 \times 3 + 1)/5 = 2$.
+
+If we now look at degrees of friends we see:
+
+- A has two friends (B and C) with degrees 2 and 3 respectively.
+- B has two friends (A and C) with degrees 2 and 3 respectively.
+- C has three friends (A, B, and D) all with degree 2.
+- D has two friends (C and E) with degrees 3 and 1 respectively.
+- C has one friend (D) with degree 2.
+
+```{r, echo=FALSE}
+x <- c(2, 3, 2, 3, rep(2, 3), 3, 1, 2)
+```
+
+Consequently, average degree of friends is $(`r paste(x, collapse=" + ")`) / `r length(x)` = `r mean(x)`$. Again, greater than average degree of individuals, which was equal to 2.
 
 
 
 
 
-# Example: school network
+## Paradox explained
 
-Let's check whether this paradox holds also in case of network from Polish school, where pupils picked out children with whom they wanted to play. This is a directed network, so the question is how often children picked up by me were picked up more often by others, on average.
+Based on the examples in the previous section we see that average number of friends of individuals (average degree) is never greater, but usually less, then average number of friends of friends. 
+The reason for this seemingly paradoxical fact is that people with many friends, like A in `star` network, or C in `stemleaf` network above, have much much more. Take A in the `star` network:
 
-```{r, fig.align='center', fig.height=5, fig.width=5}
-library("igraph")
-library("isnar")
+- A's contribution to average degree is 4.
+- A's contribution to the average degree of friends is $4 \times 4$ because four people mention A as a friend who has 4 connections himself.
+
+In other words, when we calculate average degree of friends nodes with higher degrees are weighted more than nodes with low degree.
+
+
+
+
+
+
+
+## Friendship paradox: network level and individual level
+
+The *friendship paradox* as described above can be compactly formulated as
+
+> Average number of friends is never greater than the average number of friends of friends.
+
+In this statement we are comparing two quantities
+
+1. Average number of friends.
+2. Average number of friends of friends.
+
+These quantities characterize the network as a whole. It can be proved that this statement is always true.
+
+Meanwhile, consider the following statement:
+
+> Average number of friends of friends is greater than the number of friends.
+
+Here we are comparing two quantities:
+
+1. Average number of friends that friends of an individual have.
+2. Number of friends an individual has.
+
+With these statements we are characterizing a particular individual, or node, based on the number of connections he has, and average number of connections his friends have. In other words, these quantities characterize a particular node and its immediate network neighborhood. These are individual-level properties. The statement may hold for some nodes, and not hold for other nodes.
+
+For example, in the `star` network it does not hold for node A as its degree is 4 which is greater than the average degree of friends of A, which is $(4 \times 1) / 4 = 1$.
+
+
+
+
+
+
+
+
+# Example: classroom network
+
+Let verify the friendship paradox in a real network from a Polish classroom. Children nominated others from their class with whom the like to play with. This is a directed network, so we can analyze in-degree and out-degree separately. Let us focus on in-degree, so  "popularity", i.e., how often a kid was nominated by others.
+
+```{r, school_network, small.mar=TRUE}
+library(isnar)
 data(IBE121)
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
 plot(playnet, vertex.size=5, vertex.label=NA, edge.arrow.size=.5, edge.curved=.1)
 ```
 
-Firstly we have to calculate in--degrees of all nodes.
+First, we have to calculate in-degrees of all nodes.
 ```{r}
-degrees <- degree(playnet, mode = "in")
+indegrees <- degree(playnet, mode = "in")
 ```
 
-Further we obtain an adjacency list, i. e. the list of all children picked up by each node,
+Second, we need to identify who are the nominations for each kid. We can obtain it through an *adjacency list*: a list with a component for each kid. Each component is a vector of ids of nominated kids.
+
 ```{r}
-adjacency_list <- get.adjlist(playnet, mode="out")
+adjlist <- get.adjlist(playnet, mode="out")
+# entries for first 5 kids
+adjlist[1:5]
 ```
 
-and replace vertex ID with corresponding in--degree
-```{r}
-friends_degrees <- lapply(adjacency_list, function(id) degrees[id])
-``` 
+From adjacency list we see that, for example, the second kid (number `r names(adjlist)[2]`) nominated kids with IDs `r paste(adjlist[[2]], collapse=", ")`.
 
-Now we could calculate average friends' in--degree (mean number of friends' friends) for every node.
+
+Third, we replace node IDs with corresponding in-degrees computed earlier.
+
+```{r}
+friends_degrees <- lapply(adjlist, function(id) indegrees[id])
+# in-degrees of friends of first 5 kids
+friends_degrees[1:5]
+```
+
+Finally, we calculate average in-degree among friends (average number of friends of friends) for every node.
 ```{r}
 averages <- sapply(friends_degrees, mean)
+averages
 ```
 
-We skip those who didn't pick up anyone, because you cannot calculate number of friends of their friends because there are none.
+For example, friends of the kid with number `r names(averages)[2]` on position 2 have on average `r averages[2]` friends.
+
+Not the kid with number 1024. For him the average number of friends of his friends is `NaN` meaning "Not a Number". He is the isolate in this network: has neither incoming or outgoing connections. Therefore, for him it is impossible to calculate the average.
+
+
+## Network level
+
+To verify that friendship paradox holds we compare mean in-degree of kids to the mean in-degree of friends of kids:
+
 ```{r}
-degrees <- degrees[!is.na(averages)]
-averages <- averages[!is.na(averages)]
+# Average in-degree
+mean(indegrees)
+
+# Average in-degree of friends
+mean(averages, na.rm=TRUE)
 ```
 
-Finally, the mean number of children, whose friends have more friends than they do is
+
+
+## Individual level
+
+Let us now check how this look on the individual level
+
 ```{r}
-mean(averages > degrees)
+# For each node,
+# is in-degree less than the average in-degree of friends?
+# (TRUE or FALSE)
+indegrees < averages
+
+# proportion of nodes for which it holds
+mean(indegrees < averages, na.rm=TRUE)
 ```
 
-We've confirmed that the friendship paradox holds for our network.
+Consequently, for `r round(mean(indegrees < averages, na.rm=TRUE)*100)`% of nodes it holds that their friends are on average more popular than they are.
 
-```{r, fig.align='center', fig.height=5, fig.width=5, echo=FALSE}
-plot(degrees, averages, xlab="In-degree", ylab="Avg in-degree of alters")
-abline(a=0, b=1)
+We can also visualize the relationship between popularity (in-degree) and average popularity of friends with the following chart:
+
+```{r}
+plot(indegrees, averages, xlab="In-degree", 
+     ylab="Average in-degree of friends", 
+     asp=1)
+abline(a=0, b=1, lty="dashed")
 ```
+
+Each point represents a node. The dashed line represent points, for which in-degree is equal to average in-degree of friends. We see that most nodes are above the line, i.e. their friends are on average more popular than they are.
+
+
+
+
+
+
+# Automating computations
+
+
+For the purpose of demonstration let us create an R function that, when given a network as an argument, will calculate all the quantities we are interested in.
+
+```{r, fparadox_function}
+friendship_paradox <- function(g, degmode="total", adjmode="total") {
+  # compute degrees
+  degrees <- degree(g, mode=degmode)
+  # identify alters
+  adjlist <- get.adjlist(g, mode=adjmode)
+  # substitute degrees
+  friends_degrees <- lapply(adjlist, function(id) degrees[id])
+  # compute avg degrees of alters
+  averages <- sapply(friends_degrees, mean)
+  # results
+  list( average_degree = mean(degrees),  # average degree
+       # avg degree of alters
+       average_degree_of_neighbors = mean(averages, na.rm=TRUE),
+       # prop. of nodes with degree < avg. degree of alters
+       p_nodes = mean(degrees < averages, na.rm=TRUE) 
+       )
+}
+```
+
+The function requires the argument `g` with the network. Additionally, it accepts to arguments `degmode` and `adjmode`. For both acceptable values are `"in"`, `"out"`, or `"total"`. With those two arguments we can define how to calculate degree (`degmode`) and how to identify network neighbors (`adjmode`). Be default it calculates total degree and ignores the directionality of the ties.
+The result is a list with three components:
+
+- `average_degree` with average degree of the nodes in network `g`.
+- `average_degree_of_neighbors` with average degree of neighbors.
+- `p_nodes` with proportion of nodes for which their degree is less then average degree of their neighbors.
+
+Let us test it on the classroom network from the previous section:
+
+```{r, function_test}
+friendship_paradox(playnet, degmode="in", adjmode="out")
+```
+
+These are identical to our results obtained earlier.
+
+
+
+
+
 
 
 # Example: Co-authorship network
 
+For the second example let us use a co-authorship network of researchers employed at the University of Warsaw. Nodes are researchers. There is a tie between researchers whenever they have coauthored at least one publication. This network is undirected and rather big -- has over 10'000 nodes. Nevertheless, obviously, the friendship paradox still holds: on average coauthors have more coauthors than you do.
 
-Second example - on coauthorship network. This network is undirected and quite big (over 10 thousand nodes), but friendship paradox still holds, so your coauthors have usually more coauthors then you have.
-
-Beforehand we write a function to calculate "friendship paradox index" (name created solely for this tutorial), i. e. the fraction of nodes, that have less friends than their friends have on average. 
-
-```{r}
-friendship_paradox <- function(graph){
-  degrees <- degree(graph, mode = "in")
-  adjacency_list <- get.adjlist(graph, mode="out")
-  friends_degrees <- lapply(adjacency_list, function(id) degrees[id])
-  averages <- sapply(friends_degrees, mean)
-  degrees <- degrees[!is.na(averages)]
-  averages <- averages[!is.na(averages)]
-  mean(averages > degrees)
-}
+```{r, coauthorship}
+data(coauthorship)
+# number of nodes
+vcount(coauthorship)
 ```
 
-And actual computations
+Let us do the computations:
+
 ```{r}
-data(coauthorship)
 friendship_paradox(coauthorship)
 ```
 
-So we see that again the friendship paradox holds.
+Again, the friendship paradox holds.
 
-We could focus only on the largest component.
-```{r}
-clusters <- clusters(coauthorship)
-giant_component <- induced.subgraph(coauthorship, 
-                                    clusters$membership == which.max(clusters$csize))
-friendship_paradox(giant_component)
-```
+Additionally, the percentage of researchers who collaborate less than their coauthors on average is about 87%.
 
-Value for giant component is higher because in the complete network there are a lot of isolated dyads and triads of authors, where obviously number of friends is equal to mean number of friends' friends.
 
 
 
@@ -159,48 +335,25 @@ Value for giant component is higher because in the complete network there are a 
 
 # Final notes
 
-Note the difference between two statements:
+Do note the difference between the friendship paradox proper, which is defined on the *network level*, and the relation between degree and average degree of neighbors, which is defined on *node level*. 
 
-1. Mean number of friends of friends is greater than mean number of friends.
-2. For most nodes, mean number of friends' friends is greater than number of friends.
-
-The first statement refers to means in whole network. It could be mathematically proven that the statement is true, unless all degrees are equal, see [@feld_1991] for the proof. On the other hand the second statement considers relation between number of friends and mean number of friend's friends in a single node, than tells that the first number is lower for most nodes. It is not generally true and it is easy to find a network where it goes the other way - most of nodes have more frieds than their friends do on average (that's why it is called paradox not theorem). Look on the following networks
-
-```{r, echo = FALSE, fig.align='center', fig.height=4, fig.width=8}
-n1 <- graph.full(6)
-n2 <- graph(c(1,2, 1,3, 2,3, 2,4, 3,5, 4,5, 4,6, 5,6), directed = FALSE)
-n3 <- graph.star(6, mode = "undirected")
-n4 <- graph(c(1,4, 1,3, 1,6, 2,4, 2,3, 3,5), directed = FALSE)
-par(mfrow = c(1,4), mar = rep(0, 4))
-plot(n1)
-plot(n2)
-plot(n3)
-plot(n4)
-ff_deg <- function(graph){
-  degs <- degree(graph)
-  al <- get.adjlist(graph)
-  aldegs <- lapply(al, function(id) degs[id])
-  avg <- sapply(aldegs, mean)
-  avg
-}
-```
-
-Mean number of friends | Mean number of friend's friends | Fraction of nodes, that have less friends than their friends do on average
-
--------|---------|-------
-`r mean(degree(n1))` | `r mean(ff_deg(n1))` | `r mean(ff_deg(n1) > degree(n1))`
-`r mean(degree(n2))` |`r mean(ff_deg(n2))` |`r mean(ff_deg(n2) > degree(n2))`
-`r mean(degree(n3))` |`r mean(ff_deg(n3))` |`r mean(ff_deg(n3) > degree(n3))`
-`r mean(degree(n4))` |`r mean(ff_deg(n4))` |`r mean(ff_deg(n4) > degree(n4))`
-
-We see that the number in second column column is larger than one in first column, apart from full network, where all nodes have the same degree -- that is statement 1. Statement 2 (friendship paradox) is true only for the third and fourth networks. In the third network only the first node has more friends -- 5 -- than its friends have on average -- 1. In the fourth network nodes 1 and 3 "break" friendship paradox. On the other hand, in the first network all nodes have 5 friends, they always have as many friends as their friends do on average. 
+Whether the relationship on the *node level* holds depends on other features of the network, including degree variance, degree mixing (correlations between degrees of neighbors) and so on. See @feld_1991 for more details. Social networks are usually sparse, but clustered, and degree distribution is left-skewed, so the node level relation usually holds.
 
 
-It is important to remember that friendship paradox is not a rule. Whether it holds depends on many things like variance of degree distribution and correlation between nodes, see [@feld_1991] for more details. Social networks are usually sparse, but clustered, and degree distribution is right-skewed (that means high variance), so they usually fit to this paradox perfectly.
+## Friendship paradox and degree variance
 
-On the figure below you could see how "friendship-paradox index" depends on standard deviation of degree distribution, for four different density levels. Every point represents random network with given density, horizantal line indicates mean "friendship-paradox index" in whole sample. It is higher for more varied degree distributions, although the effect is diminishing for denser nets.
+Below we illustrate how the proportion of nodes for which it holds that their degree is lower than average degree of their neighbors depends on the standard deviation of degrees in the network. Let us call this proportion "Friendship Paradox Index", or FPI.
+We do this for four different density levels.
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.align='center', fig.width=5, fig.height=5}
+First, we simulate 500 random undirected networks (Erdos-Renyi model) for four levels of density: 0.1, 0.2, 0.3, and 0.4. This gives a total of 2000 networks in four density classes. Second, in every such simulated network we calculate:
+
+1. Standard deviation of degrees.
+2. Value of FPI.
+
+Results are shown in the figures below.  Every point represents a network with a given density, standard deviation of degrees (horizontal axis) and value of FPI (vertical axis).
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 library("dplyr")
 library("ggplot2")
 set.seed(123)
@@ -209,7 +362,7 @@ N <- 20
 data <- lapply(seq(0.1, 0.4, by = 0.1), function(density) {
   tmp <- replicate(500, {
     net <- random.graph.game(N, density, directed = FALSE)
-    c(sd(degree(net)), friendship_paradox(net))
+    c(sd(degree(net)), friendship_paradox(net)$p_nodes)
   })
   data.frame(density = density, var = tmp[1,], frnd = tmp[2,])
 })
@@ -229,9 +382,25 @@ ggplot(data, aes(x = var, y = frnd)) +
        y = "Value of 'friendship paradox index'")
 ```
 
+As you can see, the larger the standard deviation of degrees, the higher the value of FPI. This correlation is stronger for sparser than for lower networks.
 
 
 
-Some applications of the friendship paradox could be found in @christakis_fowler_2010, @hodas_etal_2014, and @eom_jo_2014.
+
+## Applications.
+
+For more details and applications see:
+
+- Research of @christakis_fowler_2010 who propose an efficient vaccination strategy based on Friendship Paradox.
+- @hodas_etal_2014; @eom_jo_2014 
+
+
+
+
+
 
 # References
+
+<!---
+vim: wrap:linebreak:spell:spelllang=en_us
+-->

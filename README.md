@@ -8,7 +8,7 @@ Linki prowadzą do skompilowanych gotowych części.
 
 1. [Local neighborhoods](https://rawgit.com/mbojan/wsad-sna2/master/local_neighborhoods.html)
 2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/Centrality.html)
-3. Friendship paradox
+3. [Friendship paradox](https://rawgit.com/mbojan/wsad-sna2/master/friendship_paradox.html)
 4. Small world phenomenon
 5. Homophily and segregation
 6. [Cohesion](https://rawgit.com/mbojan/wsad-sna2/master/cohesion.html)

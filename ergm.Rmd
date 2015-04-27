@@ -7,10 +7,9 @@ bibliography: references.bib
 library(knitr)
 library(methods)
 set.seed(666)
-options(warn=2)
+# options(warn=2)
 opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
-               cache=TRUE)
-igraph.options(vertex.size=20)
+               cache=TRUE, dev="svg")
 
 .small_mar <- function(before, options, envir) {
   # save current
@@ -23,7 +22,28 @@ igraph.options(vertex.size=20)
   }
 }
 
-knit_hooks$set( small.mar = .small_mar )
+.no_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=rep(0, 4))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+.use_igraph <- function(before, options, envir) {
+  if(before) {
+    detach("package:network", force=TRUE)
+    library(igraph)
+  } else {
+    detach("package:igraph", force=TRUE)
+    library(network)
+  }
+}
+
+knit_hooks$set( small.mar = .small_mar, no.mar=.no_mar, use.igraph=.use_igraph)
 ```
 
 
@@ -99,33 +119,198 @@ $$
 \sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
 $$
 
+See `?ergm.terms` for a complete list of network statistics implemented in `ergm`.
+
+
+
+
 
 
 ## Calculating network statistics
 
-The workhorse for estimating ERG models is the `ergm` function from the `ergm` package. We will described in detail later. Function `ergm` uses a formula interface to specify the network statistics, or `terms`. See `?ergm.terms` for the whole list. If you simply want to calculate the values of network statistics in a given network you can use function `summary`.
+The workhorse for estimating ERG models is the `ergm` function from the `ergm` package. We will described in detail later. Function `ergm` uses a formula interface to specify the network statistics, or `terms`. If you simply want to calculate the values of network statistics in a given network you can use function `summary` with a single argument -- an ERGM formula. Such formula should have an object of class `network` on the left hand side, and a sum of network statistics on the right hand side.
 
-For example taking `faux.mesa.high` network, below we calculate number of edges, number of triangles, and number of edges between students of the same sex you can:
+As an example, let us take the classroom network we used in other tutorials. We need it now as a `network` object:
+
+```{r, classroom_as_network, no.mar=TRUE}
+# load data
+data(IBE121, package="isnar")
+# select select the "would like to play with" network
+playnet <- igraph::delete.edges(IBE121, igraph::E(IBE121)[question != "play"])
+# convert to 'network' object
+ibe <- intergraph::asNetwork(playnet)
+plot(ibe)
+```
+
+We can now use `summary` to calculate some network statistics of interest. For example, let's calculate
+
+- number of ties
+- number of reciprocated ties
+- Gender-based activity
+
 
 ```{r}
-library(statnet)
-data(faux.mesa.high)
-summary(faux.mesa.high ~ edges + triangle + nodematch("Sex"))
+summary(ibe ~ edges + mutual)
+```
+
+Consequently, this network has 88 ties, 22 of which are reciprocated, and girls send ties 46 times.
+
+
+
+
+## Estimation
+
+
+```{r}
+mod <- ergm(ibe ~ edges + mutual)
+summary(mod)
 ```
 
 
 
-We could also estimate ERGM:
-```{r, message=FALSE}
-model <- ergm(faux.mesa.high ~ edges + nodematch("Sex"))
-summary(model)
+## Assessing goodness of fit 
+
+
+```{r}
+fit <- gof(mod)
+layout(matrix(1:4, 2, 2))
+plot(fit)
 ```
 
-We will discuss what is happening here later.
 
 
 
-## Network probabilities
+
+
+
+
+
+
+
+
+
+
+# Example ERG models
+
+## Dyadic independence ERGMs
+
+Dyadic independence ERGMS are the simplest class of ERGMs. They assume that every dyad is independent from each other. This is very strong assumption which rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat every dyad as a single object, independent from its surrounding. Therefore in such models we could use only such measures, that are dyadic independent. That means that we could calculate change statistic knowing only the state of a given dyad and maybe some attributes of nodes (in this dyad). For instance number of edges is dyadic independent -- if we toggle an edge from 0 to 1 we are sure that number of edges will increase by 1, no matter how the rest of the network looks like. Another example is the homophily effect -- we could compute change in the number of edges between nodes of the same type knowing only attributes of these two specific nodes in a dyad. On the other hand, number of 2-stars is dyadic dependent - we need two know structure of the neighborhood if we want to calculate the change in the number of twopaths.
+
+Assuming that our statistics are dyadic independent we could rewrite edge probability to logit form:
+
+$$
+logit (P_\theta(A_{ij}=1))  = \theta^T \delta[g(a)]_{ij}
+$$
+
+That looks like a logistic regression model. Indeed, dyad-independent
+ERGMs simplify to a logistic regression for data in which dyads are observations,
+the dependent variable is binary and equals to 1 if an edge exists and 0 otherwise.
+Independent variables are the change statistics (one for each term).
+
+Consider the following example of fitting a dyad-independent ERGM to classroom
+data.
+
+```{r}
+ibe.model1 <- ergm(ibe ~ edges + nodematch("female"))
+summary(ibe.model1)
+```
+
+Let us now try to fit the same model using logistic regression. We need to prepare the data first.
+
+```{r, mm}
+mm <- isnar::mixingm(playnet, "female", full=TRUE)
+mm
+```
+
+Object `mm` is a so-called *mixing matrix* that cross-classifies all dyads in
+the network according to three characteristics:
+
+1. Gender of first node.
+2. Gender of second node.
+3. Whether there is a tie from first node to second node or not.
+
+For example, there are `r mm[2,2,1]` girl-girl pairs that are connected with a
+tie and only `r m[1,2,2]` ties that are send by a boy towards a girl, and so
+on.
+
+We now transform the mixing matrix to a data frame:
+
+```{r, mm_df}
+d <- as.data.frame(as.table(mm))
+d
+```
+
+Columns `ego` and `alter` mark whether, respectively, tie sender or tie receiver is a female.
+Variable `tie` is `TRUE` for connected pairs. Finally, variable `Freq` contains the frequency.
+
+We now add a variable `match` differentiating same-gender pairs: `match` is `TRUE` whenever `ego` and `alter` are equal:
+
+```{r, add_match}
+d$match <- with(d, ego == alter)
+d
+```
+
+We are now ready to fit our logit model:
+
+```{r, logit}
+ibe.logit <- glm( tie ~ match, data=d, weight=Freq, family=binomial("logit"))
+ibe.logit
+```
+
+As you can see, the coefficients are identical:
+
+```{r}
+cbind( ERGM=coef(ibe.model1), Logit=coef(ibe.logit))
+```
+
+
+
+
+
+
+
+But how to interpret these coefficients? Let's say we want to know what is the probability of a friendship between students of the same sex. If an edge occurs between such students then both total number of edges and numbef of same-sex edges will icrease by one. So we could calculate probality from equation
+```{r}
+coef <- model$coef
+exp(1 * coef[1] + 1 * coef[2]) / (1 + exp(1 * coef[1] + 1 * coef[2]))
+```
+
+To double-check we could calculate the frequency of same-sex edges amongst all same-sex dyads.
+```{r}
+sum(diag(mixingmatrix(faux, "Sex")$matrix)) / sum(nodematch_change)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# More advanced topics
+
+In the following two sections we present a somewhat more detailed discussion of how an ERG model can be interpreted as:
+
+1. A model for a probability distribution over all networks of a given size.
+2. A model for conditional probabilities of tie existence given the structure of the remainder of the network.
+
+Interpretation (1) can be called *global* while interpretation (2) can be called *local*.
+
+
+
+
+
+## Model-based network probabilities
+
+This is a more advanced topic.
 
 As mentioned, ERGMs assign probabilities to all networks with given size (number of nodes) according to some statistic (measure/attribute). To see how it works let's consider undirected network of size 4. There are 64 such networks in total, but some of them differ only in node permutation, so there are only 11 topologically different networks.
 
@@ -174,7 +359,7 @@ model2 <- model2 / sum(model2 * canonical_count)
 
 And plot them.
 
-```{r, echo=FALSE, fig.width=6, fig.height=5, fig.align='center'}
+```{r, echo=FALSE}
 library("RColorBrewer")
 pal <- brewer.pal(3, "Set2")
 
@@ -196,7 +381,10 @@ All networks has the same probabilities under null model obviously. It is also c
 
 
 
-#### Conditional edges probabilities
+
+## Conditional edge probabilities
+
+This a more advanced topic.
 
 The model could be equivalently described by conditional probabilities that an edge exists given the rest of the network. Conditional log-odds could be easily derived from the general form of the model
 
@@ -240,67 +428,13 @@ $$
 $$
 
 
-#### Dyadic independence ERGMs
 
-Dyadic independence ERGMS are the simplest class of ERGMs. They assume that every dyad is independent from each other. This is very strong assumption which rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat every dyad as a single object, independent from its surrounding. Therefore in such models we could use only such measures, that are dyadic independent. That means that we could calculate change statistic knowing only the state of a given dyad and maybe some attributes of nodes (in this dyad). For instance number of edges is dyadic independent - if we toggle an edges from 0 to 1 we are sure that number of edges will increase by 1, no matter how the rest of the network looks. Another example is homophily effect -- we could compute change in the number of edges between nodes of the same type knowing only attributes of these two specific nodes in a dyad. On the other hand, number of 2-stars is dyadic dependent - we need two know structure of neighborhood network if we want to calculate the change in the number of twopaths.
 
-Assuming that our statistics are dyadic independent we could rewrite edge probability to logit form:
 
-$$
-logit (P_\theta(A_{ij}=1))  = \theta^T \delta[g(a)]_{ij}
-$$
 
-which looks exactly as logistic regression. Indeed, dyadic independence ERGMs are simply logistic regression, where dependent variable are dyads (1 if edge exists, 0 otherwise) and independent variables are change statistics (one for each term). 
-
-Look on the following example to see that it's true. We will use `faux.mesa.high` network provided with `ergm` package. It is in-school friendship network, undirected, with 205 nodes and 203 vertices.
-
-First we need to estimate ergm model, with two parameters -- number of edges and number of edges between students of the same sex.
-
-```{r}
-data(faux.mesa.high)
-faux <- faux.mesa.high
-model <- ergm(faux ~ edges + nodematch("Sex"))
-summary(model)
+```{r, warnings, echo=FALSE, results="hide"}
+stopifnot(is.null(warnings()))
 ```
-
-Further we need to prepare data for logistic regression. It is a bit cumbersome, because we need to take into account all possible dyads in network. We will keep them as a vector.
-```{r}
-y <- faux[upper.tri(faux[,])]
-```
-
-Calculating change statistic vector for number of edges is straightforward as it is always 1.
-```{r}
-edge_change <- rep(1, length(y))
-```
-
-Calculating change statistics for homophily effect is a bit more complicated, but we do it by preparing a logical matrix with `TRUEs` when both vertices have the same sex.
-```{r}
-tmp <- outer(faux %v% "Sex", faux %v% "Sex", `==`)
-nodematch_change <- as.integer(tmp[upper.tri(tmp)])
-```
-
-Last part -- logistic regression
-```{r}
-model2 <- glm(y ~ edge_change + nodematch_change - 1, family = "binomial")
-summary(model2)
-```
-
-We could see that both models give exactly the same results, as expected.
-```{r}
-all.equal(model$coef, model2$coefficients, check.attributes = FALSE)
-```
-
-But how to interpret these coefficients? Let's say we want to know what is the probability of a friendship between students of the same sex. If an edge occurs between such students then both total number of edges and numbef of same-sex edges will icrease by one. So we could calculate probality from equation
-```{r}
-coef <- model$coef
-exp(1 * coef[1] + 1 * coef[2]) / (1 + exp(1 * coef[1] + 1 * coef[2]))
-```
-
-To double-check we could calculate the frequency of same-sex edges amongst all same-sex dyads.
-```{r}
-sum(diag(mixingmatrix(faux, "Sex")$matrix)) / sum(nodematch_change)
-```
-
 
 
 

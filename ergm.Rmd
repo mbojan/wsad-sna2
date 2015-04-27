@@ -99,60 +99,6 @@ $$
 \sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
 $$
 
-@snijders_2002 described number of problems with estimation of ERGMs, such as bimodal distributions of network statistics $g(a)$ and possible instability of algorithms. To counteract these issues [@snijders_etal_2006] introduced more robust measures, described extensively in [@robins_etal_2007b]:
-
-7. geometrically weighted degree
-
-$$
-\begin{array}
-z_S(a;\lambda) & =& S_2(a)-\frac{S_3(a)}{\lambda}+\frac{S_4(a)}{\lambda^2}- \ldots + (-1)^{n-1}\frac{S_{n-1}(a)}{\lambda^{n-3}} \nonumber\\
- & = & \sum_{k=2}^{n-1}(-1)^{k-1}\frac{S_k(a)}{\lambda^{k-2}},
-\end{array}
-$$
-
-8. geometrically weighted edgewise shared partner
-
-$$
-z_T(a;\lambda)  =  \sum_{1\leq i<j\leq n}a_{ij} \sum_{k=1}^{n-2}\left(\frac{-1}{\lambda}\right)^{k-1}\binom{L_{2ij}}{k},
-$$
-
-where $L_{2ij}$ is the number of two-paths connecting $i$ and $j$, that is the number of common neighbours.
-$\lambda$ could be either fixed or estimated together with parameters $\theta$, in latter case a model belongs to curved exponential--family models.
-
-
-#### Estimation --> TU PEWNIE WIĘKSZOŚĆ TRZEBA WYRZUCIĆ
-
-An algorithm to find a maximum likelihood estimator $\hat{\theta}$ (MLE) of a parameter vector $\theta$ is complex, therefore only a brief sketch will be presented here. From defition of distribution the loglikelihood function could be obtained
-$$
-\ell(\theta)=\theta^Tg(a_{obs}) - \log \kappa(\theta, \mathcal{A}),
-$$
-
-where $a_{obs}$ denotes the observed graph. In order to manage estimation with an incalculable normalizing constant the log--ratio of likelihood values is considered:
-
-$$
-\ell(\theta)-\ell(\theta_0)=(\theta-\theta_0)^Tg(a_{obs})-\log \left( \frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})}\right),
-$$
-
-where $\theta_0$ is an arbitrarily chosen starting parameter vector. The ratio of normalizing constants in above equation could be approximated. Following could be derived
-$$
-\frac{\kappa(\theta, \mathcal{A})}{\kappa(\theta_0, \mathcal{A})} = \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\}.
-$$
-Expected value could be approximated from random sample $a_1, a_2,\ldots,a_m$ from distribution $P_{\theta_0}$
-$$
- \mathbb{E}_{\theta_0}\exp\{(\theta-\theta_0)^Tg(A)\} \approx \frac{1}{m} \sum_{i=1}^m \exp\{(\theta-\theta_0)^T g(a_i)\}.
-$$
-In practice the above approximation works reasonably well if the starting parameter vector $\theta_0$ is close to the true parameter values. The maximum likelihood estimator satisfies equation
-$$
-\mathbb{E}_\theta g(A) = g(a_{obs}).
-$$
- 
-
-The simplier way to find $\hat{\theta}$ is by the pseudolikelihood estimation. It assumes that dyads $A_{ij}$ are mutually independent
-$$
-\forall_{i,j} P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)=P_\theta(A_{ij}=1) 
-$$
-where $A_{ij}^c$ represents adjacency matrix $A$ without element $A_{ij}$. With that assumption the model is identical to a logistic regression and could be solved using standard techniques. The pseudolikelihood estimator is identical to MLE when ERGM is a dyadic independence model, that means when value of $g(a)$ for a single dyad could be computed without information about the rest of the network. For example an ERMG with number of edges and homophily effect is a dyadic independence model. However, in other cases the statistical properties of pseudolikelihood estimators are not well studied and their use is discouraged.
-
 
 
 

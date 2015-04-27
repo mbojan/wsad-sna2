@@ -1,92 +1,105 @@
 ---
-title: Fitting ERGMs with statnet
-output: html_document
+title: Fitting Exponential Random Graph Models with `statnet`
 bibliography: references.bib
 ---
 
-### Technical introduction
-In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` graphs. You could use both frameworks at the same time, however we recommend to use only one at a time, to avoid duplicated function names. You could easily swith between `igraph` and `network` objects using `asIgraph` and `asNetwork` functions from `intergraph` package.
+```{r, setup, echo=FALSE, results="hide", cache=FALSE}
+library(knitr)
+library(methods)
+set.seed(666)
+options(warn=2)
+opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
+               cache=TRUE)
+igraph.options(vertex.size=20)
 
-```{r, message=FALSE}
-library("statnet")
-library("methods")
+.small_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=c(1, 1, 1, 3))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+knit_hooks$set( small.mar = .small_mar )
 ```
 
-The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
-```{r}
-data(faux.mesa.high)
-summary(faux.mesa.high ~ edges + triangle + nodematch("Sex"))
-```
-
-We could also estimate ERGM:
-```{r, message=FALSE}
-model <- ergm(faux.mesa.high ~ edges + nodematch("Sex"))
-summary(model)
-```
-
-We will discuss what is happening here later.
 
 
-## Exponential Random Graph Models
 
-### Introduction 
+# Introduction
 
-ERGMs were first introduced by [@frank_strauss_1986], and further developed by [@frank_1991], [@wasserman_pattison_1996], [@pattison_robins_2002], [@snijders_etal_2006] and many others. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM could be found in [@lusher_etal_2012], and basic information in [@robins_etal_2007]. 
+This tutorial supplements the topics covered on WSAD Summer School workshop "Introduction Statistical Social Network Analysis". The workshop presented how Exponential Random Graph Models (ERGMs) can be fit using program PNet [@wang_etal_2009]. Here we provide examples how ERGMs can be simulated and fitted using `statnet` suite of R packages for network analysis [@handcock_etal_2003].
 
-In a nutshell -- Exponential Random Graph Models are family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to graphs (networks) according to network statistics -- summary measures describing given graphs.
 
-### Mathemathical basis  --> DO PRZEPISANIA NA MNIEJ TECHNICZNY JEZYK
+In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` objects. In principle, you can use both packages at the same time. However, we recommend to use only one at a time to avoid function name conflicts [^1]. You can easily convert `igraph` objects to `network` objects (or vice versa) using `asIgraph` and `asNetwork` functions from `intergraph` package.
 
-Formally, let the random matrix $A$ be an adjacency matrix representing a network and the set $\mathcal{A}$ be a collection of all obtainable matrices, precisely the subset of all $n \times n$ matrices with zeros on its diagonal and, in case of undirected networks, symmetrical. The distribution of  $\mathcal{A}$ can be described by
+[^1]: For more details see for example http://bc.bojanorama.pl/2010/08/namespaces-and-name-conflicts/
+
+
+
+
+
+# Exponential Random Graph Models in a nutshell
+
+ERG models, as they are currently known, stem from the work by @frank_strauss_1986 and were further developed by, among others, @frank_1991, @wasserman_pattison_1996, @pattison_robins_2002, @snijders_etal_2006]. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM is provided by @lusher_etal_2012 and @robins_etal_2007. 
+
+Exponential Random Graph Models are a family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to networks according to network statistics -- summary measures describing selected features of the network.
+
+Formally, let $A$ represent a network in the form of an adjacency matrix of given size $n$. Lety $\mathcal{A}$ be a collection of all possible networks of size $n$ that can be constructed. An ERG model postulates that a probability distribution defined over all networks in $\mathcal{A}$ can be represented as:
 
 $$
 P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
 $$
 
-where $\theta$ is the vector of model parameters, $g(a)$ is a vector of network statistics and $\kappa(\theta, \mathcal{A})$ is a normalizing constant
+where $g(a)$ is a vector of network statistics, $\theta$ is a vector of weights associated with these statistics, and $\kappa(\theta, \mathcal{A})$ is a normalizing constant ensuring that all the probabilities sum-up to 1.
 
 $$
 \kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
 $$
 
-#### Network statistics
 
-A set of network statistics is chosen every time on the basis of theoretical premises concerning a particular network. However, there are a few basic configurations very often included in the model. Some  (for undirected networks) are listed below together with mathematical definition and typical notation:
 
-1. number of edges
+
+## Network statistics
+
+Different ERG models can be specified by choosing different network statistics. A set of network statistics is chosen on the basis of theoretical premises concerning a particular research problem at hand. However, there are a few basic configurations often included in the model. Example of network statistics include:
+
+1. Number of edges in the network
 $$
 S_1(a) = \sum_{1\leq i\leq j\leq n}a_{ij},
 $$
 
-2. number of _k_-stars, $k\geq2$
+2. Number of _k_-stars (for $k\geq2$). A _k_-star consists of a central node and $k$ neighbors.
 $$
 S_k(a) = \sum_{1\leq i\leq n}\binom{k_i}{k}.
 $$
-_k_-star consists from a central node and $k$ of its neighbours.
 
-3. number of triangles
+3. Number of triangles
 $$
 T(a) = \sum_{1\leq i < j < h\leq n}a_{ij}a_{ih}a_{jh}.
 $$
 
 ERGMs could easily incorporate additional information about actors attributes. To indicate extra information function $g(a)$ could be replaced with $g(a,X)$, where $X$ is a matrix containing attributes. This leads to another statistics, which measure the effect of actor's attributes. $y_i$ denotes value of an attribute $y$ of the $i$-th node:
 
-4. attribute--based activity
+4. Attribute-based activity
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}(y_i + y_j),
 $$
 
-5. homophily (binary attribute)
+5. Homophily (binary attribute)
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}y_i  y_j,
 $$
 
-6. homophily (continuous attribute)
+6. Homophily (continuous attribute)
 $$
 \sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
 $$
 
-[@snijders_2002] described number of problems with estimation of ERGMs, such as bimodal distributions of network statistics $g(a)$ and possible instability of algorithms. To counteract these issues [@snijders_etal_2006] introduced more robust measures, described extensively in [@robins_etal_2007b]:
+@snijders_2002 described number of problems with estimation of ERGMs, such as bimodal distributions of network statistics $g(a)$ and possible instability of algorithms. To counteract these issues [@snijders_etal_2006] introduced more robust measures, described extensively in [@robins_etal_2007b]:
 
 7. geometrically weighted degree
 
@@ -139,6 +152,34 @@ $$
 \forall_{i,j} P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)=P_\theta(A_{ij}=1) 
 $$
 where $A_{ij}^c$ represents adjacency matrix $A$ without element $A_{ij}$. With that assumption the model is identical to a logistic regression and could be solved using standard techniques. The pseudolikelihood estimator is identical to MLE when ERGM is a dyadic independence model, that means when value of $g(a)$ for a single dyad could be computed without information about the rest of the network. For example an ERMG with number of edges and homophily effect is a dyadic independence model. However, in other cases the statistical properties of pseudolikelihood estimators are not well studied and their use is discouraged.
+
+
+
+
+```{r, message=FALSE}
+library(statnet)
+```
+
+
+
+
+
+
+The workhorse function for building ERGMs is `ergm` fucntion from `ergm` package. It will be described in detail later. For now it will be enough to know that `ergm` uses formula interface where you specify network statistics called `terms` (see `?ergm.terms` for whole list). If you simply want to get those statistics without estimating a model you could use `summary` function with exactly the same formula. Below we see number of edges, number of triangles and number of edges between students of the same sex.
+
+```{r}
+data(faux.mesa.high)
+summary(faux.mesa.high ~ edges + triangle + nodematch("Sex"))
+```
+
+We could also estimate ERGM:
+```{r, message=FALSE}
+model <- ergm(faux.mesa.high ~ edges + nodematch("Sex"))
+summary(model)
+```
+
+We will discuss what is happening here later.
+
 
 
 ### Examples/basics
@@ -321,6 +362,9 @@ sum(diag(mixingmatrix(faux, "Sex")$matrix)) / sum(nodematch_change)
 
 
 
-#### Some more sophisticated ERGMs
 
-*********
+# References
+
+<!---
+vim: wrap:linebreak:spell:spelllang=en_us
+-->

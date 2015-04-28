@@ -122,13 +122,13 @@ Consequently, average degree of friends is $(`r paste(x, collapse=" + ")`) / `r 
 
 ## Paradox explained
 
-Based on the examples in the previous section we see that average number of friends of individuals (average degree) is never greater, but usually less, then average number of friends of friends. 
-The reason for this seemingly paradoxical fact is that people with many friends, like A in `star` network, or C in `stemleaf` network above, have much much more. Take A in the `star` network:
+Based on the examples in the previous section we see that average number of friends of individuals (average degree) is never greater, but usually less, than average number of friends of friends. 
+The reason for this seemingly paradoxical fact is that people with many friends, like A in `star` network, or C in `stemleaf` network above, contribute much more to the average degree of friends. Take A in the `star` network:
 
 - A's contribution to average degree is 4.
-- A's contribution to the average degree of friends is $4 \times 4$ because four people mention A as a friend who has 4 connections himself.
+- A's contribution to the average degree of friends is $4 \times 4 = 16$ because four people mention A as a friend who has 4 connections himself.
 
-In other words, when we calculate average degree of friends nodes with higher degrees are weighted more than nodes with low degree.
+In other words, when we calculate average degree of friends, nodes with higher degrees are weighted more than nodes with low degree.
 
 
 
@@ -171,7 +171,7 @@ For example, in the `star` network it does not hold for node A as its degree is 
 
 # Example: classroom network
 
-Let verify the friendship paradox in a real network from a Polish classroom. Children nominated others from their class with whom the like to play with. This is a directed network, so we can analyze in-degree and out-degree separately. Let us focus on in-degree, so  "popularity", i.e., how often a kid was nominated by others.
+Let verify the friendship paradox in a real network from a Polish classroom. Children nominated others from their class with whom they like to play with. This is a directed network, so we can analyze in-degree and out-degree separately. Let us focus on in-degree, so  "popularity", i.e., how often a kid was nominated by others.
 
 ```{r, school_network, small.mar=TRUE}
 library(isnar)
@@ -185,7 +185,7 @@ First, we have to calculate in-degrees of all nodes.
 indegrees <- degree(playnet, mode = "in")
 ```
 
-Second, we need to identify who are the nominations for each kid. We can obtain it through an *adjacency list*: a list with a component for each kid. Each component is a vector of ids of nominated kids.
+Second, we need to identify who are the nominations for each kid. We can obtain it through an *adjacency list*: a list with a component for each kid. Each component is a vector of IDs of nominated kids.
 
 ```{r}
 adjlist <- get.adjlist(playnet, mode="out")

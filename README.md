@@ -12,7 +12,8 @@ Linki prowadzą do skompilowanych gotowych części.
 4. Small world phenomenon
 5. Homophily and segregation
 6. [Cohesion](https://rawgit.com/mbojan/wsad-sna2/master/cohesion.html)
-7. ERGMs
+7. [ERGMs](https://rawgit.com/mbojan/wsad-sna2/master/ergm.html)
+
 
 
 (stuby w [`sylabus.md`](sylabus.md))

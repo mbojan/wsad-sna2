@@ -9,7 +9,7 @@ opts_chunk$set( fig.width=12, fig.height=8 )
 
 # Introduction 
 
-The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identifed through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
+The primary focus of social network analysis are ties (relations, connections, links) between different categories of objects (vertices, nodes, actors). The ties form networks with various structural and relational properties. Depending on research problem, some of those properties are used to describe the peculiarity of networks identified through research. Interpersonal relations, online communication, international trade, business cooperation and competition etc. have certain properties being in the interest of network researchers.
 
 There are multiple approaches in studying social networks. In this chapter we will focus on basic properties of ego-networks extensively used in many social studies. Ego-networks are often sampled from large structures and used as a basis of statistically significant conclusions on whole population [@everett_borgatti2005]. Empirical studies of ego-networks include: social support, knowledge sharing or disease spread. More recently, some ego measures can be found on the popular social network sites [e.g. relationship at LinkedIn].
 
@@ -19,9 +19,9 @@ a) __Ego__:
 "ego" is an individual node identified in the network structure. Depending on research goals, egos can be persons, groups, societies, organizations, firms, states etc. Thus, ego is a single node in the network with the individual or collective subjectivity. Stanley Wasserman and Katherine Faust defined ego-networks as a "set of alters who have ties to ego, and measurements on the ties among these alters" [@wasserman_faust_1994: 42].
 
 b) __Neighborhood__:
-a single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes).Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The neighborhood is expanded by N-step connections and all the connections between actors identified at a path of length N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations. 
+a single node in the network is usually less or better connected with other nodes. Distance between ego and other nodes in the network is called path. Network researchers studying neighborhood usually focus on one-step relations. In other words, they analyze the ego's direct connections with others (ego's adjacent nodes). Some researchers modify the basic understanding of neighborhood as an ego's direct connections. The neighborhood is expanded by N-step connections and all the connections between actors identified at a path of length N (N-step neighborhood). In this chapter, neighborhood will be understand as an ego's one-step relations. 
 
-The definition of neighborhood is a bit more complicated in case of directed graph. We could distinguish "in" and "out" and other kinds of neighborhoods. An "out" neighborhood would include all the actors to whom ties are directed from ego. Similarly an "in" neighborhood would include all the actors who sent ties directly to ego. We might also want to define a neighborhood of only those actors to whom ego had reciprocated ties. Choice of neighborhood typ should depend on research question.
+The definition of neighborhood is a bit more complicated in case of directed graph. We could distinguish "in" and "out" and other kinds of neighborhoods. An "out" neighborhood would include all the actors to whom ties are directed from ego. Similarly an "in" neighborhood would include all the actors who sent ties directly to ego. We might also want to define a neighborhood of only those actors to whom ego had reciprocated ties. Choice of neighborhood type should depend on research question.
 
 The following picture illustrates the idea of ego-networks and neighborhoods in undirected graph.
 
@@ -87,7 +87,7 @@ neighborhood(g_d, order = 1, nodes = 4, mode = "out")
 neighborhood(g_d, order = 2, nodes = 4, mode = "in")
 ```
 
-If you want to know only the size of the neighborhood instead of all nodes in ti, you could use `neighborhood.size` function.
+If you want to know only the size of the neighborhood instead of all nodes in it, you could use `neighborhood.size` function.
 ```{r}
 neighborhood.size(g, order = 2, nodes = 5)
 neighborhood.size(g_d, order = 2, nodes = 4, mode = "in")
@@ -132,7 +132,7 @@ For objects of class `network` from `statnet` you could use `get.neighborhood` f
 
 # Ego-network properties
 
-There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) compositional measures, b) structural measures. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. Degree of a vertex represents the structural property. John workmates from LinkedIn are computer geeks and he often ask them for computer help. It means that John have a good access to computer knowledge. Knowledge reosurces are example of the compositional property.
+There are multiple measures in social network analysis applied to identify the properties of ego-networks. Those measures can be grouped into: a) compositional measures, b) structural measures. For example, John have a five workmates he added to his profile at the LinkedIn. It means that his vertex degree is 5. Degree of a vertex represents the structural property. John workmates from LinkedIn are computer geeks and he often ask them for computer help. It means that John have a good access to computer knowledge. Knowledge resources are example of the compositional property.
 Further in this chapter we will focus on both compositional and structural properties of ego-networks.
 
 ## Compositional properties
@@ -146,23 +146,23 @@ As we mentioned above, ego-network is a set of nodes who have ties to ego. Thus,
 ### Ego characteristic
 
 Depending on type of research, subjectivity of ego may vary. Individual, group, organization, corporation, state etc. may be the focal point of ego-network. If we assume that ego is a person it can be characterized by socio-demographic attributes e.g. sex, race, occupation, ethnicity. It is simple to recognize and deal with these attributes when one-mode networks are analyzed. When two-mode networks (see further in this course) are considered it is necessary to choose type of actor around which  ego-network is build.
-Article of Paul Nieuwbeerta and Henk Falp shows how ego charactersitics can be used [@nieuwbeerta_flap_2000]
+Article of Paul Nieuwbeerta and Henk Falp shows how ego characteristics can be used [@nieuwbeerta_flap_2000]
 
 
 
 
 ### Resources
 
-Resources owned by ego's neighbours have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Reource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@webber_huxley_2007].
+Resources owned by ego's neighbors have an impact on ego's success and opportunities. Thus, composition of the ego-network is shaped by resources that can be accessed and mobilized by individual in purposive actions. For example, individuals with greater amount of mobilizable resources in their ego-networks have better opportunities to find a new or better job. To collect data on resources embedded in ego-networks (social capital), the Resource Generator instrument is often used by network researchers [@vandergaag_snijders_2005]. To get some more details on the Resource Generator instrument see [@webber_huxley_2007].
 
 
 
 
 ### Homophily
 
-Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of atribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
+Homophily means that alters in ego-network are similar to the ego according to some node attribute, like gender, education, age or income. It should be evaluated depending on the type of attribute. For instance when comparing income you could use mean squared difference, but for nominal attribute it would be more meaningful to calculate fraction of alters which has the same attribute level as ego. 
 
-Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex. As we are interested in ego's preference towards others and not the other way round, we will analyses out-neighborhood.
+Consider the classroom network. We want to asses to what extent children prefer to play with colleagues of the same sex. As we are interested in ego's preference towards others and not the other way round, we will analyze out-neighborhood.
 
 ```{r, fig.align='center', fig.width=4, fig.height=4, echo=-4}
 data(IBE121)
@@ -236,7 +236,7 @@ abline(v = mean(rmsd[gender == "male"], na.rm = TRUE), col = rgb(0,0,1,0.5))
 abline(v = mean(rmsd[gender == "female"], na.rm = TRUE), col = rgb(1,0,0,0.5))
 ```
 
-We see that it varies more than in case of gender. It could suggest that children don't choose their playmates according to their parents socioeconomic status, at least not in this class and not comapred to sex criterion.
+We see that it varies more than in case of gender. It could suggest that children don't choose their playmates according to their parents socioeconomic status, at least not in this class and not compared to sex criterion.
 
 
 ## Structural properties
@@ -317,7 +317,7 @@ Effective size of the left network is 3, because alters couldn't communicate wit
 
 
 ### Efficiency
-Efficiency weighs effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and and actor can be efficient without being effective" [@hanneman_riddle_2005: 138]
+Efficiency weighs effective size of A's network with its actual size. Basic question on efficiency is what is the proportion of non-redundant ties between ego and his alters? As Hanneman and Riddle clearly stated "The effective size of ego's network may tell us something about ego's total impact; efficiency tells us how much impact ego is getting for each unit invested in using ties.  An actor can be effective without being efficient; and actor can be efficient without being effective" [@hanneman_riddle_2005: 138]
 
 Again there is no explicit function to calculate efficiency, but we could write our own function.
 ```{r}
@@ -343,7 +343,7 @@ kable(do.call(rbind, tmp), digits = 2, align = rep("c", 3),
       col.names = c("Size of ego network", "Effective size", "Efficiency"))
 ```
 
-Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't the highest. On the other hand sister's husband has the hidhest possible efficiency, but she communicates only with two persons, so she is not effective.
+Mother and father have the highest effective size of their ego-networks, but these networks are big, therefore their efficiency isn't the highest. On the other hand sister's husband has the highest possible efficiency, but she communicates only with two persons, so she is not effective.
 
 ### Constraint (aggregate constraint)
 Constraint is a measure that informs about the extent to which ego's connections are to nodes who are connected to each other. Suppose that A has connections to B and C, while B and C are connected to each other. In this case A is constrained. But if A's alters have no connections besides links to A, A is not constrained. The idea of constrain sends us to the important paradox. It happens that people who have many connections may lose autonomy of action. 

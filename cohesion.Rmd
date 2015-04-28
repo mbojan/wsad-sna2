@@ -30,7 +30,9 @@ Cohesion is one of few elementary properties of social networks. Cohesiveness is
 3. The frequency of ties among members.
 4. The relative frequency of ties among subgroup members compared to non-members [Ibidem: 251-252].
 
-Methods of detection of cohesive groups in social networks vary accord to: a) type of network (one-mode vs. two-mode), type of relation (directed vs. undirected).
+Methods of detection of cohesive groups in social networks vary accord to:
+a) type of network (one-mode vs. two-mode),
+b) type of relation (directed vs. undirected).
 
 
 
@@ -43,7 +45,7 @@ In social network analysis, clique is understood as maximal complete subgraph of
 
 
 ## Cliques
-The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subrgaphs in a larger structure is one of simplest method to trace cliques in social networks. 
+The most common method to detect cliques in the network data is to find complete subgraphs. The algorithm searching for complete subgraphs in a larger structure is one of simplest method to trace cliques in social networks. 
 
 An `igraph` package provides a few useful functions for detecting clique. The main function is `cliques` which returns a list (as a vector of vertex id's) of all cliques found in the graph. We could set `min` argument to 3 to remove vertices and edges.
 
@@ -76,15 +78,22 @@ par(mar = rep(0,4))
 plot(graph, mark.groups = groups, vertex.label = NA, margin = 0)
 ```
 
-Two cliques of size 5 (yellow and red) are patially included in cliques of size 6 (blue), while the largest clique (violet) forms isolated group.
+Two cliques of size 5 (yellow and red) are partially included in cliques of size 6 (blue), while the largest clique (violet) forms isolated group.
 
-In package `network` there is a function `clique.census`, which finds all maximal cliques and additionally returns clique count and comembership matrix for vertices. It also performs symmetrization step for undirected graphs.
+In package `network` there is a function `clique.census`, which finds all maximal cliques and additionally returns clique count and co-membership matrix for vertices. It also performs symmetrization step for undirected graphs.
 
 
 
 ## N-cliques
 
-As we mentioned above, the geodesic distances among memebers of cohesive groups should be small. To make the idea of clique more flexible it is possible to specify the cutoff value n as the maxium length of geodesic distance linking pairs of actors within the cohesive subgroup [Wasserman & Faust 1994: 254]. Thus, the n-clique is a subgraph with paths of n length as maxium value allowed between pairs of actors. Formmally, n-clique is made of geodesics d(i,j) =< n equal or lesser than n value. When n=1 identified subgroup is a complete subgraph.
+As we mentioned above, the geodesic distances among members of cohesive groups
+should be small. To make the idea of clique more flexible it is possible to
+specify the cutoff value $n$ as the maximum length of geodesic distance linking
+pairs of actors within the cohesive subgroup [Wasserman & Faust 1994: 254].
+Thus, the $n$-clique is a subgraph with paths of $n$ length as maximum value
+allowed between pairs of actors. Formally, $n$-clique is made of geodesics
+$d(i,j) =< n$ equal or lesser than $n$ value. When $n=1$ identified subgroup is a
+complete subgraph.
 
 ```{r, include=FALSE, eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
@@ -106,7 +115,7 @@ kCliques(tmp)
 The idea of n-cliques has its limitations that led to the idea of n-clans. Two problems might arise when we deal with n-cliques:
 1. It may happen that the diameter of n-clique is greater than n value.
 2. It may also happen that n-clique is disconnected as n-path connecting two nodes in analyzed n-clique goes through nodes outside of that n-clique.
-The soultion to the first problem send us to the idea of n-clans. A n-clan is a n-clique in which the geodesic distance between all nodes is no greater than n [Ibidem: 260]. All n-clans in a subgraph are n-cliques, but not all n-cliques are n-clans.
+The solution to the first problem send us to the idea of n-clans. A n-clan is a n-clique in which the geodesic distance between all nodes is no greater than n [Ibidem: 260]. All n-clans in a subgraph are n-cliques, but not all n-cliques are n-clans.
 
 
 
@@ -123,7 +132,8 @@ Cohesive subgroups are often identified on adjacency of subgroup members. Such a
 
 The idea of cliques is based on rigid formal assumptions (see above). It is quite complicated to detect cliques in real life social networks. Thus, in more recent works the idea of cliques has been replaced by more flexible but still very formal concept of 'community'. So, what is the community structure? Newman and Girvan spoke of "property that seems to be common to many networks is community structure, the division of network nodes into groups within which the network connections are dense, but between which they are sparser" [@newman_girvan_2004]. There are many algorithms availale to detect communities in social networks. They can be grouped into one of three types of algorithms: a) divisive algorithms, b) agglomerative algorithms, c) optimization methods. Some of them are briefly presented below.
 
-It makes sense to study communities on connected components of a graph -- most algorithms (NIE JESTEM TEGO PEWIEN!?!?) won't create community that connects nodes from two components. Therefore we will restrict following analyses to the largest connected component in our graph.
+It makes sense to study communities on connected components of a graph -- most algorithms  will not create community that connects nodes from two components. Therefore we will restrict following analyses to the largest connected component in our graph.
+
 ```{r, fig.height=3, fig.width=3, fig.align='center'}
 cl <- clusters(graph)
 graph_c <- induced.subgraph(graph, cl$membership == which.max(cl$csize))
@@ -321,7 +331,7 @@ plot(graph_bip, layout = layout.bipartite,
      margin = 0)
 ```
 
-Although our network is too big to plotted in any sensible way, it could be seen that some judges ruled in a huge number of judgments. Quick look at degrees confirms that.
+Although our network is too big to be plotted in any sensible way, it could be seen that some judges ruled in a huge number of judgments. Quick look at degrees confirms that.
 ```{r}
 table(degree(graph_bip)[V(graph_bip)$type])
 ```

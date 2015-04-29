@@ -181,6 +181,7 @@ We can now use `summary` to calculate some network statistics of interest. For e
 
 
 ```{r}
+library(ergm)
 summary(ibe ~ edges + mutual + nodeofactor("female"))
 ```
 

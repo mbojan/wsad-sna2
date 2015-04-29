@@ -254,8 +254,7 @@ used.  Models with smaller AIC should be preferred. AIC can be calculated with
 function `AIC`.  For the two models estimated in previous sections we obtain:
 
 ```{r, aic}
-AIC(model.ibe0)
-AIC(model.ibe1)
+AIC(model.ibe0, model.ibe1)
 ```
 
 So the "reciprocity" model seems to fit the data better than homogeneous
@@ -396,12 +395,16 @@ d$match <- with(d, ego == alter)
 d
 ```
 
-We are now ready to fit our logit model:
+We are now ready to fit our logit model. Our binary dependent variable is `tie`
+(is there a tie or not). Our only independent variable is `match`, also binary,
+representing whether dyad involves actors of the same sex. We weight the cases
+with variable `Freq`.
 
 ```{r, logit}
 ibe.logit <- glm( tie ~ match, data=d, weight=Freq, family=binomial("logit"))
 ibe.logit
 ```
+
 
 As you can see, the coefficients are identical:
 
@@ -409,7 +412,21 @@ As you can see, the coefficients are identical:
 cbind( ERGM=coef(ibe.model1), Logit=coef(ibe.logit))
 ```
 
+
+
+
+
+
 ## Gender homophily
+
+In our attempt to model the `ibe` network let's pursue the topic of
+gender homophily.
+
+> Co to homofilia
+
+Basic ERG models for homophily are also dyad-independent models.
+
+> Efekty główne i efekt interakcji.
 
 ```{r, gender_homophily}
 model.ibe2a <- ergm(ibe ~ edges + mutual + nodeofactor("female") + nodeifactor("female"))

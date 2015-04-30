@@ -51,12 +51,23 @@ knit_hooks$set( small.mar = .small_mar, no.mar=.no_mar, use.igraph=.use_igraph)
 
 # Introduction
 
-This tutorial supplements the topics covered on WSAD Summer School workshop "Introduction Statistical Social Network Analysis". The workshop presented how Exponential Random Graph Models (ERGMs) can be fit using program PNet [@wang_etal_2009]. Here we provide examples how ERGMs can be simulated and fitted using `statnet` suite of R packages for network analysis [@handcock_etal_2003].
+This tutorial supplements the topics covered on WSAD Summer School workshop
+"Introduction Statistical Social Network Analysis". The workshop presented how
+Exponential Random Graph Models (ERGMs) can be fit using program PNet
+[@wang_etal_2009]. Here we provide examples how ERGMs can be simulated and
+fitted using `statnet` suite of R packages for network analysis
+[@handcock_etal_2003].
 
 
-In this tutorial we will use `network` objects from `statnet` suite of packages instead of `igraph` objects. In principle, you can use both packages at the same time. However, we recommend to use only one at a time to avoid function name conflicts [^1]. You can easily convert `igraph` objects to `network` objects (or vice versa) using `asIgraph` and `asNetwork` functions from `intergraph` package.
+In this tutorial we will use `network` objects from `statnet` suite of packages
+instead of `igraph` objects. In principle, you can use both packages at the
+same time. However, we recommend to use only one at a time to avoid function
+name conflicts [^1]. You can easily convert `igraph` objects to `network`
+objects (or vice versa) using `asIgraph` and `asNetwork` functions from
+`intergraph` package.
 
-[^1]: For more details see for example http://bc.bojanorama.pl/2010/08/namespaces-and-name-conflicts/
+[^1]: For more details see for example
+http://bc.bojanorama.pl/2010/08/namespaces-and-name-conflicts/
 
 
 
@@ -64,17 +75,30 @@ In this tutorial we will use `network` objects from `statnet` suite of packages 
 
 # Exponential Random Graph Models in a nutshell
 
-ERG models, as they are currently known, stem from the work by @frank_strauss_1986 and were further developed by, among others, @frank_1991, @wasserman_pattison_1996, @pattison_robins_2002, @snijders_etal_2006]. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM is provided by @lusher_etal_2012 and @robins_etal_2007. 
+ERG models, as they are currently known, stem from the work by
+@frank_strauss_1986 and were further developed by, among others, @frank_1991,
+@wasserman_pattison_1996, @pattison_robins_2002, @snijders_etal_2006]. ERGMs
+have established their position as one of the most important tools in social
+networks analysis. Comprehensive description of ERGM is provided by
+@lusher_etal_2012 and @robins_etal_2007. 
 
-Exponential Random Graph Models are a family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to networks according to network statistics -- summary measures describing selected features of the network.
+Exponential Random Graph Models are a family of statistical models for
+understanding processes that shape the global structure of a network. This goal
+is achieved by assigning probability to networks according to network
+statistics -- summary measures describing selected features of the network.
 
-Formally, let $A$ represent a network in the form of an adjacency matrix of given size $n$. Lety $\mathcal{A}$ be a collection of all possible networks of size $n$ that can be constructed. An ERG model postulates that a probability distribution defined over all networks in $\mathcal{A}$ can be represented as:
+Formally, let $A$ represent a network in the form of an adjacency matrix of
+given size $n$. Lety $\mathcal{A}$ be a collection of all possible networks of
+size $n$ that can be constructed. An ERG model postulates that a probability
+distribution defined over all networks in $\mathcal{A}$ can be represented as:
 
 $$
 P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
 $$
 
-where $g(a)$ is a vector of network statistics, $\theta$ is a vector of weights associated with these statistics, and $\kappa(\theta, \mathcal{A})$ is a normalizing constant ensuring that all the probabilities sum-up to 1.
+where $g(a)$ is a vector of network statistics, $\theta$ is a vector of weights
+associated with these statistics, and $\kappa(\theta, \mathcal{A})$ is a
+normalizing constant ensuring that all the probabilities sum-up to 1.
 
 $$
 \kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
@@ -97,7 +121,8 @@ where:
 - $\delta(y_{ij})$ is a vector of *change statistics* for each term in the model.
 - $\theta$ is a vector of parameters, as before.
 
-The change statistics capture how a particular term $g(y)$ changes if the $y_{ij}$ tie is formed or not:
+The change statistics capture how a particular term $g(y)$ changes if the
+$y_{ij}$ tie is formed or not:
 
 $$
 \delta( y_{ij} ) = g( y^{+}_{ij} ) - g( y^{-}_{ij} )
@@ -106,7 +131,9 @@ $$
 where $y^{+}_{ij}$ represents $y^c$ with $y_{ij}$ set to 1, and $y^{+}_{ij}$
 represents $y^c$ with $y_{ij}$ set to 0.
 
-As a consequence, model parameters $\theta$ can be interpreted as log-odds of a presence of a network tie conditional on the state of all other dyads in the network.
+As a consequence, model parameters $\theta$ can be interpreted as log-odds of a
+presence of a network tie conditional on the state of all other dyads in the
+network.
 
 
 
@@ -115,7 +142,11 @@ As a consequence, model parameters $\theta$ can be interpreted as log-odds of a 
 
 ## Network statistics
 
-Different ERG models can be specified by choosing different network statistics. A set of network statistics is chosen on the basis of theoretical premises concerning a particular research problem at hand. However, there are a few basic configurations often included in the model. Example of network statistics include:
+Different ERG models can be specified by choosing different network statistics.
+A set of network statistics is chosen on the basis of theoretical premises
+concerning a particular research problem at hand. However, there are a few
+basic configurations often included in the model. Example of network statistics
+include:
 
 1. Number of edges in the network (`edges`)
 $$
@@ -132,7 +163,11 @@ $$
 T(a) = \sum_{1\leq i < j < h\leq n}a_{ij}a_{ih}a_{jh}.
 $$
 
-ERGMs could easily incorporate additional information about actors attributes. To indicate extra information function $g(a)$ could be replaced with $g(a,X)$, where $X$ is a matrix containing attributes. This leads to another statistics, which measure the effect of actor's attributes. $y_i$ denotes value of an attribute $y$ of the $i$-th node:
+ERGMs could easily incorporate additional information about actors attributes.
+To indicate extra information function $g(a)$ could be replaced with $g(a,X)$,
+where $X$ is a matrix containing attributes. This leads to another statistics,
+which measure the effect of actor's attributes. $y_i$ denotes value of an
+attribute $y$ of the $i$-th node:
 
 4. Attribute-based activity (`nodeofactor`)
 $$
@@ -149,7 +184,8 @@ $$
 \sum_{1\leq i\leq j\leq n}a_{ij}|y_i-  y_j|.
 $$
 
-See `?ergm.terms` for a complete list of network statistics implemented in `ergm`.
+See `?ergm.terms` for a complete list of network statistics implemented in
+`ergm`.
 
 
 
@@ -158,9 +194,16 @@ See `?ergm.terms` for a complete list of network statistics implemented in `ergm
 
 ## Calculating network statistics
 
-The workhorse for estimating ERG models is the `ergm` function from the `ergm` package. We will described in detail later. Function `ergm` uses a formula interface to specify the network statistics, or `terms`. If you simply want to calculate the values of network statistics in a given network you can use function `summary` with a single argument -- an ERGM formula. Such formula should have an object of class `network` on the left hand side, and a sum of network statistics on the right hand side.
+The workhorse for estimating ERG models is the `ergm` function from the `ergm`
+package. We will described in detail later. Function `ergm` uses a formula
+interface to specify the network statistics, or `terms`. If you simply want to
+calculate the values of network statistics in a given network you can use
+function `summary` with a single argument -- an ERGM formula. Such formula
+should have an object of class `network` on the left hand side, and a sum of
+network statistics on the right hand side.
 
-As an example, let us take the classroom network we used in other tutorials. We need it now as a `network` object:
+As an example, let us take the classroom network we used in other tutorials. We
+need it now as a `network` object:
 
 ```{r, classroom_as_network, no.mar=TRUE}
 # load data
@@ -173,7 +216,8 @@ ibe
 plot(ibe)
 ```
 
-We can now use `summary` to calculate some network statistics of interest. For example, let's calculate
+We can now use `summary` to calculate some network statistics of interest. For
+example, let's calculate
 
 - number of ties
 - number of reciprocated ties
@@ -185,7 +229,8 @@ library(ergm)
 summary(ibe ~ edges + mutual + nodeofactor("female"))
 ```
 
-Consequently, this network has 88 ties, 22 of which are reciprocated, and girls send ties 46 times.
+Consequently, this network has 88 ties, 22 of which are reciprocated, and girls
+send ties 46 times.
 
 
 
@@ -226,8 +271,8 @@ with two terms:
 - `mutual` which is the number of symmetrical (reciprocated) dyads in the network.
 
 To fit the model to our classroom network we use the function `ergm` and
-provide a model formula as an argument. The formula has a network object
-on the left hand side and a sum of the two terms on the right hand side:
+provide a model formula as an argument. The formula has a network object on the
+left hand side and a sum of the two terms on the right hand side:
 
 ```{r, reciprocity}
 model.ibe1 <- ergm(ibe ~ edges + mutual)
@@ -235,12 +280,12 @@ summary(model.ibe1)
 ```
 
 
-From the results we see that the `edges` effect is negative and significant while
-the `mutual` term is positive and significant too. Both effects are roughly equal
-in absolute size, so cancel each other out, which means that odds for a mutual tie
-are about 1 and the probability about 0.5. Conditional odds for a non-mutual tie
-are $\exp(-2.466) = 0.0849$ so the probability about 0.08. Indeed, there is a
-strong tendency to reciprocate ties.
+From the results we see that the `edges` effect is negative and significant
+while the `mutual` term is positive and significant too. Both effects are
+roughly equal in absolute size, so cancel each other out, which means that odds
+for a mutual tie are about 1 and the probability about 0.5. Conditional odds
+for a non-mutual tie are $\exp(-2.466) = 0.0849$ so the probability about 0.08.
+Indeed, there is a strong tendency to reciprocate ties.
 
 
 
@@ -249,9 +294,14 @@ strong tendency to reciprocate ties.
 ### Model comparison
 
 ERG models do not have associated goodness of fit  measures like $R^2$ in
-linear regression.  To compare different models a AIC measure [@akaike_1998] is
-used.  Models with smaller AIC should be preferred. AIC can be calculated with
-function `AIC`.  For the two models estimated in previous sections we obtain:
+linear regression.  To compare different models a Akaike Information Criterion
+(AIC) measure [@akaike_1998] is used. Models with smaller AIC should be
+preferred.  AIC can be used to compare non-nested models. Its design penalizes
+models with more parameters, so adding more terms to the ERG model does not
+necessarily lead to better fitting models according to AIC. 
+
+AIC can be calculated with function `AIC`.  For the two models estimated in
+previous sections we obtain:
 
 ```{r, aic}
 AIC(model.ibe0, model.ibe1)
@@ -264,10 +314,11 @@ Bernoulli model.
 
 ### Goodness of fit through simulation
 
-To examine how well a given ERG model fits the data a simulation-based methods are used.
-Given an estimated model we can simulate networks consistent with it. Once we simulate
-a lot of networks from the model, we can check, whether these simulated networks
-posses the same kind of global network properties as the observed network.
+To examine how well a given ERG model fits the data a simulation-based methods
+are used.  Given an estimated model we can simulate networks consistent with
+it. Once we simulate a lot of networks from the model, we can check, whether
+these simulated networks posses the same kind of global network properties as
+the observed network.
 
 Global properties usually analyzed in this way include:
 
@@ -275,8 +326,8 @@ Global properties usually analyzed in this way include:
 - distribution of shortest path lengths (minimum geodesic distances).
 - distribution of the number of edge-wise shared partners.
 
-This can be done with the function `gof`. Let us examine the homogeneous Bernoulli model
-fitted earlier.
+This can be done with the function `gof`. Let us examine the homogeneous
+Bernoulli model fitted earlier.
 
 ```{r, gof_bernoulli}
 fit0 <- gof(model.ibe0)
@@ -339,28 +390,43 @@ possibilities in the sections below.
 
 # Dyad-independent ERGMs      {#dyadic_independence}
 
-Dyadic independence ERGMS are the simplest class of ERGMs. They assume that every dyad is independent from each other. This is very strong assumption which rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat every dyad as a single object, independent from its surrounding. Therefore in such models we could use only such measures, that are dyadic independent. That means that we could calculate change statistic knowing only the state of a given dyad and maybe some attributes of nodes (in this dyad). For instance number of edges is dyadic independent -- if we toggle an edge from 0 to 1 we are sure that number of edges will increase by 1, no matter how the rest of the network looks like. Another example is the homophily effect -- we could compute change in the number of edges between nodes of the same type knowing only attributes of these two specific nodes in a dyad. On the other hand, number of 2-stars is dyadic dependent - we need two know structure of the neighborhood if we want to calculate the change in the number of twopaths.
+Dyadic independence ERGMS are the simplest class of ERGMs. They assume that
+every dyad is independent from each other. This is very strong assumption which
+rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat
+every dyad as a single object, independent from its surrounding. Therefore in
+such models we could use only such measures, that are dyadic independent. That
+means that we could calculate change statistic knowing only the state of a
+given dyad and maybe some attributes of nodes (in this dyad). For instance
+number of edges is dyadic independent -- if we toggle an edge from 0 to 1 we
+are sure that number of edges will increase by 1, no matter how the rest of the
+network looks like. Another example is the homophily effect -- we could compute
+change in the number of edges between nodes of the same type knowing only
+attributes of these two specific nodes in a dyad. On the other hand, number of
+2-stars is dyadic dependent - we need two know structure of the neighborhood if
+we want to calculate the change in the number of twopaths.
 
-Assuming that our statistics are dyadic independent we could rewrite edge probability to logit form:
+Assuming that our statistics are dyadic independent we could rewrite edge
+probability to logit form:
 
 $$
 logit (P_\theta(A_{ij}=1))  = \theta^T \delta[g(a)]_{ij}
 $$
 
-That looks like a logistic regression model. Indeed, dyad-independent
-ERGMs simplify to a logistic regression for data in which dyads are observations,
-the dependent variable is binary and equals to 1 if an edge exists and 0 otherwise.
+That looks like a logistic regression model. Indeed, dyad-independent ERGMs
+simplify to a logistic regression for data in which dyads are observations, the
+dependent variable is binary and equals to 1 if an edge exists and 0 otherwise.
 Independent variables are the change statistics (one for each term).
 
 Consider the following example of fitting a dyad-independent ERGM to classroom
 data.
 
 ```{r}
-ibe.model1 <- ergm(ibe ~ edges + nodematch("female"))
-summary(ibe.model1)
+model.ibe1 <- ergm(ibe ~ edges + nodematch("female"))
+summary(model.ibe1)
 ```
 
-Let us now try to fit the same model using logistic regression. We need to prepare the data first.
+Let us now try to fit the same model using logistic regression. We need to
+prepare the data first.
 
 ```{r, mm}
 mm <- isnar::mixingm(playnet, "female", full=TRUE)
@@ -385,10 +451,12 @@ d <- as.data.frame(as.table(mm))
 d
 ```
 
-Columns `ego` and `alter` mark whether, respectively, tie sender or tie receiver is a female.
-Variable `tie` is `TRUE` for connected pairs. Finally, variable `Freq` contains the frequency.
+Columns `ego` and `alter` mark whether, respectively, tie sender or tie
+receiver is a female.  Variable `tie` is `TRUE` for connected pairs. Finally,
+variable `Freq` contains the frequency.
 
-We now add a variable `match` differentiating same-gender pairs: `match` is `TRUE` whenever `ego` and `alter` are equal:
+We now add a variable `match` differentiating same-gender pairs: `match` is
+`TRUE` whenever `ego` and `alter` are equal:
 
 ```{r, add_match}
 d$match <- with(d, ego == alter)
@@ -409,36 +477,58 @@ ibe.logit
 As you can see, the coefficients are identical:
 
 ```{r}
-cbind( ERGM=coef(ibe.model1), Logit=coef(ibe.logit))
+cbind( ERGM=coef(model.ibe1), Logit=coef(ibe.logit))
+```
+
+In the next section we show how homophily can be modeled in some more detail.
+
+
+
+
+
+
+## Gender homophily example
+
+In our attempt to model the `ibe` network let's pursue the topic of gender
+*homophily*. Network homophily is a pattern in which ties are more likely to
+exist between nodes similar to each other according to some attribute, e.g.
+gender [@mcpherson_etal_2001; bojanowski_corten_2014].
+
+ERG models for homophily are also dyad-independent models, similar to the
+one from the previous section. Conditional probability of a tie exist between
+two nodes can be represented as a function of attributes of the first node,
+attributes if the second node, and possible interaction effects.
+
+```{r, homophily_main}
+model.ibe2a <- ergm(ibe ~ edges + mutual + nodeofactor("female") +
+                    nodeifactor("female"))
+summary(model.ibe2a)
 ```
 
 
 
 
+```{r, homophily_mixing}
+model.ibe2b <- ergm(ibe ~ edges + mutual +  nodeofactor("female") + nodeifactor("female")
+                    + nodematch("female"))
+summary(model.ibe2b)
+```
 
+Compare Bernoulli model, reciprocity model, and the two homophily models
 
-## Gender homophily
-
-In our attempt to model the `ibe` network let's pursue the topic of
-gender homophily.
-
-> Co to homofilia
-
-Basic ERG models for homophily are also dyad-independent models.
-
-> Efekty główne i efekt interakcji.
-
-```{r, gender_homophily}
-model.ibe2a <- ergm(ibe ~ edges + mutual + nodeofactor("female") + nodeifactor("female"))
-model.ibe2b <- ergm(ibe ~ edges + mutual + nodeofactor("female") + nodeifactor("female") + nodematch("female"))
+```{r, homophily_AIC}
 AIC(model.ibe0, model.ibe1, model.ibe2a, model.ibe2b)
 ```
+
+Homophily model seems to fit best. Let's examine the (lack of) fit in some more
+detail with the `gof` function.
 
 ```{r. gender_homophily_gof}
 fit2b <- gof(model.ibe2b)
 layout(matrix(1:4, 2, 2, byrow=TRUE))
 plot(fit2b)
 ```
+
 
 
 
@@ -483,12 +573,14 @@ Friend of a friend is likely a friend too.
 
 # More technical details for interested and technically inclined readers
 
-In the following two sections we present a somewhat more detailed discussion of how an ERG model can be interpreted as:
+In the following two sections we present a somewhat more detailed discussion of
+how an ERG model can be interpreted as:
 
 1. A model for a probability distribution over all networks of a given size.
 2. A model for conditional probabilities of tie existence given the structure of the remainder of the network.
 
-Interpretation (1) can be called *global* while interpretation (2) can be called *local*.
+Interpretation (1) can be called *global* while interpretation (2) can be
+called *local*.
 
 
 
@@ -498,11 +590,20 @@ Interpretation (1) can be called *global* while interpretation (2) can be called
 
 This is a more advanced topic.
 
-As mentioned, ERGMs assign probabilities to all networks with given size (number of nodes) according to some statistic (measure/attribute). To see how it works let's consider undirected network of size 4. There are 64 such networks in total, but some of them differ only in node permutation, so there are only 11 topologically different networks.
+As mentioned, ERGMs assign probabilities to all networks with given size
+(number of nodes) according to some statistic (measure/attribute). To see how
+it works let's consider undirected network of size 4. There are 64 such
+networks in total, but some of them differ only in node permutation, so there
+are only 11 topologically different networks.
 
-Assume we have three models: null model, model with one parameter (number of edges) and with two parameters (number of edges and 2-stars/twopaths). Parameters are equal $\theta_1=-0.5$ for number of edges (both models) and $\theta_2 = 0.2$ for number of twopaths. We will calculate probability of each type of network under all three models.
+Assume we have three models: null model, model with one parameter (number of
+edges) and with two parameters (number of edges and 2-stars/twopaths).
+Parameters are equal $\theta_1=-0.5$ for number of edges (both models) and
+$\theta_2 = 0.2$ for number of twopaths. We will calculate probability of each
+type of network under all three models.
 
-First we need to generate all possible networks of size 4 and select one representative for each canonical form.
+First we need to generate all possible networks of size 4 and select one
+representative for each canonical form.
 
 ```{r, fig.width=5, fig.height=5, fig.align='center'}
 # all 4-node networks
@@ -521,7 +622,10 @@ canonical_count <- table(degrees$id)
 nets_unique <- nets[match(unique(degrees$id), degrees$id)]
 ```
 
-Now we calculate the numerator in equation for probability for every canonical form and each model. Under null model every network is equally probable, so we don't have to compute anything. For other functions small function will come in handy.
+Now we calculate the numerator in equation for probability for every canonical
+form and each model. Under null model every network is equally probable, so we
+don't have to compute anything. For other functions small function will come in
+handy.
 
 ```{r}
 model0 <- rep(1, 11)
@@ -535,7 +639,8 @@ model1 <- sapply(nets_unique, prob, coeff = c(edges = -0.5))
 model2 <- sapply(nets_unique, prob, coeff = c(edges = -0.5, twopath = 0.2))
 ```
 
-Next step is calculating proper probabilities. To do so we sum numerators over all canonical forms taking the size of each group into account.
+Next step is calculating proper probabilities. To do so we sum numerators over
+all canonical forms taking the size of each group into account.
 
 ```{r}
 model0 <- model0 / sum(model0 * canonical_count)
@@ -563,7 +668,15 @@ legend("center", legend = c("Null model", "Edges only", "Edges and twopaths"),
 par(mfrow = c(1, 1))
 ```
 
-All networks has the same probabilities under null model obviously. It is also clear that under model with edges only probability is decreasing as density (or edge count) is increasing. This is caused by negative edge parameter - less dense networks are preferable. Last model is the most interesting one - we could notice that probability decreases in the beginning as density increases, but afterwards it starts to increase again. Edge parameter is still negative so dense networks are penalised. However, second parameter is positive and number of twopath (2-stars) increases more or less faster than number of edges. Therefore probabilities of dense networks are increasing. 
+All networks has the same probabilities under null model obviously. It is also
+clear that under model with edges only probability is decreasing as density (or
+edge count) is increasing. This is caused by negative edge parameter - less
+dense networks are preferable. Last model is the most interesting one - we
+could notice that probability decreases in the beginning as density increases,
+but afterwards it starts to increase again. Edge parameter is still negative so
+dense networks are penalised. However, second parameter is positive and number
+of twopath (2-stars) increases more or less faster than number of edges.
+Therefore probabilities of dense networks are increasing. 
 
 
 
@@ -572,7 +685,9 @@ All networks has the same probabilities under null model obviously. It is also c
 
 This a more advanced topic.
 
-The model could be equivalently described by conditional probabilities that an edge exists given the rest of the network. Conditional log-odds could be easily derived from the general form of the model
+The model could be equivalently described by conditional probabilities that an
+edge exists given the rest of the network. Conditional log-odds could be easily
+derived from the general form of the model
 
 $$
 \frac{P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)}{P_\theta(A_{ij}=0|A_{ij}^c=a_{ij}^c)}=\exp\{\theta^T \delta[g(a)]_{ij}\} 
@@ -587,7 +702,9 @@ $$
 \end{array}
 $$
 
-Coming back to 4-nodes networks. Let's say we have a model with two statistics defined above: number of edges and number of 2-stars (twopaths) with corresponding parameters $\theta_1=-0.5$ and $\theta_2 = 0.2$.
+Coming back to 4-nodes networks. Let's say we have a model with two statistics
+defined above: number of edges and number of 2-stars (twopaths) with
+corresponding parameters $\theta_1=-0.5$ and $\theta_2 = 0.2$.
 
 ```{r, echo=FALSE, fig.width=8, fig.height=5, fig.align='center'}
 source("function_compute_prob.R")
@@ -608,9 +725,14 @@ for (i in seq_along(nets_unique)) {
 par(mfrow = c(1, 1))
 ```
 
-Look close on 7th network. Where has probability $0.73$ come from? So assume that we create an edge between top two nodes. Then number of edges is obviously increased by 1, but number of twopaths is increased by 3 - new edge creates twopath with every other edges. Now we have change statictics so we could compute probability from equation
+Look close on 7th network. Where has probability $0.73$ come from? So assume
+that we create an edge between top two nodes. Then number of edges is obviously
+increased by 1, but number of twopaths is increased by 3 - new edge creates
+twopath with every other edges. Now we have change statictics so we could
+compute probability from equation
+
 $$
- \frac{\exp\{-0.5 * 1 + 0.2 * 3\}}{1+\exp\{-0.5 * 1 + 0.2 * 3\}} = `r exp(-0.5+0.6)/(1+exp(-0.5+0.6))`
+ \frac{\exp\{-0.5 \cdot 1 + 0.2 \cdot 3\}}{1+\exp\{-0.5 \cdot 1 + 0.2 \cdot 3\}} = `r exp(-0.5+0.6)/(1+exp(-0.5+0.6))`
 $$
 
 

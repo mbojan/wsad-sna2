@@ -58,13 +58,12 @@ Exponential Random Graph Models (ERGMs) can be fit using program PNet
 fitted using `statnet` suite of R packages for network analysis
 [@handcock_etal_2003].
 
-
-In this tutorial we will use `network` objects from `statnet` suite of packages
-instead of `igraph` objects. In principle, you can use both packages at the
-same time. However, we recommend to use only one at a time to avoid function
-name conflicts [^1]. You can easily convert `igraph` objects to `network`
-objects (or vice versa) using `asIgraph` and `asNetwork` functions from
-`intergraph` package.
+In this tutorial we will use network data in the form of objects of class
+`network` instead of objects of class `igraph`.  In principle, you can use both
+packages at the same time. However, we recommend to use only one at a time to
+avoid function name conflicts [^1]. You can easily convert `igraph` objects to
+`network` objects (or vice versa) using `asIgraph` and `asNetwork` functions
+from `intergraph` package.
 
 [^1]: For more details see for example
 http://bc.bojanorama.pl/2010/08/namespaces-and-name-conflicts/
@@ -257,6 +256,15 @@ in this network is equal to $26 \times 25 = 650$. Odds for tie existence are
 then equal to $88 / (650 - 88) = 0.156583$.  If we calculate log-odds we will
 get $log(0.156583) = - 1.854165$ which is exactly the value of the `edges` term
 in the model above. This corresponds to a constant tie probability of `r 88/650`.
+This, in turn, is obviously equal to network density:
+
+```{r, ibe_density}
+network.density(ibe)
+```
+
+As network density is usually not of our primary research interest, the `edges`
+term is usually included in models and interpreted in a similar manner like the
+intercept in linear regression.
 
 
 
@@ -378,6 +386,17 @@ possibilities in the sections below.
 
 
 
+# (In)dependence assumptions
+
+In the previous section we shown two simple ERG models: the homogeneous Bernoulli model
+and the 
+
+Assumptions about forms of dependence:
+
+1. Bernoulli graphs
+2. Dyadic independence
+3. Markov Graphs
+4. 
 
 
 
@@ -388,12 +407,24 @@ possibilities in the sections below.
 
 
 
-# Dyad-independent ERGMs      {#dyadic_independence}
 
-Dyadic independence ERGMS are the simplest class of ERGMs. They assume that
-every dyad is independent from each other. This is very strong assumption which
-rarely (if ever) holds in real social networks. Dyadic independence ERGMs treat
-every dyad as a single object, independent from its surrounding. Therefore in
+
+
+# Dyad-independent ERGMs       {#dyadic_independence}
+
+Dyadic independence ERGMs are probably the simplest class of ERGMs. They assume
+that every dyad is independent from each other. In other words
+
+
+
+This is a very strong
+assumption which rarely (if ever) holds in real social networks. Dyadic
+independence ERGMs treat every dyad as a single object, independent from its
+surrounding.
+
+
+
+Therefore, in
 such models we could use only such measures, that are dyadic independent. That
 means that we could calculate change statistic knowing only the state of a
 given dyad and maybe some attributes of nodes (in this dyad). For instance

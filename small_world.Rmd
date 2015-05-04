@@ -10,6 +10,19 @@ set.seed(666)
 # options(warn=2)
 opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
                cache=FALSE, dev="svg")
+
+.small_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=c(1, 1, 3, 1))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+knit_hooks$set( small.mar = .small_mar)
 ```
 
 # Introduction - global properties of networks
@@ -29,6 +42,55 @@ However, social networks are very far from being random. Large local clustering 
 A model of network with both a high local clustering and short paths between the nodes has been proposed by Watts and Strogatz (1998). They created a class of networks, which are a combination of regular and random graphs. The network is constructed from highly structured graph, for example $N$ nodes distributed around the circle, each with $k$ connection with the nearest nodes. Then, with probability $p$ the other end of each connection is assigning  to another randomly selected node. Watts-Strogatz model thus consists of close connections with high local density for small $p$ and with a fraction $p$ of random connections. The $p$ takes values from the interval $[0, 1]$ and determines the degree of disorder of the network - from a regular grid, when $p = 0$ to a completely random system for $p = 1$. Watts and Strogatz had shown that even for small values of $p$, when a network has high local clustering, the average distance between nodes is short. Such graphs are called a small world networks.
 
 A graph is considered small-world, if its average local clustering coefficient $\bar{C}$ is significantly higher than a random graph constructed on the same set of nodes, and if the graph has approximately the same mean-shortest path length as its corresponding random graph. In the next section, we show an example how to verify in $R$ if a given graph is a  small-world network.
+
+# Small World illustrations
+
+Generating small world networks.
+
+```{r small_world_sim, fig.width=9, fig.height=3, small.mar=TRUE}
+library(igraph)
+n <- 50
+nei <- 2
+circ <- watts.strogatz.game(1, n, nei, p=0)
+l.circle <- layout.circle(circ)
+g <- watts.strogatz.game(1, n, nei, p=0.3)
+layout(matrix(1:3, 1, 3))
+plot(circ, layout=l.circle, main="Overlapping neighborhoods")
+plot(g, layout=l.circle, main="Random rewiring")
+plot(g, main="Final network")
+```
+
+Testing for small world phenomenon:
+
+> Coś mi się tu nie podoba, jeszcze nie wiem co...
+
+```{r, small_world_testing}
+# Observed
+transitivity(g)
+average.path.length(g)
+
+# Generate 1000 random networks of the same size and density
+glist <- replicate(1000, erdos.renyi.game(vcount(g), ecount(g), type="gnm", directed=FALSE),
+                   simplify=FALSE)
+# Calculate transitivity and avg path length
+stats <- sapply(glist, function(g) c(clustering=transitivity(g), distances=average.path.length(g)))
+stats <- as.data.frame(t(stats))
+
+# Compare to observed (1)
+layout(matrix(1:2, 1, 2))
+hist(stats$clustering, col="grey", border="white", xlab="", main="Local density")
+abline( v = transitivity(g), lwd=3, col="red")
+hist(stats$distances, col="grey", border="white", xlab="", main="Average geodesic length")
+abline( v = average.path.length(g), lwd=3, col="red")
+```
+
+```{r}
+# Compare to observed (2)
+plot(stats)
+abline(v=transitivity(g), h=average.path.length(g), col="red")
+```
+
+
 
 # Example - global properties of coauthoship network
 
@@ -95,7 +157,7 @@ The average short paths for the largest conected component of coauthorship netwo
 
 We can also compute the diameter $d$ of a network, that is the greatest distance between any pair of nodes.
 ```{r diameter, results='hide'}
-max(shortest.paths(coaut.LargestComponent))
+diameter(coaut.LargestComponent)
 ```
 
 

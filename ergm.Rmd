@@ -75,11 +75,11 @@ http://bc.bojanorama.pl/2010/08/namespaces-and-name-conflicts/
 # Exponential Random Graph Models in a nutshell
 
 ERG models, as they are currently known, stem from the work by
-@frank_strauss_1986 and were further developed by, among others, @frank_1991,
-@wasserman_pattison_1996, @pattison_robins_2002, @snijders_etal_2006]. ERGMs
-have established their position as one of the most important tools in social
-networks analysis. Comprehensive description of ERGM is provided by
-@lusher_etal_2012 and @robins_etal_2007. 
+@holland_leinhardt_1976 and @frank_strauss_1986, and were further developed by,
+among others, @frank_1991, @wasserman_pattison_1996, @pattison_robins_2002,
+@snijders_etal_2006. ERGMs have established their position as one of the most
+important tools in social networks analysis. Comprehensive description of ERG
+models is provided in the book by @lusher_etal_2012.
 
 Exponential Random Graph Models are a family of statistical models for
 understanding processes that shape the global structure of a network. This goal
@@ -87,7 +87,7 @@ is achieved by assigning probability to networks according to network
 statistics -- summary measures describing selected features of the network.
 
 Formally, let $A$ represent a network in the form of an adjacency matrix of
-given size $n$. Lety $\mathcal{A}$ be a collection of all possible networks of
+given size $n$. Let $\mathcal{A}$ be a collection of all possible networks of
 size $n$ that can be constructed. An ERG model postulates that a probability
 distribution defined over all networks in $\mathcal{A}$ can be represented as:
 
@@ -95,13 +95,20 @@ $$
 P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
 $$
 
-where $g(a)$ is a vector of network statistics, $\theta$ is a vector of weights
-associated with these statistics, and $\kappa(\theta, \mathcal{A})$ is a
-normalizing constant ensuring that all the probabilities sum-up to 1.
+where
+
+- $g(a)$ is a vector of network statistics, 
+- $\theta$ is a vector of weights associated with these statistics, 
+- $\kappa(\theta, \mathcal{A})$ is a normalizing constant ensuring that all the probabilities sum-up to 1.
 
 $$
 \kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
 $$
+
+In words, the probability that we observe a particular network $a$ out of the
+set $\mathcal{A}$ of all possible networks of size $n$ is a function of chosen
+network statistics $g(a)$, associated parameters $\theta$, and the normalizing
+constant $\kappa$.
 
 The model can also be written as a model for conditional log-odds of tie
 existence between a pair of nodes.  This makes it a little bit similar to a
@@ -119,6 +126,10 @@ where:
 - $y^c_{ij}$ is the complement of $y_{ij}$. In other words all other dyads in the network apart from $(i, j)$.
 - $\delta(y_{ij})$ is a vector of *change statistics* for each term in the model.
 - $\theta$ is a vector of parameters, as before.
+
+In words, the log-odds that actors $i$ and $j$ are connected with a tie, given
+the particular configuration of all the remaining ties, is a function of change
+statistics for each term in the model.
 
 The change statistics capture how a particular term $g(y)$ changes if the
 $y_{ij}$ tie is formed or not:
@@ -207,7 +218,8 @@ need it now as a `network` object:
 ```{r, classroom_as_network, no.mar=TRUE}
 # load data
 data(IBE121, package="isnar")
-# select select the "would like to play with" network
+# select the "would like to play with" network
+# by dropping other edges
 playnet <- igraph::delete.edges(IBE121, igraph::E(IBE121)[question != "play"])
 # convert to 'network' object
 ibe <- intergraph::asNetwork(playnet)
@@ -239,7 +251,7 @@ send ties 46 times.
 Before we go into more complex examples let us illustrate how ERG models are
 fit using two very simple models.
 
-### Homogenous Bernoulli model
+### Homogenous Bernoulli model       {#bernoulli}
 
 First let's estimate the simplest possible model. The model assumes that the
 network is purely random: every tie in the network appears with the same
@@ -268,7 +280,7 @@ intercept in linear regression.
 
 
 
-### Are ties reciprocated?
+### Are ties reciprocated?       {#reciprocity}
 
 As a little bit more complex example, let's assess the extent, to which
 children nominations are reciprocated, i.e., if A nominated B is it more likely
@@ -388,15 +400,113 @@ possibilities in the sections below.
 
 # (In)dependence assumptions
 
-In the previous section we shown two simple ERG models: the homogeneous Bernoulli model
-and the 
+You are probably familiar with Ordinary Least Squares (OLS) regression:
 
-Assumptions about forms of dependence:
+$$
+Y_i = \alpha + \beta X_i + \varepsilon_i
+$$
 
-1. Bernoulli graphs
-2. Dyadic independence
-3. Markov Graphs
-4. 
+If you recall, on of the assumption of OLS is that observations are
+independent, which translates to the requirement
+$\operatorname{Cor}{(\varepsilon_i, \varepsilon_j)} = 0$.  In other words, that
+the correlation between errors for any two observations is 0. Some
+generalizations of OLS regression go in the direction of relaxing this
+assumption, by allowing some observations to be correlated. In particular,
+multilevel models [e.g. @snijders_bosker_2011] can be considered such a
+generalization as, while we assume zero correlation between observations
+belonging to different groups, observations belonging to the same group can be
+correlated.
+
+Part of the challenge in modeling the structure of social networks is in
+dependence.  Social networks represent relationships between actors, which make
+these actors and their actions dependent in some respect. In particular, the
+process through which they form relations with others may be dependent.
+Consequently, in social networks, in principle, every tie may depend on other
+ties in the network. To approach this "Hell of Dependence" in a tractable way,
+proposed models can be characterized with *independence assumptions* that they
+pose. These statements specify what kind of independence, and between which
+ties, is assumed behind a given model. Much like in OLS regression, a lot of
+new developments in statistical analysis of social networks have been made by
+postulating new assumptions that relax some independence assumptions
+made by previous ones.
+
+In this section we review the following independence assumptions.
+
+1. The Bernoulli assumption.
+2. Dyadic independence assumption.
+3. Markov dependence assumption.
+4. Other forms of dependence.
+
+Examples of ERG models that conform to particular assumptions are
+presented in the [section TODO]().
+
+
+
+## Bernoulli assumption
+
+The Bernoulli assumption is the simplest and the strongest. We have already
+discussed it in the section with the [homogeneous Bernoulli model example](#bernoulli) above. 
+According to this model every *tie* is assumed to be a realization of an
+independent [Bernoulli Trial](http://en.wikipedia.org/wiki/Bernoulli_trial), a
+flip of a coin. The probability that an arc from $i$ to $j$ exist does not
+depend in any way on the structure of the remaining ties of the network. In
+particular, it does not depend on how many ties $i$ and $j$ already have,
+whether they have any network neighbors in common, and so on. It also does not
+depend on whether or not there is an arc from $j$ to $i$.
+
+
+
+## Dyadic independence assumption
+
+Recall that a dyad is a pair $(Y_{ij}, Y_{ji})$ that is the state of ties
+between actors $i$ and $j$. According to the Bernoulli assumption all
+$Y_{ij}$, for all $i$ and $j$, are independent from one another. In particular,
+$Y_{ij}$ is assumed independent from $Y_{ji}$, as mentioned in the previous
+section.
+
+The assumption of *dyadic independence* relaxes the assumption of independence
+*within dyads*. Consequently, $Y_{ij}$ and $Y_{ji}$ can be dependent.
+
+The reciprocity model [discussed previously](#reciprocity) is a
+dyad-independent model.  The presence or absence of a tie from $i$ to $j$
+affects the probability of tie from $j$ to $i$ because of the presence of the
+`mutual` term.  However, it does not affect the probabilities of any other ties
+in the network.
+
+There are also other important dyad-independent models:
+
+- Models that include node covariates. Sending or receiving ties might be
+  affected by a value of a nodal attribute, e.g., gender, age, and so on.
+- Models that include dyadic covariates. Ties may be more likely between nodes
+  that are similar to one another (e.g. same gender, smaller age difference) or
+  are in some way closer to one another, e.g., are separated by a smaller
+  geographical distance.
+
+We will explore both types of models when analyzing homophily in the subsequent
+sections.
+
+Most dyad-independent ERGMs simplify to Generalized Linear Models, which we will
+show in section [Dyad-independent ERGMs](#dyadic_independence).
+
+
+
+
+## Markov dependence
+
+Assumption of *Markov dependence* was proposed by @frank_strauss_1986 and
+further relaxes the dyadic independence assumption.
+
+Dyadic independence implies that all dyads are independent, including those
+involving the same actor, i.e.: 
+
+- $Y_{ij}$ is independent from $Y_{ik}$ (the same tie sender)
+- $Y_{ij}$ is independent from $Y_{kj}$ (the same tie receiver)
+
+Markov dependence allows dyads to be dependent if they share the same actor.
+
+
+
+## Other forms of dependence
 
 
 
@@ -563,7 +673,70 @@ plot(fit2b)
 
 
 
-# Examples of more complex models
+# Practical examples of ERG models       {#practical_examples}
+
+## Dyad independent models
+
+> TODO homofilia tutaj
+
+
+
+## Markov dependence models
+
+> TODO Modelowanie sieci między sędziami.
+
+```{r, judges_data}
+data(judge_net, package="isnar")
+judges <- intergraph::asNetwork(judge_net)
+plot(judges)
+```
+
+```{r, judges_descriptives}
+library(sna)
+# degree distribution
+table(degree(judges))
+```
+
+```{r, judges_model}
+f <- list(m0 = formula(judges ~ edges))
+f$m1 <- update(f$m0, . ~ . + kstar(2))
+f$m2 <- update(f$m0, . ~ . + kstar(2:3))
+f$m3 <- update(f$m2, . ~ . + triangle)
+models <- lapply(f, function(x) ergm(x, estimate="MPLE"))
+```
+
+```{r, sim2}
+s <- simulate(models$m2, nsim=200)
+stats <- as.data.frame(attr(s, "stats"))
+summary(stats)
+plot(stats)
+```
+
+```{r, remodel}
+m2a <- ergm(f$m2, constraint=~edges)
+g <- gof(m2a)
+layout(matrix(1:4, 2, 2, byrow=TRUE))
+plot(g)
+layout(matrix(1:9, 3, 3, byrow=TRUE))
+s <- simulate(m2a, nsim=9)
+for(n in s) plot(n)
+```
+
+With `triangle`.
+
+```{r, sim3}
+s <- simulate(models$m3, nsim=200)
+stats <- as.data.frame(attr(s, "stats"))
+summary(stats)
+```
+
+> TODO Sama degeneracja... Tylko kompletne sieci
+
+
+
+
+
+## Social circuit models
 
 Triadic closure only.
 

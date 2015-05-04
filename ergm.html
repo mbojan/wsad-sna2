@@ -81,7 +81,7 @@ img {
 <li><a href="#network-statistics"><span class="toc-section-number">2.1</span> Network statistics</a></li>
 <li><a href="#calculating-network-statistics"><span class="toc-section-number">2.2</span> Calculating network statistics</a></li>
 <li><a href="#fitting-ergms"><span class="toc-section-number">2.3</span> Fitting ERGMs</a><ul>
-<li><a href="#homogenous-bernoulli-model"><span class="toc-section-number">2.3.1</span> Homogenous Bernoulli model</a></li>
+<li><a href="#bernoulli"><span class="toc-section-number">2.3.1</span> Homogenous Bernoulli model</a></li>
 <li><a href="#are-ties-reciprocated"><span class="toc-section-number">2.3.2</span> Are ties reciprocated?</a></li>
 </ul></li>
 <li><a href="#goodness-of-fit"><span class="toc-section-number">2.4</span> Goodness of fit</a><ul>
@@ -89,7 +89,10 @@ img {
 <li><a href="#goodness-of-fit-through-simulation"><span class="toc-section-number">2.4.2</span> Goodness of fit through simulation</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#independence-assumptions"><span class="toc-section-number">3</span> (In)dependence assumptions</a></li>
+<li><a href="#independence-assumptions"><span class="toc-section-number">3</span> (In)dependence assumptions</a><ul>
+<li><a href="#bernoulli-assumption"><span class="toc-section-number">3.1</span> Bernoulli assumption</a></li>
+<li><a href="#dyadic-independence-assumption"><span class="toc-section-number">3.2</span> Dyadic independence assumption</a></li>
+</ul></li>
 <li><a href="#dyadic_independence"><span class="toc-section-number">4</span> Dyad-independent ERGMs</a><ul>
 <li><a href="#gender-homophily-example"><span class="toc-section-number">4.1</span> Gender homophily example</a></li>
 </ul></li>
@@ -105,20 +108,26 @@ img {
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>This tutorial supplements the topics covered on WSAD Summer School workshop “Introduction Statistical Social Network Analysis”. The workshop presented how Exponential Random Graph Models (ERGMs) can be fit using program PNet <span class="citation">(Wang, Robins, and Pattison 2009)</span>. Here we provide examples how ERGMs can be simulated and fitted using <code>statnet</code> suite of R packages for network analysis <span class="citation">(Handcock et al. 2003)</span>.</p>
-<p>In this tutorial we will use <code>network</code> objects from <code>statnet</code> suite of packages instead of <code>igraph</code> objects. In principle, you can use both packages at the same time. However, we recommend to use only one at a time to avoid function name conflicts.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> You can easily convert <code>igraph</code> objects to <code>network</code> objects (or vice versa) using <code>asIgraph</code> and <code>asNetwork</code> functions from <code>intergraph</code> package.</p>
+<p>In this tutorial we will use network data in the form of objects of class <code>network</code> instead of objects of class <code>igraph</code>. In principle, you can use both packages at the same time. However, we recommend to use only one at a time to avoid function name conflicts.<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> You can easily convert <code>igraph</code> objects to <code>network</code> objects (or vice versa) using <code>asIgraph</code> and <code>asNetwork</code> functions from <code>intergraph</code> package.</p>
 </div>
 <div id="exponential-random-graph-models-in-a-nutshell" class="section level1">
 <h1><span class="header-section-number">2</span> Exponential Random Graph Models in a nutshell</h1>
-<p>ERG models, as they are currently known, stem from the work by <span class="citation">Frank and Strauss (1986)</span> and were further developed by, among others, <span class="citation">Frank (1991)</span>, <span class="citation">Wasserman and Pattison (1996)</span>, <span class="citation">Pattison and Robins (2002)</span>, <span class="citation">Snijders et al. (2006)</span>]. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERGM is provided by <span class="citation">Lusher, Koskinen, and Robins (2012)</span> and <span class="citation">Robins et al. (2007)</span>.</p>
+<p>ERG models, as they are currently known, stem from the work by <span class="citation">Holland and Leinhardt (1976)</span> and <span class="citation">Frank and Strauss (1986)</span>, and were further developed by, among others, <span class="citation">Frank (1991)</span>, <span class="citation">Wasserman and Pattison (1996)</span>, <span class="citation">Pattison and Robins (2002)</span>, <span class="citation">Snijders et al. (2006)</span>. ERGMs have established their position as one of the most important tools in social networks analysis. Comprehensive description of ERG models is provided in the book by <span class="citation">Lusher, Koskinen, and Robins (2012)</span>.</p>
 <p>Exponential Random Graph Models are a family of statistical models for understanding processes that shape the global structure of a network. This goal is achieved by assigning probability to networks according to network statistics – summary measures describing selected features of the network.</p>
-<p>Formally, let <span class="math">\(A\)</span> represent a network in the form of an adjacency matrix of given size <span class="math">\(n\)</span>. Lety <span class="math">\(\mathcal{A}\)</span> be a collection of all possible networks of size <span class="math">\(n\)</span> that can be constructed. An ERG model postulates that a probability distribution defined over all networks in <span class="math">\(\mathcal{A}\)</span> can be represented as:</p>
+<p>Formally, let <span class="math">\(A\)</span> represent a network in the form of an adjacency matrix of given size <span class="math">\(n\)</span>. Let <span class="math">\(\mathcal{A}\)</span> be a collection of all possible networks of size <span class="math">\(n\)</span> that can be constructed. An ERG model postulates that a probability distribution defined over all networks in <span class="math">\(\mathcal{A}\)</span> can be represented as:</p>
 <p><span class="math">\[
 P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a \in \mathcal{A},
 \]</span></p>
-<p>where <span class="math">\(g(a)\)</span> is a vector of network statistics, <span class="math">\(\theta\)</span> is a vector of weights associated with these statistics, and <span class="math">\(\kappa(\theta, \mathcal{A})\)</span> is a normalizing constant ensuring that all the probabilities sum-up to 1.</p>
+<p>where</p>
+<ul>
+<li><span class="math">\(g(a)\)</span> is a vector of network statistics,</li>
+<li><span class="math">\(\theta\)</span> is a vector of weights associated with these statistics,</li>
+<li><span class="math">\(\kappa(\theta, \mathcal{A})\)</span> is a normalizing constant ensuring that all the probabilities sum-up to 1.</li>
+</ul>
 <p><span class="math">\[
 \kappa(\theta, \mathcal{A}) = \sum_{a \in \mathcal{A}}\exp{(\theta^Tg(a))}.
 \]</span></p>
+<p>In words, the probability that we observe a particular network <span class="math">\(a\)</span> out of the set <span class="math">\(\mathcal{A}\)</span> of all possible networks of size <span class="math">\(n\)</span> is a function of chosen network statistics <span class="math">\(g(a)\)</span>, associated parameters <span class="math">\(\theta\)</span>, and the normalizing constant <span class="math">\(\kappa\)</span>.</p>
 <p>The model can also be written as a model for conditional log-odds of tie existence between a pair of nodes. This makes it a little bit similar to a logistic regression model (see section <a href="#dyadic_independence">Dyadic independence ERGMs</a> for more details):</p>
 <p><span class="math">\[
 \operatorname{logit}{ (Y_{ij} = 1 | y^c_{ij} )  = \theta \delta( y_{ij} ) }
@@ -131,6 +140,7 @@ P_\theta(A=a)=\frac{\exp{(\theta^Tg(a))}}{\kappa(\theta, \mathcal{A})}, \qquad a
 <li><span class="math">\(\delta(y_{ij})\)</span> is a vector of <em>change statistics</em> for each term in the model.</li>
 <li><span class="math">\(\theta\)</span> is a vector of parameters, as before.</li>
 </ul>
+<p>In words, the log-odds that actors <span class="math">\(i\)</span> and <span class="math">\(j\)</span> are connected with a tie, given the particular configuration of all the remaining ties, is a function of change statistics for each term in the model.</p>
 <p>The change statistics capture how a particular term <span class="math">\(g(y)\)</span> changes if the <span class="math">\(y_{ij}\)</span> tie is formed or not:</p>
 <p><span class="math">\[
 \delta( y_{ij} ) = g( y^{+}_{ij} ) - g( y^{-}_{ij} )
@@ -171,7 +181,8 @@ T(a) = \sum_{1\leq i &lt; j &lt; h\leq n}a_{ij}a_{ih}a_{jh}.
 <p>As an example, let us take the classroom network we used in other tutorials. We need it now as a <code>network</code> object:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load data</span>
 <span class="kw">data</span>(IBE121, <span class="dt">package=</span><span class="st">&quot;isnar&quot;</span>)
-<span class="co"># select select the &quot;would like to play with&quot; network</span>
+<span class="co"># select the &quot;would like to play with&quot; network</span>
+<span class="co"># by dropping other edges</span>
 playnet &lt;-<span class="st"> </span>igraph::<span class="kw">delete.edges</span>(IBE121, igraph::<span class="kw">E</span>(IBE121)[question !=<span class="st"> &quot;play&quot;</span>])
 <span class="co"># convert to 'network' object</span>
 ibe &lt;-<span class="st"> </span>intergraph::<span class="kw">asNetwork</span>(playnet)
@@ -211,7 +222,7 @@ ibe</code></pre>
 <div id="fitting-ergms" class="section level2">
 <h2><span class="header-section-number">2.3</span> Fitting ERGMs</h2>
 <p>Before we go into more complex examples let us illustrate how ERG models are fit using two very simple models.</p>
-<div id="homogenous-bernoulli-model" class="section level3">
+<div id="bernoulli" class="section level3">
 <h3><span class="header-section-number">2.3.1</span> Homogenous Bernoulli model</h3>
 <p>First let’s estimate the simplest possible model. The model assumes that the network is purely random: every tie in the network appears with the same unknown probability <span class="math">\(p\)</span>. It is also known as <em>homogeneous Bernoulli model</em> as each tie is sampled independently with a given probability <span class="math">\(p\)</span>, so is a “Bernoulli trial”. Appropriate ERGM formulation is</p>
 <pre class="sourceCode r"><code class="sourceCode r">model.ibe0 &lt;-<span class="st"> </span><span class="kw">ergm</span>(ibe ~<span class="st"> </span>edges)
@@ -235,9 +246,10 @@ ibe</code></pre>
 ##  Residual Deviance: 901.1  on 649  degrees of freedom
 ##  
 ## AIC: 903.1    BIC: 907.6    (Smaller is better.)</code></pre>
-<p>The <code>ibe</code> network has 26 nodes. This means that the number of all possible ties in this network is equal to <span class="math">\(26 \times 25 = 650\)</span>. Odds for tie existence are then equal to <span class="math">\(88 / (650 - 88) = 0.156583\)</span>. If we calculate log-odds we will get <span class="math">\(log(0.156583) = - 1.854165\)</span> which is exactly the value of the <code>edges</code> term in the model above. This corresponds to a constant tie probability of 0.1353846.</p>
+<p>The <code>ibe</code> network has 26 nodes. This means that the number of all possible ties in this network is equal to <span class="math">\(26 \times 25 = 650\)</span>. Odds for tie existence are then equal to <span class="math">\(88 / (650 - 88) = 0.156583\)</span>. If we calculate log-odds we will get <span class="math">\(log(0.156583) = - 1.854165\)</span> which is exactly the value of the <code>edges</code> term in the model above. This corresponds to a constant tie probability of 0.1353846. This, in turn, is obviously equal to network density:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">network.density</span>(ibe)</code></pre>
 <pre><code>## [1] 0.1353846</code></pre>
+<p>As network density is usually not of our primary research interest, the <code>edges</code> term is usually included in models and interpreted in a similar manner like the intercept in linear regression.</p>
 </div>
 <div id="are-ties-reciprocated" class="section level3">
 <h3><span class="header-section-number">2.3.2</span> Are ties reciprocated?</h3>
@@ -322,14 +334,27 @@ ibe</code></pre>
 </div>
 <div id="independence-assumptions" class="section level1">
 <h1><span class="header-section-number">3</span> (In)dependence assumptions</h1>
-<p>In the previous section we shown two very simple ERG models.</p>
-<p>Assumptions about forms of dependence:</p>
+<p>You are probably familiar with Ordinary Least Squares (OLS) regression:</p>
+<p><span class="math">\[
+Y_i = \alpha + \beta X_i + \varepsilon_i
+\]</span></p>
+<p>If you recall, on of the assumption of OLS is that observations are independent, which translates to the requirement <span class="math">\(\operatorname{Cor}{(\varepsilon_i, \varepsilon_j)} = 0\)</span>. In other words, that the correlation between errors for any two observations is 0. Some generalizations of OLS regression go in the direction of relaxing this assumption, by allowing some observations to be correlated. In particular, multilevel models <span class="citation">(e.g. Snijders and Bosker 2011)</span> can be considered such a generalization as, while we assume zero correlation between observations belonging to different groups, observations belonging to the same group can be correlated.</p>
+<p>Part of the challenge in modeling the structure of social networks is in dependence. Social networks represent relationships between actors, which make these actors and their actions dependent in some respect. In particular, the process through which they form relations with others may be dependent. Consequently, in social networks, in principle, every tie may depend on other ties in the network. To approach this “Hell of Dependence” in a tractable way, proposed models can be characterized with <em>independence assumptions</em> that they pose. These statements specify what kind of independence, and between which ties, is assumed behind a given model. Much like in OLS regression, a lot of new developments in statistical analysis of social networks have been made by postulating new assumptions that are a relaxation of previously formulated ones.</p>
+<p>In this section we review the most important ones:</p>
 <ol style="list-style-type: decimal">
-<li>Bernoulli graphs</li>
-<li>Dyadic independence</li>
-<li>Markov Graphs</li>
-<li></li>
+<li>The Bernoulli assumption.</li>
+<li>Dyadic independence assumption.</li>
+<li>Markov dependence assumption.</li>
+<li>Other forms of dependence.</li>
 </ol>
+<p>In the previous section we shown two simple ERG models: the homogeneous Bernoulli model and the reciprocity model.</p>
+<div id="bernoulli-assumption" class="section level2">
+<h2><span class="header-section-number">3.1</span> Bernoulli assumption</h2>
+<p>The Bernoulli assumption is the simplest and the strongest. We have already discussed in the <a href="#bernoulli">section above</a>. According to this model every <em>tie</em> is assumed to be a realization of an independent Bernoulli Trial, a flip of a coin. The probability that an edge between <span class="math">\(i\)</span> and <span class="math">\(j\)</span> exist does not depend in any way on the structure of the remaining ties of the network. In particular, it does not depend on how many ties <span class="math">\(i\)</span> and <span class="math">\(j\)</span> already have, whether they have any network neighbors in common, and so on.</p>
+</div>
+<div id="dyadic-independence-assumption" class="section level2">
+<h2><span class="header-section-number">3.2</span> Dyadic independence assumption</h2>
+</div>
 </div>
 <div id="dyadic_independence" class="section level1">
 <h1><span class="header-section-number">4</span> Dyad-independent ERGMs</h1>
@@ -666,10 +691,11 @@ vim: wrap:linebreak:spell:spelllang=en_us
 <p>Frank, Ove. 1991. “Statistical Analysis of Change in Networks.” <em>Statistica Neerlandica</em> 45 (3): 283–93.</p>
 <p>Frank, Ove, and David Strauss. 1986. “Markov Graphs.” <em>Journal of the American Statistical Association</em> 81 (395): 832–42.</p>
 <p>Handcock, Mark S., David R. Hunter, Carter T. Butts, Steven M. Goodreau, and Martina Morris. 2003. <em>Statnet: Software Tools for the Statistical Modeling of Network Data</em>. Seattle, WA. <a href="http://statnetproject.org" class="uri">http://statnetproject.org</a>.</p>
+<p>Holland, Paul W., and Samuel Leinhardt. 1976. “Local Structure in Social Networks.” In <em>Sociological Methodology: 1976</em>, edited by D. Heise, 1–45. San Francisco: Jossey-Bass.</p>
 <p>Lusher, Dean, Johan Koskinen, and Garry Robins. 2012. <em>Exponential Random Graph Models for Social Networks: Theory, Methods, and Applications</em>. Structural Analysis in the Social Sciences. Cambridge University Press.</p>
 <p>McPherson, Miller, Lynn Smith-Lovin, and James M Cook. 2001. “Birds of a Feather: Homophily in Social Networks.” <em>Annual Review of Sociology</em>. JSTOR, 415–44.</p>
 <p>Pattison, Philippa, and Garry Robins. 2002. “Neighborhood–Based Models for Social Networks.” <em>Sociological Methodology</em> 32 (1): 301–37.</p>
-<p>Robins, Garry, Pip Pattison, Yuval Kalish, and Dean Lusher. 2007. “An Introduction to Exponential Random Graph (P*) Models for Social Networks.” <em>Social Networks</em> 29 (2): 173–91.</p>
+<p>Snijders, Tom A. B., and Roel Bosker. 2011. <em>Multilevel Analysis</em>. Springer.</p>
 <p>Snijders, Tom A. B., Philippa E. Pattison, Garry L. Robins, and Mark S. Handcock. 2006. “New Specifications for Exponential Random Graph Models.” <em>Sociological Methodology</em> 36 (1): 99–153.</p>
 <p>Wang, Peng, Garry Robins, and Philippa Pattison. 2009. <em>PNet: Program for the Simulation and Estimation of Exponential Random Graph (P*) Models. User Manual</em>. Melbourne, Australia: Department of Psychology. School of Behavioral Science. University of Melbourne. <a href="http://sna.unimelb.edu.au/PNet" class="uri">http://sna.unimelb.edu.au/PNet</a>.</p>
 <p>Wasserman, Stanley, and Philippa Pattison. 1996. “Logit Models and Logistic Regressions for Social Networks: I. an Introduction to Markov Graphs and P*.” <em>Psychometrika</em> 61 (3): 401–25.</p>

@@ -1,10 +1,92 @@
 # Small-world phenomenon
 
-High clustering, short geodesics.
 
-Czy w danej sieci występuję fenomen małych światów?
+## Introduction - global properties of networks
 
-Źródła:
+In recent years, an increasing part of the study of social networks are conducted on very large networks, i.e. networks consisting of thousands or millions of nodes. This is primarily due to the significant increase in opportunities to collect data on large networks, resulting from the development of digital technologies, as well as telecommunications networks and other technologies to collect information about the behavior of people and relationships and communication between them.
 
-* Watts & Strogatz
+Many especially large networks has some special properties. Those global properties of network structure are important because of the impact on the dynamics of processes that are taking place within the network. 
 
+Firstly, it is worth noting that such large networks are generally very sparse, i.e., the density of the network is low. Most of the nodes is not adjacent to each other. On the other hand, some of the large networks are characterized by high local density. Two people who know each other usually have many mutual friends. In other words, the probability that two people who have a common friend also know each other is very large. In contrast, the two individuals randomly selected from a large population will very rarely know each other. Such networks, even though they have little global density, have high local clustering. 
+
+The average node is connected only with a small fraction of other nodes as compared to how many nodes are in the network. However surprisingly, the average distance between the nodes turns out to be very small. The first illustration of occurrence of short paths were experiments conducted in the 1960s by Stanley Milgram (Milgram 1967 Travers in 1969, Korte 1970). These studies showed that the average distances between different persons in the United States through a chain of acquaintances are very short.
+
+An ingenious study conducted by Milgram was based on letters that were passed through a chain of acquaintances. People chosen for the study received a letter with a name, surname and place of residence of the addressee, who lived on the other side of the US. They were asked to pass a letter to one of their acquaintances, who had to pass it to the next person, so that the letter reached the addressee in the fewest number of steps. At the same time, each person who received and forwarded the letter were invited to send information to researchers about when and from whom she received a letter and to whom and when it was passed. As a result, it was possible to track how messages were passed. To the surprise of many, the letters sent in this way reached its destination very quickly - in 6 steps on average. The result of Milgram's experiments was surprising, but probably every one of us experienced that "the world is small", when we discovered to have mutual friends with people previously unknown and in no way related to us. 
+
+Properties of the various networks structure have been studied by mathematicians for a long time. One of the simplest network models are random graphs, i.e. networks in which the probability of a direct link between each pair of nodes is the same. Such graphs have many interesting characteristics. As was shown by Solomonoff (1951) and independently by Erdős  and Rényi (1959), in random graphs in which there are more links than nodes, most of the nodes are connected (indirectly) to form one large component. A connected component is a maximal subgraph in which any two nodes are connected to each other by paths. Moreover, the size of the largest component, is highly dependent on the number of connections held by the nodes. 
+
+Another property of random graphs is that the distances between the nodes belonging to the largest component are small (Erdős, Rényi 1959). This is true even if the graph is large, and the number of connections possessed by each node is much lower than the total number of nodes in the graph. It turns out, that the average length of paths connecting nodes in a random network is $log(N)/log(k)$, where $N$ is the number nodes, and $k$ the average number of links owned by one node. This means that the paths in the random graphs are very short.
+
+However, social networks are very far from being random. Large local clustering is a good proof of that fact. Circles of friends of two people who know each other overlap to a very large extent and random graphs do not have this property. In other words there is large transitivity in social networks. 
+
+A model of network with both a high local clustering and short paths between the nodes has been proposed by Watts and Strogatz (1998). They created a class of networks, which are a combination of regular and random graphs. The network is constructed from highly structured graph, for example $N$ nodes distributed around the circle, each with $k$ connection with the nearest nodes. Then, with probability $p$ the other end of each connection is assigning  to another randomly selected node. Watts-Strogatz model thus consists of close connections with high local density for small $p$ and with a fraction $p$ of random connections. The $p$ takes values from the interval $[0, 1]$ and determines the degree of disorder of the network - from a regular grid, when $p = 0$ to a completely random system for $p = 1$. Watts and Strogatz had shown that even for small values of $p$, when a network has high local clustering, the average distance between nodes is short. Such graphs are called a small world networks.
+
+A graph is considered small-world, if its average local clustering coefficient $\bar{C}$ is significantly higher than a random graph constructed on the same set of nodes, and if the graph has approximately the same mean-shortest path length as its corresponding random graph. In the next section, we show an example how to verify in $R$ if a given graph is a  small-world network.
+
+## Example - global properties of coauthoship network
+
+We use ```coauthorship``` network from ```isnar``` R package. 
+
+```{r data}
+library("igraph")
+library("isnar")
+# Load data on co-authorship
+data(coauthorship)
+# number of nodes
+N <- vcount(coauthorship)
+# average number of edges per node
+k <- ecount(coauthorship)/N
+```
+
+### Connected components of a graph
+
+In the first step, it is worth checking whether the network is connected, and if not, how many components there are, and what is the size of the largest one.
+
+```{r connectivity, results="hide"}
+is.connected(coauthorship, mode="strong")
+```
+
+returns value ```FALSE``` therefore we should divide a network into strongly connected components and compute the number of components. 
+
+```{r clusters, results='hide'}
+coaut.Clusters <- clusters(coauthorship, mode="strong")
+coaut.Clusters$no
+```
+
+Size of the largest components:
+
+```{r size, results='hide'}
+max(coaut.Clusters$csize)
+```
+
+Then we choose a subgraph of the entire network, whith only the nodes from the largest component.
+
+```{r largestComponent, results='hide'}
+coaut.LargestComponent <- subgraph(coauthorship, coaut.Clusters$membership==1)
+```
+
+
+### Local density
+
+We use ```transitivity``` function with ```type="local"``` to compute the average of the local clustering coefficients.
+
+```{r local density, results='hide'}
+mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)
+```
+
+Now we can compare the obtained value ```r mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)``` with the expected value of the average local clustering coefficient $\bar{C}$ for a random graph constructed on the same set of nodes. The empirically observed value is significantly higher than $k/N$ expected for a corresponding random graph.
+
+### Shortest paths between nodes
+
+In order to compute the average distance between nodes in the largest component one can use ```average.path.length``` function from ```igraph``` package. 
+
+```{r shortPaths, results='hide'}
+average.path.length(coaut.LargestComponent)
+```
+
+The average short paths for the largest conected component of coauthorship network is around $10.725$. 
+
+We can also compute the diameter $d$ of a network, that is the greatest distance between any pair of nodes.
+```{r diameter}
+max(shortest.paths(coaut.LargestComponent))
+```

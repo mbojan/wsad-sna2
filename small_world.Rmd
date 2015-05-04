@@ -84,9 +84,60 @@ In order to compute the average distance between nodes in the largest component 
 average.path.length(coaut.LargestComponent)
 ```
 
-The average short paths for the largest conected component of coauthorship network is around $10.725$. 
+The average short paths for the largest conected component of coauthorship network is around ```r average.path.length(coaut.LargestComponent)```. Whereas the average geodesics for a corresponding random graph equals $log(N)/log(k)$ that is ```r log(N)/log(k)``` in our example.
 
 We can also compute the diameter $d$ of a network, that is the greatest distance between any pair of nodes.
-```{r diameter}
+```{r diameter, results='hide'}
 max(shortest.paths(coaut.LargestComponent))
 ```
+
+
+
+## Degree distribution
+
+
+
+
+## Simulations - generating a network with a given properties
+
+Sometimes one needs the ability to generate network with the given properties. The ```igraph``` package allows you to create a network according to various theoretical models. In this section we show three basic ones.
+
+### Random networks
+
+```{r gen.ER, results='hide', eval=FALSE}
+erdos.renyi.game(n, p.or.m, type=c("gnp", "gnm"),directed = FALSE, loops = FALSE, ...)
+```
+
+where:
+
+```n``` is the number of nodes in the network.
+```p``` is the probability for drawing an edge between two arbitrary vertices (G(n,p) graph)
+```m```  is the number of edges in the graph (for G(n,m) graphs). The ```type``` of the random graph can be either gnp (G(n,p) graph) or gnm (G(n,m) graph) depending on which value ```p``` or ```m``` was given. One can also specify if the graph will be ```directed``` and whether to add ```loops``` or no (both parameters with defaults set to FALSE).
+
+### Small-world networks 
+
+Generate a graph according to the Watts-Strogatz network model.
+
+```{r gen.WS, results='hide', eval=FALSE}
+watts.strogatz.game(dim, size, nei, p, loops = FALSE, multiple = FALSE)
+```
+
+where:
+
+```dim``` is the number of dimensions of the starting lattice. ```size``` is the size of the lattice along each dimension. ```nei``` the neighborhood within which the vertices of the lattice will be connected. ```p``` is the rewiring probability (value between zero and one).
+One can also decide if ```loops``` and ```multiple``` edges are allowed in the generated graph.
+
+### Scale-free network
+
+```{r gen.BA, results='hide', eval=FALSE}
+barabasi.game(n, power = 1, m = NULL, out.dist = NULL, out.seq = NULL, 
+    out.pref = FALSE, zero.appeal = 1, directed = TRUE,
+    algorithm = c("psumtree", "psumtree-multiple", "bag"),
+    start.graph = NULL)
+```
+
+
+
+## Implications
+
+These global properties of networks are important because they have impact on processes that take place within the network structure and in relations between the nodes.

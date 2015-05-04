@@ -1,7 +1,9 @@
-# Small-world phenomenon
+---
+title: Small-world phenomenon
+---
 
 
-## Introduction - global properties of networks
+# Introduction - global properties of networks
 
 In recent years, an increasing part of the study of social networks are conducted on very large networks, i.e. networks consisting of thousands or millions of nodes. This is primarily due to the significant increase in opportunities to collect data on large networks, resulting from the development of digital technologies, as well as telecommunications networks and other technologies to collect information about the behavior of people and relationships and communication between them.
 
@@ -23,7 +25,7 @@ A model of network with both a high local clustering and short paths between the
 
 A graph is considered small-world, if its average local clustering coefficient $\bar{C}$ is significantly higher than a random graph constructed on the same set of nodes, and if the graph has approximately the same mean-shortest path length as its corresponding random graph. In the next section, we show an example how to verify in $R$ if a given graph is a  small-world network.
 
-## Example - global properties of coauthoship network
+# Example - global properties of coauthoship network
 
 We use ```coauthorship``` network from ```isnar``` R package. 
 
@@ -38,7 +40,7 @@ N <- vcount(coauthorship)
 k <- ecount(coauthorship)/N
 ```
 
-### Connected components of a graph
+## Connected components of a graph
 
 In the first step, it is worth checking whether the network is connected, and if not, how many components there are, and what is the size of the largest one.
 
@@ -66,7 +68,7 @@ coaut.LargestComponent <- subgraph(coauthorship, coaut.Clusters$membership==1)
 ```
 
 
-### Local density
+## Local density
 
 We use ```transitivity``` function with ```type="local"``` to compute the average of the local clustering coefficients.
 
@@ -76,7 +78,7 @@ mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)
 
 Now we can compare the obtained value ```r mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)``` with the expected value of the average local clustering coefficient $\bar{C}$ for a random graph constructed on the same set of nodes. The empirically observed value is significantly higher than $k/N$ expected for a corresponding random graph.
 
-### Shortest paths between nodes
+## Shortest paths between nodes
 
 In order to compute the average distance between nodes in the largest component one can use ```average.path.length``` function from ```igraph``` package. 
 
@@ -93,16 +95,16 @@ max(shortest.paths(coaut.LargestComponent))
 
 
 
-## Degree distribution
+# Degree distribution
 
 
 
 
-## Simulations - generating a network with a given properties
+# Simulations - generating a network with a given properties
 
 Sometimes one needs the ability to generate network with the given properties. The ```igraph``` package allows you to create a network according to various theoretical models. In this section we show three basic ones.
 
-### Random networks
+## Random networks
 
 ```{r gen.ER, results='hide', eval=FALSE}
 erdos.renyi.game(n, p.or.m, type=c("gnp", "gnm"),directed = FALSE, loops = FALSE, ...)
@@ -114,7 +116,7 @@ where:
 ```p``` is the probability for drawing an edge between two arbitrary vertices (G(n,p) graph)
 ```m```  is the number of edges in the graph (for G(n,m) graphs). The ```type``` of the random graph can be either gnp (G(n,p) graph) or gnm (G(n,m) graph) depending on which value ```p``` or ```m``` was given. One can also specify if the graph will be ```directed``` and whether to add ```loops``` or no (both parameters with defaults set to FALSE).
 
-### Small-world networks 
+## Small-world networks 
 
 Generate a graph according to the Watts-Strogatz network model.
 
@@ -127,7 +129,7 @@ where:
 ```dim``` is the number of dimensions of the starting lattice. ```size``` is the size of the lattice along each dimension. ```nei``` the neighborhood within which the vertices of the lattice will be connected. ```p``` is the rewiring probability (value between zero and one).
 One can also decide if ```loops``` and ```multiple``` edges are allowed in the generated graph.
 
-### Scale-free network
+## Scale-free network
 
 ```{r gen.BA, results='hide', eval=FALSE}
 barabasi.game(n, power = 1, m = NULL, out.dist = NULL, out.seq = NULL, 
@@ -138,6 +140,6 @@ barabasi.game(n, power = 1, m = NULL, out.dist = NULL, out.seq = NULL,
 
 
 
-## Implications
+# Implications
 
 These global properties of networks are important because they have impact on processes that take place within the network structure and in relations between the nodes.

@@ -63,3 +63,10 @@ editall:
 .PHONY: clean
 clean:
 	rm -rf $(files:=.html) $(files:=.pdf)
+
+# IMPORTANT!
+# Do puszczenia po wygenerowaniu HTMLi z opcją w 'self_contained: false' w
+# pliku '_output.yaml'!
+.PHONY: proof
+proof:
+	htmlproof . --verbose --ext .html --alt-ignore /figure-html/

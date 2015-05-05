@@ -3,3 +3,4 @@ html_document:
   highlight: pygment
   toc: true
   pandoc_args: ["--number-sections"]
+  self_contained: true

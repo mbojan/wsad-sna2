@@ -1,4 +1,51 @@
-# Homophily and segregation
+---
+title: Homophily and segregation
+bibliography: references.bib
+---
+
+```{r, setup, echo=FALSE, results="hide", cache=FALSE}
+library(knitr)
+library(methods)
+set.seed(666)
+# options(warn=2)
+opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
+               cache=TRUE, dev="svg")
+
+.small_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=c(1, 1, 1, 3))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+.no_mar <- function(before, options, envir) {
+  # save current
+  op <- par(no.readonly=TRUE)
+  if(before) {
+    par(mar=rep(0.5, 4))
+  } else {
+    # restore
+    par(op)
+  }
+}
+
+.use_igraph <- function(before, options, envir) {
+  if(before) {
+    detach("package:network", force=TRUE)
+    library(igraph)
+  } else {
+    detach("package:igraph", force=TRUE)
+    library(network)
+  }
+}
+
+knit_hooks$set( small.mar = .small_mar, no.mar=.no_mar, use.igraph=.use_igraph)
+```
+
 
 
 Segregation and homophily as local and global characteristics of the network.

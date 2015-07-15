@@ -121,9 +121,9 @@ $$
 
 where:
 
-- $Y_{ij}$ is a variable capturing the state of a pair of actors $i$ and $j$, whether there is a tie or not.
-- $y_{ij}$ is a particular realization of that variable
-- $y^c_{ij}$ is the complement of $y_{ij}$. In other words all other dyads in the network apart from $(i, j)$.
+- $Y_{ij}$ is a binary variable capturing the state of a pair of actors $i$ and $j$, whether there is a tie ($Y_{ij}=1$) or not ($Y_{ij}=0$).
+- $y_{ij}$ is a particular realization of variable $Y_{ij}$.
+- $y^c_{ij}$ is the complement of $y_{ij}$, i.e. all other actor pairs in the network apart from $(i, j)$.
 - $\delta(y_{ij})$ is a vector of *change statistics* for each term in the model.
 - $\theta$ is a vector of parameters, as before.
 
@@ -138,8 +138,8 @@ $$
 \delta( y_{ij} ) = g( y^{+}_{ij} ) - g( y^{-}_{ij} )
 $$
 
-where $y^{+}_{ij}$ represents $y^c$ with $y_{ij}$ set to 1, and $y^{+}_{ij}$
-represents $y^c$ with $y_{ij}$ set to 0.
+where $y^{+}_{ij}$ represents $y^c$ and $y_{ij}$ set to 1, while $y^{-}_{ij}$
+represents $y^c$ and $y_{ij}$ set to 0.
 
 As a consequence, model parameters $\theta$ can be interpreted as log-odds of a
 presence of a network tie conditional on the state of all other dyads in the
@@ -195,7 +195,7 @@ $$
 $$
 
 See `?ergm.terms` for a complete list of network statistics implemented in
-`ergm`.
+`ergm` or view it on the www.rdocumentation.org [here](http://www.rdocumentation.org/packages/ergm/functions/ergm-terms).
 
 
 
@@ -276,9 +276,9 @@ The model consists of a single term `edges`: number of edges in the network.
 
 The `ibe` network has 26 nodes. This means that the number of all possible ties
 in this network is equal to $26 \times 25 = 650$. Odds for tie existence are
-then equal to $88 / (650 - 88) = 0.156583$.  If we calculate log-odds we will
-get $log(0.156583) = - 1.854165$ which is exactly the value of the `edges` term
-in the model above. This corresponds to a constant tie probability of `r 88/650`.
+then equal to $88 / (650 - 88) = `r (o <- 88/(650-88))`$.  If we calculate log-odds we will
+get $\log (0.156583) = `r log(o)`$ which is exactly the value of the `edges` term
+in the model above. This corresponds to a constant tie probability of $88/650 = `r 88/650`$.
 This, in turn, is obviously equal to network density:
 
 ```{r, ibe_density}

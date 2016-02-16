@@ -1,4 +1,4 @@
-# pliki
+# Pliki z częściami
 files:=cohesion ergm friendship_paradox local_neighborhoods segregation small_world Centrality
 
 pandoc=pandoc
@@ -7,7 +7,14 @@ pandoc_flags=-s
 # Jak kompilować?
 # 1 = rmarkdown::render()
 # 0 = knitr::knit() + pandoc
+ifeq ($(use_rmarkdown),)
 use_rmarkdown=1
+endif
+
+# Format docelowy
+ifeq ($(output_format),)
+	output_format=html_document
+endif
 
 
 .PHONY: default
@@ -23,7 +30,7 @@ endef
 
 
 define run-rmarkdown
-Rscript -e 'rmarkdown::render("$<")'
+Rscript -e 'rmarkdown::render("$<", output_format="$(output_format)")'
 endef
 
 
@@ -32,7 +39,9 @@ endef
 
 # Jak kompilować
 ifeq ($(use_rmarkdown),1) 
-%.html: %.Rmd
+$(files:=.pdf): output_format=pdf_document
+
+%.html %.pdf: %.Rmd
 	$(run-rmarkdown)
 else
 $(files:=.html) $(files:=.pdf): pandoc_flags+=--bibliography=references.bib

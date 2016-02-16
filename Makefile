@@ -1,8 +1,8 @@
 # Pliki z częściami
-files:=cohesion ergm friendship_paradox local_neighborhoods segregation small_world Centrality
+files=local_neighborhoods Centrality friendship_paradox small_world segregation cohesion ergm
 
 pandoc=pandoc
-pandoc_flags=-s
+pandoc_flags=
 
 # Jak kompilować?
 # 1 = rmarkdown::render()
@@ -25,7 +25,7 @@ default: html
 # Recipes
 
 define run-pandoc
-$(pandoc) $(pandoc_flags) $< -o $@
+$(pandoc) $(pandoc_flags) $^ -o $@
 endef
 
 
@@ -44,7 +44,7 @@ $(files:=.pdf): output_format=pdf_document
 %.html %.pdf: %.Rmd
 	$(run-rmarkdown)
 else
-$(files:=.html) $(files:=.pdf): pandoc_flags+=--bibliography=references.bib
+$(files:=.html) $(files:=.pdf): pandoc_flags+=-s -S --bibliography=references.bib
 
 %.md: %.Rmd
 	Rscript -e "knitr::knit('$<', output='$@')"
@@ -54,6 +54,16 @@ $(files:=.html) $(files:=.pdf): pandoc_flags+=--bibliography=references.bib
 endif
 
 $(files:=.html) $(files:=.pdf): references.bib _output.yaml
+
+
+
+# Wersja książkowa
+
+all.html all.pdf: pandoc_flags=-s -S --number-sections --bibliography=references.bib
+
+
+all.html all.pdf: local_neighborhoods.md Centrality.md
+	$(run-pandoc)
 
 
 #============================================================================ 

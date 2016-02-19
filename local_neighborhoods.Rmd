@@ -2,9 +2,14 @@
 title: Ego-networks and local neighborhoods
 bibliography: references.bib
 ---
+
 ```{r, setup, echo=FALSE}
 library(knitr)
-opts_chunk$set( fig.width=12, fig.height=8 )
+opts_chunk$set(
+               fig.width=12, 
+               fig.height=8,
+               cache=TRUE
+               )
 ```
 
 # Introduction 

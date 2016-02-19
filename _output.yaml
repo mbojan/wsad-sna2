@@ -4,3 +4,12 @@ html_document:
   toc: true
   pandoc_args: ["--number-sections"]
   self_contained: true
+pdf_document:
+  number_sections: true
+  toc: true
+  template: template-pdf.tex
+  pandoc_args: [
+    "--variable", "graphics=yes",
+    "--variable", "geometry:margin=2cm",
+    "--variable", "fontfamily:mathpazo"
+  ]

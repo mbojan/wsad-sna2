@@ -7,7 +7,7 @@ html_document:
 pdf_document:
   number_sections: true
   toc: true
-  template: template-pdf.tex
+  template: template-wsad.tex
   pandoc_args: [
     "--variable", "graphics=yes",
     "--variable", "geometry:margin=2cm",

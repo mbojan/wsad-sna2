@@ -77,7 +77,7 @@ plot(g_d, vertex.color="lightskyblue", vertex.label.color="black",
 par(op)
 ```
 
-The simplest function is `neighbors`, which returns neighbors of a given vertex (without that vertex). For directed graph we could specify what type of neighborhood we want. Note that in last neighborhoods vertex 3 occurs twice, because an edge between 3 and 4 is reciprocated.
+The simplest function is `neighbors`, which returns neighbors of a given vertex (without that vertex). For directed graph we could specify what type of neighborhood we want. Note that in last neighborhoods vertex 3 occurs twice, because the edge between 3 and 4 is reciprocated.
 ```{r}
 neighbors(g, 5)
 neighbors(g_d, 4, mode = "in")

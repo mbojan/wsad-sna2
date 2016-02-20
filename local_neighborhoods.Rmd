@@ -6,9 +6,9 @@ bibliography: references.bib
 ```{r setup, echo=FALSE}
 library(knitr)
 opts_chunk$set(
-  fig.width=12, 
-  fig.height=8,
-  cache=TRUE
+  fig.retina=NULL,
+  fig.align="center",
+  cache=FALSE
 )
 set.seed(123)
 ```
@@ -38,7 +38,7 @@ library(isnar)
 ```
 
 
-```{r neighborhood_defined, echo = FALSE, fig.align="center"}
+```{r neighborhood_defined, echo = FALSE}
 g <- random.graph.game(20, 0.2, directed = FALSE)
 g$layout <- layout.auto(g)
 V(g)$color <- "grey"
@@ -46,27 +46,27 @@ V(g)$size <- 8
 E(g)$color <- "grey"
 neighborhoods <- lapply(0:4, function(x) neighborhood(g, x, nodes = 15)[[1]])
 titles <- c("Ego (0-step neighborhood)",
-            "Ego-network, (1-step) neighborhood",
+            "1-step neighborhood",
             "2-step neighborhood",
             "3-step neighborhood",
-            "4-step neighborhood (full network)")
+            "4-step neighborhood")
 
 layout(matrix(1:6, 2, 3, byrow=TRUE))
-op <- par(  mar = c(1,2,1,2) )
+op <- par( mar = c(0.1, 0.1, 1, 0.1) )
 for (i in seq_along(neighborhoods)) {
   neighborhood <- neighborhoods[[i]]
   V(g)$color[neighborhood] <- "red"
   V(g)$size[neighborhood] <- 12
   V(g)$size[15] <- 17
   E(g)[neighborhood %--% neighborhood] $color <- "red"
-  plot(g, main = titles[i], vertex.label = NA, margin = -0.05)
+  plot(g, main = titles[i], vertex.label = NA)
 }
 par(op)
 ```
 
 To find neighborhoods in `igraph`, both for directed and undirected graphs, you can use a variety of functions. We will demonstrate them using two networks -- directed and undirected, both shown below. 
 
-```{r neighbors_networks, fig.align='center', echo=1:2}
+```{r neighbors_networks, echo=1:2}
 g <- graph.famous("Frucht")
 g_d <- graph(c(1,2, 1,3, 2,1, 2,4, 3,4, 4,3, 1,5, 5,4, 6,3, 4,6, 5,7))
 layout(matrix(1:2, 1, 2))
@@ -113,24 +113,41 @@ get.adjlist(g_d, mode = "out")
 
 You could also directly create ego-network based on the `graph.neighborhood` function. We set letters as vertex names so as it is clear which vertices are in which ego-network.
 
-```{r graph_neighborhood, fig.align='center', echo=-5}
+```{r graph_neighborhood}
 V(g)$name <- letters[1:vcount(g)]
+plot(g, main="Whole network", vertex.color="lightskyblue")
 
-ego_networks <- graph.neighborhood(g, order = 1, nodes = 1:5)
-
-par(list(mfrow = c(2, 3), mar = rep(0.1, 4)))
-plot(g, vertex.size = 25, vertex.label.cex = 1.8)
-for (graph in ego_networks) plot(graph, vertex.size = 25, vertex.label.cex = 1.8)
+# compute neighborhood graphs
+ego_networks <- graph.neighborhood(g, order = 1, nodes = 1:6)
 ```
 
-```{r, fig.align='center', fig.height=7, fig.width=7, echo=-5}
+Plotting neighborhood graphs of vertices `r paste(letters[1:6], collapse=", ")`:
+
+```{r plot_graph_neighborhood}
+layout(matrix(1:6, 2, 3, byrow=TRUE))
+op <- par(mar = rep(0.1, 4))
+for(graph in ego_networks) {
+  plot(graph, vertex.color="lightskyblue")
+}
+par(op)
+```
+
+For a directed network we may choose to compute only neighbors on incoming ties using argument `mode="in"`:
+
+```{r graph_neighborhood_directed}
 V(g_d)$name <- letters[1:vcount(g_d)]
+plot(g_d, vertex.color="lightskyblue", main="Whole directed network")
 
-ego_networks <- graph.neighborhood(g_d, order = 1, mode = "in")
+# compute neighborhoods
+ego_networks <- graph.neighborhood(g_d, order = 1, mode = "in", nodes=1:6)
+```
 
-par(list(mfrow = c(3, 3), mar = rep(0.1, 4)))
-plot(g_d, vertex.size = 25, vertex.label.cex = 1.8)
-for (graph in ego_networks) plot(graph, vertex.size = 25, vertex.label.cex = 1.8)
+```{r plot_graph_neighborhood_directed}
+layout(matrix(1:6, 2, 3, byrow=TRUE))
+op <- par(mar=rep(0.1, 4))
+for (graph in ego_networks) {
+  plot(graph, vertex.color="lightskyblue")
+}
 ```
 
 For objects of class `network` from `statnet` you could use `get.neighborhood` function.
@@ -179,9 +196,18 @@ Consider the classroom network. We want to asses to what extent children prefer 
 ```{r, fig.align='center', fig.width=4, fig.height=4, echo=-4}
 data(IBE121)
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-V(playnet)$color <- ifelse(V(playnet)$female, "blue", "red")
-par(mar = rep(0,4))
-plot(playnet, vertex.label = NA)
+V(playnet)$color <- ifelse(V(playnet)$female, "pink", "lightskyblue")
+op <- par(mar = rep(0,4))
+plot(playnet, vertex.label = NA, edge.arrow.size=0.5)
+legend(
+  "topleft",
+  pch=21,
+  pt.cex=2,
+  bty="n",
+  pt.bg=c("lightskyblue", "pink"),
+  legend=c("Boys", "Girls")
+)
+par(op)
 ```
 
 We create explicit vector with sex, for clarity.
@@ -203,11 +229,11 @@ props <- lapply(adj, function(alters) {
 ```
 
 Finally we compare our proportions to ego's sex.
-```{r, fig.align='center', fig.height=3, fig.width=4, echo=1}
+```{r}
 frac <- sapply(seq_along(props), function(i) props[[i]][gender[i]])
-par(mar = c(5,2,1,2))
-hist(frac, xlab = "Proportion of alters with the same sex as ego", main = "")
-abline(v = mean(frac, na.rm = TRUE))
+hist(frac, xlab = "Proportion of alters with the same sex as ego", main = "",
+     col="grey", border="white")
+abline(v = mean(frac, na.rm = TRUE), col="red", lwd=2)
 ```
 The vertical line indicates the average in whole network.
 
@@ -228,7 +254,7 @@ status <- rowMeans(status, na.rm = TRUE)
 ```
 
 Algorithm is almost the same as above, but this time we don't compare fractions but calculate root-mean-square difference.
-```{r, fig.align='center', fig.height=3, fig.width=4, echo=1:2}
+```{r echo=1:2}
 alters_status <- lapply(adj, function(alters) s <- status[alters])
 rmsd <- sapply(seq_along(alters_status), function(i){
   diff <- abs(alters_status[[i]] - status[i])
@@ -237,8 +263,9 @@ rmsd <- sapply(seq_along(alters_status), function(i){
 summary(rmsd)
 par(mar = c(5,2,1,2))
 hist(rmsd, xlab = "Root mean squared difference between \nsocioeconomic status of ego and its alters", 
+     col="grey", border="white",
      main = "")
-abline(v = mean(rmsd, na.rm = TRUE))
+abline(v = mean(rmsd, na.rm = TRUE), col="red", lwd=2)
 ```
 ```{r, include = FALSE, eval=FALSE}
 # histogram of fractions with respect to gender

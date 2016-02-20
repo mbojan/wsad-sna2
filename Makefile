@@ -55,6 +55,8 @@ endif
 
 $(files:=.html) $(files:=.pdf): references.bib _output.yaml
 
+$(files:=.pdf): template-wsad.tex
+
 
 
 # Wersja książkowa

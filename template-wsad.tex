@@ -132,64 +132,72 @@ $if(verbatim-in-note)$
 \VerbatimFootnotes % allows verbatim text in footnotes
 $endif$
 
+\usepackage[dvipsnames]{xcolor}
+
 %%% Use protect on footnotes to avoid problems with footnotes in titles
 \let\rmarkdownfootnote\footnote%
 \def\footnote{\protect\rmarkdownfootnote}
 
-%%% Change title format to be more compact
-\usepackage{titling}
+% %%% Change title format to be more compact
+% \usepackage{titling}
+% 
+% % Create subtitle command for use in maketitle
+% \newcommand{\subtitle}[1]{
+%   \posttitle{
+%     \begin{center}\large#1\end{center}
+%     }
+% }
 
-% Create subtitle command for use in maketitle
-\newcommand{\subtitle}[1]{
-  \posttitle{
-    \begin{center}\large#1\end{center}
-    }
+\title{%
+\textcolor{gray}{Further Topics in Social Network Analysis}\\
+$title$
 }
 
-\setlength{\droptitle}{-2em}
-$if(title)$
-  \title{$title$}
-  \pretitle{\vspace{\droptitle}\centering\huge}
-  \posttitle{\par}
-$else$
-  \title{}
-  \pretitle{\vspace{\droptitle}}
-  \posttitle{}
-$endif$
-$if(subtitle)$
-\subtitle{$subtitle$}
-$endif$
-$if(author)$
-  \author{$for(author)$$author$$sep$ \\ $endfor$}
-  \preauthor{\centering\large\emph}
-  \postauthor{\par}
-$else$
-  \author{Dominik Batorski,
-	Michał Bojanowski,
-  Bartosz Chroł,
-  Kamil Filipek\\
-  Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw}
-  \preauthor{}\postauthor{}
-$endif$
-$if(date)$
-  \predate{\centering\large\emph}
-  \postdate{\par}
-  \date{$date$}
-$else$
-  \date{}
-  \predate{}\postdate{}
-$endif$
+\author{%
+  Dominik Batorski\and
+	Michał Bojanowski\and
+	Bartosz Chroł\and
+	Kamil Filipek
+}
+
+\date{%
+  Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw\\
+  \vspace{\baselineskip}
+  \centering\includegraphics[height=10ex]{logotypy/wsad_logo_en_color.pdf}
+  }
+
+
+
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{Batorski, Bojanowski, Chroł, Filipek: Ego-networks and local neighborhoods}
+\lhead{Batorski, Bojanowski, Chroł, Filipek}
+\rhead{Ego-networks and local neighborhoods}
+
+\fancypagestyle{plain}{ %
+  \fancyhf{} % remove everything
+  \renewcommand{\headrulewidth}{0pt} % remove lines as well
+  \renewcommand{\footrulewidth}{0pt}
+  \cfoot{%
+    \includegraphics[height=5ex]{logotypy/humancapital_eng-crop.pdf}
+    \hfill
+    \includegraphics[height=5ex]{logotypy/ics_logo.pdf}
+    \hfill
+    \includegraphics[height=5ex]{logotypy/uw.pdf}
+    \hfill
+    \includegraphics[height=5ex]{logotypy/esf.pdf}  \\
+    {\centering\scriptsize Project co-financed by the European Union under the European Social Fund}
+  }
+}
 
 $for(header-includes)$
 $header-includes$
 $endfor$
 
 
+
 \begin{document}
+
 
 \maketitle
 
@@ -203,6 +211,7 @@ $for(include-before)$
 $include-before$
 
 $endfor$
+
 $if(toc)$
 {
 \hypersetup{linkcolor=black}
@@ -216,6 +225,10 @@ $endif$
 $if(lof)$
 \listoffigures
 $endif$
+
+\newpage
+
+
 $body$
 
 $if(natbib)$

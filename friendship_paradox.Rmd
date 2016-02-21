@@ -321,7 +321,7 @@ These are identical to our results obtained earlier.
 
 For the second example let us use a co-authorship network of researchers employed at the University of Warsaw. Nodes are researchers. There is a tie between researchers whenever they have coauthored at least one publication. This network is undirected and rather big -- has over 10'000 nodes. Nevertheless, obviously, the friendship paradox still holds: on average coauthors have more coauthors than you do.
 
-```{r, coauthorship}
+```{r coauthorship}
 data(coauthorship)
 # number of nodes
 vcount(coauthorship)
@@ -329,7 +329,7 @@ vcount(coauthorship)
 
 Let us do the computations:
 
-```{r}
+```{r fp_coauthorhip}
 friendship_paradox(coauthorship)
 ```
 
@@ -355,7 +355,7 @@ Whether the relationship on the *node level* holds depends on other features of 
 Below we illustrate how the proportion of nodes for which it holds that their degree is lower than average degree of their neighbors depends on the standard deviation of degrees in the network. Let us call this proportion "Friendship Paradox Index", or FPI.
 We do this for four different density levels.
 
-First, we simulate 500 random undirected networks (Erdos-Renyi model) for four levels of density: 0.1, 0.2, 0.3, and 0.4. This gives a total of 2000 networks in four density classes. Second, in every such simulated network we calculate:
+First, we simulate 200 random undirected networks (Erdos-Renyi model) for four levels of density: 0.1, 0.2, 0.3, and 0.4. This gives a total of 800 networks in four density classes. Second, in every such simulated network we calculate:
 
 1. Standard deviation of degrees.
 2. Value of FPI.
@@ -363,14 +363,14 @@ First, we simulate 500 random undirected networks (Erdos-Renyi model) for four l
 Results are shown in the figures below.  Every point represents a network with a given density, standard deviation of degrees (horizontal axis) and value of FPI (vertical axis).
 
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r fpi_simulation, message=FALSE, warning=FALSE, echo=FALSE}
 library("dplyr")
 library("ggplot2")
 set.seed(123)
 N <- 20
 
 data <- lapply(seq(0.1, 0.4, by = 0.1), function(density) {
-  tmp <- replicate(500, {
+  tmp <- replicate(200, {
     net <- random.graph.game(N, density, directed = FALSE)
     c(sd(degree(net)), friendship_paradox(net)$p_nodes)
   })

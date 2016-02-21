@@ -4,8 +4,21 @@ bibliography: references.bib
 ---
 
 ```{r, setup, echo=FALSE, results="hide"}
-library(knitr)
-opts_chunk$set( fig.width=12, fig.height=8 )
+suppressMessages({
+  library(knitr)
+  library(igraph)
+  } )
+
+opts_chunk$set(
+  fig.retina=NULL,
+  fig.align="center",
+  cache=FALSE
+  )
+
+igraph_options(
+  vertex.color="lightskyblue",
+  edge.arrow.size=0.5
+)
 set.seed(666)
 ```
 
@@ -44,13 +57,15 @@ The simplest measure of centrality is degree centrality. In undirected graphs, a
 Consider the two simple networks presented below. 
 
 ```{r, simple_networks}
-g1 <- graph.formula(Mary ---+ Sara,
-                    Sara ---+ Lara,
-                    Sara ---+ John,
-                    John ---+ Mary,
-                    John ---+ Peter,
-                    Peter ---+ Tom,
-                    Tom ---+ Peter)
+g1 <- graph.formula(
+  Mary ---+ Sara,
+  Sara ---+ Lara,
+  Sara ---+ John,
+  John ---+ Mary,
+  John ---+ Peter,
+  Peter ---+ Tom,
+  Tom ---+ Peter
+)
 # undirected version
 g1u <- as.undirected(g1)
 ```
@@ -61,8 +76,8 @@ The network `g1u` is an undirected version of `g1`, where a line is present in `
 op <- par(mar=c(1,1,2,1))
 lay <- layout.fruchterman.reingold(g1)
 layout(matrix(1:2, 1, 2))
-plot(g1u, main="Undirected", layout=lay, vertex.size=20)
-plot(g1, main="Directed", layout=lay, vertex.size=20, edge.curved=0.1)
+plot(g1u, main="Undirected", layout=lay, vertex.size=20, vertex.color="lightskyblue")
+plot(g1, main="Directed", layout=lay, vertex.size=20, edge.curved=0.1, vertex.color="lightskyblue")
 par(op)
 ```
 
@@ -112,11 +127,13 @@ Basic rationale behind closeness centrality is that all pairs of actors in a net
 Let us illustrate this concept using the example network from above, and think of the edges as steps of a walks around the network that start from Sara. 
 
 ```{r, closeness_figure}
-sp <- get.shortest.paths(g1, from=V(g1)["Sara"], output="epath")$epath
+# list of edge sequences for shortest paths originating from Sara
+sp <- shortest_paths(g1, from=V(g1)["Sara"], output="epath")$epath
+lens <- sapply(sp, length)
 ecol <- rep("grey", ecount(g1))
-ecol[ unique(sapply(sp, "[", 1)) ] <- "brown"
-ecol[ unique(sapply(sp, "[", 2)) ] <- "red"
-ecol[ unique(sapply(sp, "[", 3)) ] <- "orange"
+ecol[ unique(sapply(sp[lens > 0], "[", 1)) ] <- "brown"
+ecol[ unique(sapply(sp[lens > 1], "[", 2)) ] <- "red"
+ecol[ unique(sapply(sp[lens > 2], "[", 3)) ] <- "orange"
 plot(g1, main="Walks from Sara to others", layout=lay, vertex.size=20,
      edge.curved=0.1, edge.color=ecol)
 legend("topright", lty=1, lwd=2, col=c("brown", "red", "orange"),

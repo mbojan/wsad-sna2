@@ -7,7 +7,7 @@ Samouczek SNA.
 Linki prowadzą do skompilowanych gotowych części.
 
 1. [Local neighborhoods](https://rawgit.com/mbojan/wsad-sna2/master/local_neighborhoods.html)
-2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/Centrality.html)
+2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/centrality.html)
 3. [Friendship paradox](https://rawgit.com/mbojan/wsad-sna2/master/friendship_paradox.html)
 4. [Small world phenomenon](https://rawgit.com/mbojan/wsad-sna2/master/small_world.html)
 5. Homophily and segregation

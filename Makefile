@@ -1,5 +1,5 @@
 # Pliki z częściami
-files=local_neighborhoods Centrality friendship_paradox small_world segregation cohesion ergm
+files=local_neighborhoods centrality friendship_paradox small_world segregation cohesion ergm
 
 pandoc=pandoc
 pandoc_flags=
@@ -64,7 +64,7 @@ $(files:=.pdf): template-wsad.tex
 all.html all.pdf: pandoc_flags=-s -S --number-sections --bibliography=references.bib
 
 
-all.html all.pdf: local_neighborhoods.md Centrality.md
+all.html all.pdf: local_neighborhoods.md centrality.md
 	$(run-pandoc)
 
 

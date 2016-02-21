@@ -1,5 +1,6 @@
 ---
-title: Ego-networks and local neighborhoods
+title: "Ego-networks and local neighborhoods"
+output: html_document
 bibliography: references.bib
 ---
 
@@ -316,7 +317,8 @@ neighborhood.size(playnet, 1)
 For networks of class `network` there is a function also called `degree` in package `sna`.
 
 ### Effective size of the network
-The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that an ego is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatti simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatti_1997: 35]. The average degree of ego's alters is 2. So, the effective size of the network is 1 ( 3 (ego's network size) - 2 (average degree of ego's alters)). See more in: [@burt_1992], [@borgatti_1997].
+
+The effective size is the number of nodes ego has, minus the average number of ties that each node has, excluding tie to ego. Imagine that an ego is linked to three other nodes. At the same time, all of the nodes are connected to each other. Ego's network size is 3. However, the ties are redundant. Stephen Borgatti simply pointed that "The general meaning of redundancy is clear: a person's ego network has redundancy to the extent that her contacts are connected to each other as well" [@borgatti_1997: 35]. The average degree of ego's alters is 2. So, the effective size of the network is 1 ( 3 (ego's network size) - 2 (average degree of ego's alters)). See more in: [@burt_1992;@borgatti_1997].
 
 There is no function in `igraph` to calculate effective size of the network, but it is easy to write it by ourselves.
 

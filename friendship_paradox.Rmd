@@ -4,15 +4,25 @@ bibliography: references.bib
 ---
 
 
-```{r, setup, echo=FALSE, results="hide", cache=FALSE}
+```{r setup, echo=FALSE, results="hide", cache=FALSE}
 library(knitr)
 library(methods)
 library(igraph)
+
 set.seed(666)
 options(warn=2)
-opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
-               cache=FALSE)
-igraph.options(vertex.size=20)
+
+opts_chunk$set(
+  out.width="100%", 
+  fig.width=8, 
+  fig.height=6, 
+  fig.retina=NULL,
+  cache=FALSE
+  )
+
+igraph_options(
+  vertex.size=20
+  )
 
 .small_mar <- function(before, options, envir) {
   # save current

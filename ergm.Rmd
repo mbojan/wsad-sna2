@@ -541,39 +541,31 @@ involving the same actor, i.e.:
 - $Y_{ij}$ is independent from $Y_{ik}$ (the same tie sender)
 - $Y_{ij}$ is independent from $Y_{kj}$ (the same tie receiver)
 
-```{r, illustration_markov, echo=FALSE, fig.width=3, fig.height=3, out.width=NULL, no.mar=TRUE}
+Markov dependence assumes that dyads are independent *unless* share an actor on one of the endpoints. See left on the figure below. The probability of tie $ij$ might not be independent from the probability of tie $jk$ because these are both ties of actor $j$.
+
+```{r illustration_dependence, echo=FALSE, out.width="0.4\\textwidth", small_mar=TRUE}
+layout(matrix(1:2, 1, 2))
 g <- igraph::graph.formula(i -- j, j -- k)
 l <- matrix(c(1,2, 2,1, 3,2), 3, 2, byrow=TRUE)
 igraph::plot.igraph(g, layout=l, vertex.color="white", vertex.size=40,
                     edge.width=2, vertex.label.color="black", vertex.label.font=3)
-```
+title(main="Markov dependence")
 
-> TODO describe on figure
-
-Markov dependence assumes that dyads are independent *unless*
-share an actor on one of the endpoints.
-
-ERG models conforming to the Markov dependence assumption allow to
-model the shape of degree distribution and processes like preferential
-attachment or transitivity (e.g. meeting friends through friends, etc.).
-
-
-
-
-
-## Other forms of dependence           {#ass_pci}
-
-Partial conditional independence pattison & robins.
-
-```{r, illustration_pcd, echo=FALSE, fig.width=3, fig.height=3, out.width=NULL, no.mar=TRUE}
 g <- igraph::graph.formula(i -- j, j -- u, u -- v, v -- i)
 l <- matrix(c(1,1, 1,2, 2,2, 2,1), 4, 2, byrow=TRUE)
 igraph::plot.igraph(g, layout=l, vertex.color="white", edge.lty=c(1,2,2,1),
                     vertex.size=40, vertex.label.color="black",
                     edge.width=2, vertex.label.font=3)
+title(main="Partial conditional dependence")
 ```
 
-> TODO: GWESP GWDSP
+ERG models conforming to the Markov dependence assumption allow to
+model the shape of degree distribution and processes like preferential
+attachment or transitivity (e.g. meeting friends through friends, etc.).
+
+Further relaxations of independence assumptions lead to the so-called "Socal Circuit Model" in which two ties $ij$ and $vu$ are assumed independent *unless* there is a link $iu$ or $jv$.
+See @koskinen_daraganova_2012 for further details.
+
 
 
 
@@ -753,7 +745,7 @@ AIC(model.ibe0, model.ibe1, model.ibe2a, model.ibe2b)
 Homophily model seems to fit best. Let's examine the (lack of) fit in some more
 detail with the `gof` function.
 
-```{r. gender_homophily_gof}
+```{r gender_homophily_gof}
 fit2b <- gof(model.ibe2b)
 layout(matrix(1:4, 2, 2, byrow=TRUE))
 plot(fit2b)
@@ -771,7 +763,7 @@ Explicit modeling of degree distributions.
 
 > TODO Modelowanie sieci między sędziami.
 
-```{r, judges_data, eval=FALSE}
+```{r judges_data, eval=FALSE}
 data(judge_net, package="isnar")
 judges <- intergraph::asNetwork(judge_net)
 plot(judges)
@@ -806,7 +798,7 @@ summary(f$m2)
 ```
 
 
-```{r, ibe_markov, eval=FALSE}
+```{r ibe_markov, eval=FALSE}
 f <- list(m0 = formula( ibe ~ edges ))
 f$m1 <- update(f$m0, . ~ . + ostar(2:3) + istar(2:3))
 models <- lapply(f, function(m) ergm(m))
@@ -982,17 +974,16 @@ The model could be equivalently described by conditional probabilities that an
 edge exists given the rest of the network. Conditional log-odds could be easily
 derived from the general form of the model
 
-$$
-\frac{P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c)}{P_\theta(A_{ij}=0|A_{ij}^c=a_{ij}^c)}=\exp\{\theta^T \delta[g(a)]_{ij}\} 
-$$
+$$\frac{ P_\theta ( A_{ij}=1 | A_{ij}^c = a_{ij}^c ) }{ P_\theta ( A_{ij}=0 | A_{ij}^c = a_{ij}^c ) }=
+\exp\{\theta^T \delta[g(a)]_{ij}\}$$
 
 where $\delta[g(a)]_{ij}$ is the change of $g(a)$ when $a_{ij}$ is changed from 0 to 1. So the probability of an edge is equal to
 
 $$
-\begin{array} 
- P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c) & = & \frac{\exp\{\theta^T \delta[g(a)]_{ij}\}}{1+\exp\{\theta^T \delta[g(a)]_{ij}\}} \nonumber\\
- & = & (1 + \exp\{-\theta^T \delta[g(a)]_{ij}\})^{-1} ,
-\end{array}
+\begin{split} 
+ P_\theta(A_{ij}=1|A_{ij}^c=a_{ij}^c) &=  \frac{\exp\{\theta^T \delta[g(a)]_{ij}\}}{1+\exp\{\theta^T \delta[g(a)]_{ij}\}} \nonumber\\
+ & =  (1 + \exp\{-\theta^T \delta[g(a)]_{ij}\})^{-1} ,
+\end{split}
 $$
 
 Coming back to 4-nodes networks. Let's say we have a model with two statistics
@@ -1038,7 +1029,7 @@ $$
 
 
 
-```{r, warnings, echo=FALSE, results="hide"}
+```{r warns, echo=FALSE, results="hide"}
 stopifnot(is.null(warnings()))
 ```
 
@@ -1046,6 +1037,6 @@ stopifnot(is.null(warnings()))
 
 # References
 
-<!---
+<!--
 vim: wrap:linebreak:spell:spelllang=en_us
 -->

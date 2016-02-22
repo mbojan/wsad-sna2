@@ -10,7 +10,7 @@ Linki prowadzą do skompilowanych gotowych części.
 2. [Centrality](https://rawgit.com/mbojan/wsad-sna2/master/centrality.html)
 3. [Friendship paradox](https://rawgit.com/mbojan/wsad-sna2/master/friendship_paradox.html)
 4. [Small world phenomenon](https://rawgit.com/mbojan/wsad-sna2/master/small_world.html)
-5. Homophily and segregation
+5. [Homophily and segregation](https://rawgit.com/mbojan/wsad-sna2/master/segregation.html)
 6. [Cohesion](https://rawgit.com/mbojan/wsad-sna2/master/cohesion.html)
 7. [ERGMs](https://rawgit.com/mbojan/wsad-sna2/master/ergm.html)
 

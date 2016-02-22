@@ -49,7 +49,7 @@ A graph is considered small-world, if its average local clustering coefficient $
 
 # Example - global properties of coauthoship network
 
-We use ```coauthorship``` network from ```isnar``` R package. 
+We use `coauthorship` network from `isnar` R package. 
 
 ```{r data}
 library("igraph")
@@ -87,7 +87,7 @@ max(coaut.Clusters$csize) #the size of the largest component
 
 There are `r max(coaut.Clusters$csize)` nodes in the largest component, this is `r round(100*max(coaut.Clusters$csize)/N,1)`% of the graph.
 
-Then we choose a subgraph of the entire network, whith only the nodes from the largest component. It can be done with ```subgraph``` function from the ```igraph``` package.
+Then we choose a subgraph of the entire network, whith only the nodes from the largest component. It can be done with `subgraph` function from the `igraph` package.
 
 ```{r largestComponent, results='hide', warning=FALSE}
 coaut.LargestComponent <- subgraph(coauthorship, coaut.Clusters$membership==1)
@@ -96,13 +96,13 @@ coaut.LargestComponent <- subgraph(coauthorship, coaut.Clusters$membership==1)
 
 ## Local density
 
-We use ```transitivity``` function with ```type="local"``` to compute the average of the local clustering coefficients.
+We use `transitivity` function with `type="local"` to compute the average of the local clustering coefficients.
 
 ```{r local density, results='hide'}
 mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)
 ```
 
-Now we can compare the obtained value ```r mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)``` with the expected value of the average local clustering coefficient $\bar{C}$ for a random graph constructed on the same set of nodes. The empirically observed value is significantly higher than $k/N$ expected for a corresponding random graph, that is `r round(k/N, 7)` in this network.
+Now we can compare the obtained value `r mean(transitivity(coaut.LargestComponent, type="local"), na.rm=T)` with the expected value of the average local clustering coefficient $\bar{C}$ for a random graph constructed on the same set of nodes. The empirically observed value is significantly higher than $k/N$ expected for a corresponding random graph, that is `r round(k/N, 7)` in this network.
 
 ## Shortest paths between nodes
 
@@ -112,7 +112,7 @@ In order to compute the average distance between nodes in the largest component 
 average.path.length(coaut.LargestComponent)
 ```
 
-The average short paths for the largest conected component of coauthorship network is around ```r average.path.length(coaut.LargestComponent)```. Whereas the average geodesics for a corresponding random graph equals $log(N)/log(k)$ that is ```r log(N)/log(k)``` in our example. This can be interpreted that, despite the high local density, the network is not a small world because average path lenght between nodes is not short enough.
+The average short paths for the largest conected component of coauthorship network is around `r average.path.length(coaut.LargestComponent)`. Whereas the average geodesics for a corresponding random graph equals $log(N)/log(k)$ that is `r log(N)/log(k)` in our example. This can be interpreted that, despite the high local density, the network is not a small world because average path lenght between nodes is not short enough.
 
 We can also compute the diameter $d$ of a network, that is the greatest distance between any pair of nodes.
 ```{r diameter, results='hide'}
@@ -142,7 +142,7 @@ In both cases, there is a large number of nodes that have low number of relation
 
 ## Degree distribution in R
 
-Degree for each node can be computed using ```degree``` function. 
+Degree for each node can be computed using `degree` function. 
 
 ```{r degree, results='hide'}
 degree(coauthorship)
@@ -171,11 +171,11 @@ plot(ecdf(degree(coauthorship)), main='Cumulative degree distribution of coautho
 
 # Simulations - generating a network with a given properties
 
-Sometimes one needs the ability to generate network with the given properties. The ```igraph``` package allows you to create a network according to various theoretical models. In this section we show three basic ones, which were discussed earlier in this chapter.
+Sometimes one needs the ability to generate network with the given properties. The `igraph` package allows you to create a network according to various theoretical models. In this section we show three basic ones, which were discussed earlier in this chapter.
 
 ## Random graphs
 
-Random graphs are generated with ```erdos.renyi.game``` function
+Random graphs are generated with `erdos.renyi.game` function
 
 ```{r gen.ER, results='hide', eval=FALSE}
 erdos.renyi.game(n, p.or.m, type=c("gnp", "gnm"),directed = FALSE, loops = FALSE, ...)
@@ -183,14 +183,14 @@ erdos.renyi.game(n, p.or.m, type=c("gnp", "gnm"),directed = FALSE, loops = FALSE
 
 where:
 
-```n``` is the number of nodes in the network.  
-```p``` is the probability for drawing an edge between two arbitrary vertices (```G(n,p)``` graph)  
-```m```  is the number of edges in the graph (for ```G(n,m)``` graphs).   
-The ```type``` of the random graph can be either gnp (```G(n,p)``` graph) or gnm (```G(n,m)``` graph) depending on which value $p$ or $m$ was given. One can also specify if the graph will be ```directed``` and whether to add ```loops``` or no (both parameters with defaults set to ```FALSE```).
+`n` is the number of nodes in the network.  
+`p` is the probability for drawing an edge between two arbitrary vertices (`G(n,p)` graph)  
+`m`  is the number of edges in the graph (for `G(n,m)` graphs).   
+The `type` of the random graph can be either gnp (`G(n,p)` graph) or gnm (`G(n,m)` graph) depending on which value $p$ or $m$ was given. One can also specify if the graph will be `directed` and whether to add `loops` or no (both parameters with defaults set to `FALSE`).
 
 ## Small-world networks 
 
-Generate a graph according to the Watts-Strogatz network model with ```watts.strogatz.game``` function.
+Generate a graph according to the Watts-Strogatz network model with `watts.strogatz.game` function.
 
 ```{r gen.WS, results='hide', eval=FALSE}
 watts.strogatz.game(dim, size, nei, p, loops = FALSE, multiple = FALSE)
@@ -198,15 +198,15 @@ watts.strogatz.game(dim, size, nei, p, loops = FALSE, multiple = FALSE)
 
 where:
 
-```dim``` is the number of dimensions of the starting lattice.  
-```size``` is the size of the lattice along each dimension.  
-```nei``` the neighborhood within which the vertices of the lattice will be connected.  
-```p``` is the rewiring probability (value between zero and one).   
-One can also decide if ```loops``` and ```multiple``` edges are allowed in the generated graph.
+`dim` is the number of dimensions of the starting lattice.  
+`size` is the size of the lattice along each dimension.  
+`nei` the neighborhood within which the vertices of the lattice will be connected.  
+`p` is the rewiring probability (value between zero and one).   
+One can also decide if `loops` and `multiple` edges are allowed in the generated graph.
 
 ## Scale-free network
 
-In order to generate a scale-free network use ```barabasi.game``` function:
+In order to generate a scale-free network use `barabasi.game` function:
 
 ```{r gen.BA, results='hide', eval=FALSE}
 barabasi.game(n, power = 1, m = NULL, out.dist = NULL, out.seq = NULL, 
@@ -217,10 +217,10 @@ barabasi.game(n, power = 1, m = NULL, out.dist = NULL, out.seq = NULL,
 
 where:
 
-```n``` is a number of vertices.  
-```power``` is the power of the preferential attachment, the default is one, ie. linear preferential attachment.  
-```directed``` whether to create a directed graph.  
-other arguments explanation can be found using ```?barabasi.game``` call. 
+`n` is a number of vertices.  
+`power` is the power of the preferential attachment, the default is one, ie. linear preferential attachment.  
+`directed` whether to create a directed graph.  
+other arguments explanation can be found using `?barabasi.game` call. 
 
 ## Example
 

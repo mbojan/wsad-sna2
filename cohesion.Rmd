@@ -3,8 +3,31 @@ title: Cohesion in Social Networks
 bibliography: references.bib
 ---
 
-```{r, setup, echo=FALSE, results="hide"}
-set.seed(666)
+```{r setup, echo=FALSE, results="hide", cache=FALSE}
+suppressMessages({
+  library(knitr)
+  library(igraph)
+  } )
+
+pdf.options(
+  family="Palatino"
+)
+
+opts_chunk$set(
+  fig.retina=NULL,
+  fig.align="center",
+  cache=FALSE
+  )
+
+igraph_options(
+  vertex.color="lightskyblue",
+  edge.arrow.size=0.5,
+  vertex.size=25,
+  vertex.label.cex=0.7,
+  vertex.label.family="Palatino"
+)
+
+set.seed(123)
 ```
 
 # Introduction
@@ -13,13 +36,13 @@ The idea of cohesion has been widely studied in contemporary social science. Res
 
 In our analysis we will use network of judges -- there is an edge between two judges if they were judging at least one case together.
 
-```{r, message=FALSE, fig.align='center', fig.height=4, fig.width=4}
+```{r, message=FALSE}
 library("igraph")
 library("isnar")
 data(judge_net)
 graph <- judge_net
 par(mar = rep(0,4))
-plot(graph, vertex.label = NA, margin = 0)
+plot(graph)
 ```
 
 
@@ -394,5 +417,3 @@ graph
 
 
 # References
-
-Details: [@batagelj_zaversnik_2003, batagelj_zaversnik_2002, @moody_white_2003]

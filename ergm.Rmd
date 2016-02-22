@@ -615,15 +615,15 @@ illustrate
 - how to specify different ERG models matching different research questions
 - show ERG models pretending to different independence assumptions (see [section on (in)dependence assumptions](#independence_assumptions)).
 
+Below we present brief examples of modeling homophily and triadic closure with ERGMs.
 
-> TODO summarize following subsections
 
 
 ## Actor relation effects: gender homophily in a school class
 
 The first example shows how ERG models can be used to model homophily.  Topics
 of homophily and segregation in social networks are covered in a separate
-tutorial entitled TODO title.
+tutorial.
 
 Recall that homophily is a tendency for ties to form between similar actors.
 Similarity need to be specified according to a specific node attribute, which
@@ -757,66 +757,6 @@ plot(fit2b)
 
 
 
-## Markov dependence models
-
-Explicit modeling of degree distributions.
-
-> TODO Modelowanie sieci między sędziami.
-
-```{r judges_data, eval=FALSE}
-data(judge_net, package="isnar")
-judges <- intergraph::asNetwork(judge_net)
-plot(judges)
-library(sna)
-# degree distribution
-table(degree(judges))
-
-# Markov
-f <- list(m0 = formula(judges ~ edges))
-f$m1 <- update(f$m0, . ~ kstar(1:3))
-f$m2 <- update(f$m0, . ~ kstar(2:3) + triangle)
-models.mple <- lapply(f, function(x) ergm(x, estimate="MPLE"))
-models.bayes <- lapply(f, function(x) bergm(x))
-for(m in models.bayes) bergm.output(m)
-m1 <- ergm(f$m1, control=control.ergm(MCMC.burnin=50000, MCMC.samplesize=2000, MCMC.interval=3000))
-mcmc.diagnostics(m1)
-m1.gof <- gof(m1)
-layout(matrix(1:4, 2, 2, byrow=TRUE))
-plot(m1.gof)
-
-# m2
-m2 <- ergm(f$m2, constraints=~edges, verbose=TRUE,
-           control=control.ergm(MCMC.burnin=50000, MCMC.samplesize=1000, MCMC.interval=10000))
-mcmc.diagnostics(m2)
-m2.gof <- gof(m2)
-layout(matrix(1:4, 2, 2, byrow=TRUE))
-plot(m2.gof)
-s <- simulate(m2, nsim=100)
-stats <- as.data.frame(attr(s, "stats"))
-plot(stats)
-summary(f$m2)
-```
-
-
-```{r ibe_markov, eval=FALSE}
-f <- list(m0 = formula( ibe ~ edges ))
-f$m1 <- update(f$m0, . ~ . + ostar(2:3) + istar(2:3))
-models <- lapply(f, function(m) ergm(m))
-lapply(models, summary)
-m1.gf <- gof(models$m1)
-layout(matrix(1:4, 2, 2, byrow=TRUE))
-plot(m1.gf)
-m2 <- ergm(ibe ~ edges + 
-           gwidegree(0.1, fixed=TRUE) + gwodegree(0.1, fixed=TRUE) +
-           nodematch("female") )
-mcmc.diagnostics(m2)
-gof2 <- gof(m2)
-layout(matrix(1:4, 2, 2, byrow=TRUE))
-plot(gof2)
-s <- simulate(m2, nsim=100)
-stats <- as.data.frame(attr(s, "stats"))
-plot(stats)
-```
 
 
 
@@ -827,9 +767,11 @@ plot(stats)
 
 ## Social circuit models
 
-Triadic closure controlling for homophily and reciprocity.
+Here we present an example of an ERGM which contains a statistic which subsumes to the "Social Circuit" dependence assumptions presented earlier. It is Geometrically Weighted Edgwise Shared Partners (GWESP). With this statistic we model the distribution of the number of network partners of nodes, that are themselves connected (hence "edge" in the name of the statistic). Positive effect indicates the tendency for creating transitive triplets.
 
-```{r, gwesp2}
+Let us fit an ERGM with the GWESP statistic together with gender homophily effects investigated earlier.
+
+```{r gwesp2}
 model.ibe4 <- ergm(ibe ~ edges + mutual + 
                    nodeofactor("female") + nodeifactor("female") + nodematch("female") +
                    gwesp(alpha=0.2, fixed=TRUE), 
@@ -839,8 +781,17 @@ layout(matrix(1:4, 2, 2, byrow=TRUE))
 plot(fit4)
 ```
 
-Model fit still not ideal.
-Friend of a friend is likely a friend too.
+Model fit still not ideal. In particular, the models does not explain the spike in the in-degree distribution for degree 2. Nevertheless, the fit is much better than in models estimated earlier. Let us have a look at the estimates:
+
+```{r gwesp2_model_summary}
+summary(model.ibe4)
+```
+
+From the results we can observe:
+
+- Friendship nominations are reciprocated
+- There is a strong gender homophily effect
+- GWESP effect is positive, hence friendship nominations are transitive. In other words, ceteris paribus, friend of a friend is likely to be a friend too.
 
 
 

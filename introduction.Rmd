@@ -36,7 +36,7 @@ The course covers the following topics contained in a set of self-study tutorial
 6. **Cohesion in social networks**. Identifying groups in social networks.
 7. **Fitting Exponential Random Graph Models with 'statnet'**. Short tutorial on fitting ERGMs using packages in 'statnet' suite of packages for social network analysis.
 
-The tutorials use "igraph" package for social network data representation. Additional functions and datasets are available in package "isnar" (https://github.com/mbojan/isnar). See its GitHub page for installation instructions.
+With the exception of (7), the tutorials use "igraph" package for social network data representation. Additional functions and datasets are available in package "isnar" (https://github.com/mbojan/isnar). See its GitHub page for installation instructions. The section on ERGMs uses "network" and "ergm" packages from ['statnet'](http://www.statnet.org).
 
 We hope you will enjoy the course!
 

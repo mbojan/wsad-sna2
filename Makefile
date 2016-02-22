@@ -1,5 +1,5 @@
 # Pliki z częściami
-files=local_neighborhoods centrality friendship_paradox small_world segregation cohesion ergm
+files=introduction local_neighborhoods centrality friendship_paradox small_world segregation cohesion ergm
 
 pandoc=pandoc
 pandoc_flags=
@@ -57,6 +57,7 @@ $(files:=.html) $(files:=.pdf): references.bib _output.yaml
 
 $(files:=.pdf): template-wsad.tex
 
+introduction.pdf: template-wsad-introduction.tex
 
 
 # Wersja książkowa

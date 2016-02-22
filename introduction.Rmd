@@ -1,0 +1,43 @@
+---
+title: "Introduction"
+output:
+  pdf_document:
+    template: template-wsad-introduction.tex
+    toc: false
+---
+
+```{r setup, echo=FALSE, results="hide", cache=FALSE}
+suppressMessages({
+  library(knitr)
+  } )
+
+pdf.options(
+  family="Palatino"
+)
+
+opts_chunk$set(
+  fig.retina=NULL,
+  fig.align="center",
+  cache=FALSE
+  )
+
+set.seed(123)
+```
+
+The presented self-study course extends the content of the WSAD summer school workshops "Introduction to Social Network Analysis" and "Introduction to Statistical Analysis of Social Networks". It is intended for advanced undergraduate and graduate students interested in expanding their knowledge of social network analysis. No strong mathematical network is required, but working skills in R are a necessity.
+
+The course covers the following topics contained in a set of self-study tutorials:
+
+1. **Local neighborhoods and ego-networks**. Analyzing local structures of social networks via immediate neighborhoods of the nodes.
+2. **Centrality**. Measuring structural importance of individual nodes.
+3. **Friendship paradox**. Understanding why your friends have on average more friends than you do.
+4. **Small world phenon**. Understanding "small world" phenomenon and other global properties of social networks.
+5. **Homophily and segregation**. Methods of measuring the extent to which social networks can be segregated.
+6. **Cohesion in social networks**. Identifying groups in social networks.
+7. **Fitting Exponential Random Graph Models with 'statnet'**. Short tutorial on fitting ERGMs using packages in 'statnet' suite of packages for social network analysis.
+
+The tutorials use "igraph" package for social network data representation. Additional functions and datasets are available in package "isnar" (https://github.com/mbojan/isnar). See its GitHub page for installation instructions.
+
+We hope you will enjoy the course!
+
+Dominik Batorski & Michał Bojanowski & Bartosz Chroł & Kamil Filipek

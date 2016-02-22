@@ -4,12 +4,30 @@ bibliography: references.bib
 ---
 
 ```{r, setup, echo=FALSE, results="hide", cache=FALSE}
-library(knitr)
-library(methods)
-set.seed(666)
-# options(warn=2)
-opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
-               cache=TRUE, dev="svg")
+suppressMessages({
+  library(knitr)
+  library(igraph)
+  } )
+
+pdf.options(
+  family="Palatino"
+)
+
+igraph_options(
+  vertex.color="lightskyblue",
+  edge.arrow.size=0.5,
+  vertex.size=20,
+  vertex.label.cex=0.7,
+  vertex.label.family="Palatino"
+)
+
+opts_chunk$set(
+  fig.retina=NULL,
+  fig.align="center",
+  cache=TRUE
+  )
+
+set.seed(123)
 
 .small_mar <- function(before, options, envir) {
   # save current
@@ -43,11 +61,15 @@ opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
   }
 }
 
-knit_hooks$set( small.mar = .small_mar, no.mar=.no_mar, use.igraph=.use_igraph)
+knit_hooks$set(
+  small.mar = .small_mar,
+  no.mar=.no_mar,
+  use.igraph=.use_igraph
+  )
 ```
 
 
-
+<!--
 Segregation and homophily as local and global characteristics of the network.
 Mixing matrices. Segregation as dependence of edge probability on node at-
 tributes.  Segregation as dependence between node attributes (mixing). Overview
@@ -58,96 +80,200 @@ index, and more.
 Bojanowski & Corten (2014)
 
 Funkcje do większości miar są w https://github.com/mbojan/isnar
+-->
+
+Syntetic definition of homophily has been offered by McPherson, Smith-Lovin and Cook "Homophily is a principle that a contact between similar people occurs at a higher rate that among dissimilar people. (...) Homophily implies that distance in terms of social characteristics translates into network distance, the number of relationships through which a piece of information must travel to connect two individuals" [@mcpherson_etal_2001, p.416]. Homophilic relations are based on shared characteristics e.g. values, knowledge, skills, beliefs, wealth, social status, geographic closure, ethnicity etc. If we consider a social network that is made of two types of nodes, the density of connections should be higherer between similar nodes. A related concept is "network segregation" [@freeman1978segregation;@bojanowski_corten_2014].
+
+The difference between concepts of "homophily" and "segregation" is subtle: by segregation we usually mean a property of network structure while "homophily" is an individual-level propensity to form social network ties with similar others. While homophily usually leads to segregation, lack of homophily can lead to segregation too, as @schelling1971dynamic famously demonstrated.
+
+In this tutorial we present examples of descriptive tools to analyze homophily/segregation in social networks. We focus on methods that take into account a single node-level variable which is nominal. Consequently this variable exhaustively divides all the nodes into a set of mutually exclusive *groups*.
+
+Data and functions presented here are available in package ["isnar"](https://github.com/mbojan/isnar) [@bojanowski_isnar].
 
 
+# Mixing matrix
 
-Syntetic definition of homophily has been offered by McPherson, Smith-Lovin and Cook "Homophily is a principle that a contact between similar people occurs at a higher rate that among dissimilar people. (...) Homophily implies that distance in terms of social characteristics translates into network distance, the number of relationships through which a piece of information must travel to connect two individuals" [@mcpherson_etal_2001:416]. Homophilic relations are based on shared characteristics e.g. values, knowledge, skills, beliefs, wealth, social status, geographic closure, ethnicity etc. If we consider a social network that is made of two types of nodes, the density of connections should be higherer between similar nodes. Details on how to construct the homophily models in social network analysis can be found in Hanneman and Riddle book.
+The probably most important tool for analyzing homophily/segregation patterns in social networks is the *mixing matrix*. Mixing matrix is a three-dimensional distribution of all the dyads in the network understudy which are crossclassified according to the following dimensions:
 
-The assortativity coefficient returns the level of graph homophily. Positive value means that similar vertices tend to connect to each other, and negative is opposite. More on measures of homophily can be found in R package igraph documentation. In our exercise we will user assortativity.degree function using vertex degree as vertex values.
+1. Group membership of ego
+2. Group membership of alter
+3. Whether the dyad is connected or not.
 
-See how assortativity coefficient behaves on following undirected networks consisting of two group of nodes - blue and green, 
+Technically, let us have a network of size $N$ represented with a adjacency matrix $X = [x_{ij}]_{N \times N}$ and a node level variable $t = [t_i]_N$ such that $t_i \in \{1, ..., K\}$. In other words, the variable represents the memebership of each node in one of the $K$ groups. The mixing matrix $M(X, t)$ is an array $M = [m_{ghy}]_{K\times K \times 2}$ where $g, h \in \{1, ..., K\}$ and $y \in \{0, 1\}$. In other words the value $m_{gh0}$ is the number of *disconnected* dyads between nodes belonging to groups $g$ and $h$, and $m_{gh1}$ is the number of *connected* dyads in between nodes belonging to groups $g$ and $h$.
 
-IDEAS FOR EXAMPLES
-```{r, echo = FALSE}
-library("igraph")
-library("isnar")
+Recall the classroom network from package "isnar" built from "would like to play with" nominations:
+
+```{r ibe_data}
+library(isnar)
 data(IBE121)
 playnet <- delete.edges(IBE121, E(IBE121)[question != "play"])
-
-g <- graph.empty(4, directed = FALSE)
-types <- rep(c("blue", "green"), each = 2)
-layout <- matrix(c(0,0, 0,1, 1,0, 1,1), ncol = 2, byrow = TRUE)
-
-old.par <- par(no.readonly = TRUE)
-par(mfrow = c(1, 3), mar = rep(0,4))
-
-g1 <- g + edges(c(1,2, 3,4))
-plot(g1, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
-
-g2 <- g + edges(c(1,2, 1,3, 2,4, 3,4))
-plot(g2, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
-
-g3 <- g + edges(c(1,3, 2,4))
-plot(g3, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
-
-par(old.par)
-
-g <- graph.empty(6, directed = FALSE)
-types <- rep(c("blue", "green"), each = 3)
-layout <- matrix(c(0,0, -0.5,1, 0,2, 1,0, 1.5,1, 1,2), ncol = 2, byrow = TRUE)
-
-old.par <- par(no.readonly = TRUE)
-par(mfrow = c(1, 3))
-
-g1 <- g + edges(c(1,2, 2,3, 4,5, 5,6))
-plot(g1, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
-
-g2 <- g + edges(c(1,2, 2,3, 1,4, 1,6, 3,4, 3,6, 4,5, 5,6))
-plot(g2, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
-
-g3 <- g + edges(c(1,4, 2,5, 3,6))
-plot(g3, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
-
-par(old.par)
-
-
-g <- graph.empty(6, directed = FALSE)
-types <- c(rep("blue", 2), rep("green", 4))
-layout <- matrix(c(0,0.5, 0,1.5, 1,0, 1,2/3, 1,4/3, 1,2), ncol = 2, byrow = TRUE)
-
-old.par <- par(no.readonly = TRUE)
-par(mfrow = c(1, 3))
-
-g1 <- g + edges(c(1,2, 3,4, 3,5, 3,6))
-plot(g1, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g1, factor(types))))
-
-g2 <- g + edges(c(1,2, 2,3, 1,4, 1,6, 3,4, 3,6, 4,5, 5,6))
-plot(g2, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g2, factor(types))))
-
-g3 <- g + edges(c(1,3, 1,4, 2,5, 2,6))
-plot(g3, vertex.color = types, layout = layout)
-text(0, 1.2, paste("Assortativity = ", assortativity.nominal(g3, factor(types))))
-
-par(old.par)
+plot(playnet, vertex.label=NA,
+     vertex.color=ifelse(V(playnet)$female, "pink", "lightskyblue"))
+legend("topleft", pch=21, pt.bg=c("lightskyblue", "pink"),
+      legend=c("Boys", "Girls"), bty="n", pt.cex=2 )
 ```
 
-To calculate assortativity coefficient in `igraph` use `assortativity.nominal` function. You have to explicitly provide types of vertices in `types` argument (as integer vector or factor).
+We can create the mixing matrix using `mixingm` function from package "isnar":
 
-We are analysing classroom network. Consider the following question - do children prefer to play withing group of the same sex (girls with girls, boys with boys)? To check this we could plot network with indicated gender.
+```{r mixing_matrix}
+m <- mixingm(playnet, "female", full=TRUE)
+m
+```
+
+As we can see, there are alltogether $40 + 41 = 81$ homophilous ties that connect children of the same sex, and only $5 + 2 = 7$ ties connecting children of opposite sex.
+
+
+Let us extend the mixing matrix notation to accomodate marginal distributions of the mixing matrix by denoting by subscript $+$ summation over corresponding dimension. For example:
+
+$$
+\begin{split}
+m_{gh+} &= \sum_{y = 0}^1 m_{ghy}\\
+m_{++y} &= \sum_{g = 1}^K \sum_{h=1}^K m_{ghy}
+\end{split}
+$$
+
+... and so on.
+
+We can analyze homophily by analyzing the mixing matrix using tools that are used to analyze any cross-classification. For example, we may calculate conditional probabilities of tie existence $m_{ghy} / m_{gh+}$:
+
+```{r mm_condprob}
+round( prop.table(m, c(1,2)) * 100, 1)
+```
+
+or summarize the connected dyads by analyzing the *contact layer* of the mixing matrix (i.e. $m_{gh1}$) by calculating conditional probabilities of nominations $m_{gh1} / m_{g+1}$:
+
+```{r mm_contact_layer}
+round( prop.table(m[,,2], 1 ) * 100, 1)
+```
+
+This tells us, for example, that boys consists 95\% of all nominations made by boys, and 11% nominations made by girls.
+
+Most of the existing indexes of homophily/segregation can be derived as functions of the mixing matrix. We provide some examples below.
+
+
+
+
+
+
+# Assortativity coefficient
+
+The assortativity coefficient [@newman_2003;@newman_girvan_2004] summarizes the contact layer of the mixing matrix by evaluating the relative "weight" of the values on the diagonal. The more likely it is for nodes to be connected within groups, the larger the values in the cells on the diagonal of the contact layer of the mixing matrix.
+
+If we use $p_{gh} = m_{gh1} / m_{gh+}$ as joint probabilities in the contact layer of the mixing matrix, we can write assortativity coefficient as
+
+$$
+\text{Assortativity} = \frac{\sum_{g=1}^K p_{gg} - \sum_{g=1}^K p_{g+} p_{+g}}{1 - \sum_{g=1}^K p_{g+} p_{+g}}
+$$
+
+The index returns 1 for perfeclty segregated networks (all ties exist within groups). It returns 0 for random networks. The minimum value of the index depends on average degrees of nodes in each group [see @bojanowski_corten_2014 for details].
+
+Assortativity coefficient can be computed with `assort` from package "isnar". `assort` expects an igraph object and the name of vertex attribute defining the groups. In our classroom network the assortativity with respect to gender is:
+
 ```{r}
-plot(playnet, vertex.label = NA, vertex.size = 5, 
-     vertex.color = V(playnet)$female + 2)
+assort(playnet, "female")
 ```
-It looks like children indeed prefer to play with same-sex colleagues. To estimate strength of this preference we could calculate assortativity coefficient.
+
+
+
+
+# Freeman segregation index
+
+Freeman’s segregation index [@freeman1978segregation] is applicable to undirected networks and two groups of nodes. The basic idea behind this measure is to compare the proportion of between-group ties in the observed network with a benchmark representing null segregation. Freeman proposed a baseline proportion of between-group ties expected to exist in a purely random graph with group sizes and density identical to the observed network. As the number of between-group ties in the observed network increases, segregation decreases.
+
+Based on the mixing matrix the observed proportion of between-group ties is equal to
+
+$$
+p = \frac{m_{121}}{m_{++1}}
+$$
+
+The expected proportion of between-group ties in the random graph is equal to the proportion of between-group dyads in the total number of dyads in the network (ignoring their connected/disconnected state):
+
+$$
+\pi = \frac{m_{12+}}{m_{+++}}
+$$
+
+Given these two quantities Freeman’s segregation index is equal to
+
+$$
+\text{Freeman} = \frac{\pi - p}{\pi} = 1 - \frac{p}{\pi}
+$$
+
+Freeman index varies between 0 and 1. It returns 0 for a random network and returns 1 for a perfectly segregated network.
+
+To try it out in practice let us create an undirected network based on classroom data such that there is an edge only in reciprocated dyads. In other words, we are considering only reciprocated "play with" nominations
+
 ```{r}
-assortativity.nominal(playnet, types = factor(V(playnet)$female))
+z <- as.undirected(playnet, mode="mutual")
+plot(z, vertex.label=NA,
+     vertex.color=ifelse(V(z)$female, "pink", "lightskyblue"))
+legend("topleft", pch=21, pt.bg=c("lightskyblue", "pink"),
+      legend=c("Boys", "Girls"), bty="n", pt.cex=2 )
 ```
-Assortativity coefficient is close to 1, what confirms homophily in researched graph.
+
+For this network the gender segregation as measured by Freeman's index is:
+
+```{r freeman}
+freeman(z, "female")
+```
+
+which is very close to 1 (perfect segregation). Indeed, we see only a single reciprocated nomination between a boy and a girl.
+
+
+```{r, eval=FALSE, echo=FALSE}
+# Not used: missing data on judge gender
+data("judge_net")
+plot(judge_net, vertex.label=NA,
+     vertex.color=ifelse(V(judge_net)$JudgeSex == "F", "red", "navyblue"))
+freeman(judge_net, "JudgeSex")
+```
+
+
+
+
+
+
+
+# Coleman's homophily index
+
+@coleman_1958 homophily index is defined for *directed* networks. By design it assigns a segregation scores for each group in the network, unlike previously described measures which assign a single value for the whole network. In other words, Coleman's index is a group-level measure.
+
+The index captures the tendency for members of a particular group to nominate others from the same group. The tendency is evaluated vis a vis the situation in which the nominations would be random.
+The expected number of ties within group $g$ if choices were made at random is:
+
+$$
+m_{gg1}^* = \sum_{i: t_i = g} \eta_i \frac{n_g - 1}{N - 1}
+$$
+
+where $\eta_i$ is the out-degree of node $i$, $n_g$ is the number of nodes in group $g$, and $N$ is the size of the network.
+
+Coleman's homophily index for group $g$ is then equal to:
+
+$$
+\begin{split}
+	\text{Coleman}_g &=
+	\begin{cases}
+		\frac{ m_{gg1} - m^*_{gg1}}{\sum_{i: t_i = g} \eta_i - m^*_{gg1}} & \text{if} \quad m_{gg1} \geq m^*_{gg1}\\
+		\frac{m_{gg1} - m^*_{gg1}}{m^*_{gg1}} & \text{if} \quad m_{gg1} < m^*_{gg1}
+	\end{cases}
+\end{split}
+$$
+
+Coleman's index returns 0 if and only if expected proportion of within-group ties in group $g$ is equal to the proportion of nodes from group $g$ in the total number of nodes (excluding ego). It is equal to 1 if all nominations of group $g$ nodes belong to group $g$. It is equal to -1 if all nominations of group $g$ nodes do not belong to group $g$.
+
+For the `playnet` network Coleman's indexes for boys and girls are:
+
+```{r coleman_playnet}
+coleman(playnet, "female")
+```
+
+As we can see both values are close to 1 (high segregation). The value for boys is larger as girls are slightly more likely to nominate boys than boys are to nominate girls.
+
+
+
+# See also
+
+- The article of @bojanowski_corten_2014 contains a more detailed comparative analysis of segregation measures presented in this tutorial as well as other measures.
+- Homophily effects can be expressed in Exponential Random Graph Model framework. See ERGM section of this tutorial for more details.
+
+
+# References

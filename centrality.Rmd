@@ -191,8 +191,6 @@ closeness(g1, mode = "all")
 
 To consider possible interpretations, let us assume that the network ties represent knowledge flows, i.e., an arrow from Sara to John represents the fact that John goes often to Sara for advice. As a consequence, advice (knowledge) can be thought to "flow" from Sara to John.
 
-> TODO: poniższe do przemyślenia / poprawy:
-
 Closeness centrality of Sara when considering *incoming ties* (`mode="in"`) could be interpreted as the extent, to which Sara is a "sink" in the overall process of advice flow in the network. In other words, that she tends to receive advice from others, who themselves seek advice from others, who seek advice from others, and so on. Her position allows her to receive more directed and indirect advice than others in the network.
 
 Closeness centrality of Sara when considering *outgoing ties* (`mode="out"`) can be then interpreted as an extent to which she is a "source" of advice for others (directly or indirectly) in the network.

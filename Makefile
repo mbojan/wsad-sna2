@@ -67,6 +67,8 @@ all.html all.pdf: pandoc_flags=-s -S --number-sections --bibliography=references
 all.html all.pdf: local_neighborhoods.md centrality.md
 	$(run-pandoc)
 
+wsad-samouczek_sna.zip: $(files:=.pdf)
+	zip $@ $^
 
 #============================================================================ 
 # More tgts
@@ -75,7 +77,7 @@ all.html all.pdf: local_neighborhoods.md centrality.md
 html: $(files:=.html)
 
 .PHONY: pdf
-html: $(files:=.pdf)
+pdf: $(files:=.pdf)
 
 .PHONY: editall
 editall:
@@ -91,3 +93,6 @@ clean:
 .PHONY: proof
 proof:
 	htmlproof . --verbose --ext .html --alt-ignore /figure-html/
+
+.PHONY: zip
+zip: wsad-samouczek_sna.zip

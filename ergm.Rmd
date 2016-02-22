@@ -1,15 +1,23 @@
 ---
-title: Fitting Exponential Random Graph Models with `statnet`
+title: "Fitting Exponential Random Graph Models with `statnet`"
 bibliography: references.bib
 ---
 
-```{r, setup, echo=FALSE, results="hide", cache=FALSE}
-library(knitr)
-library(methods)
-set.seed(666)
-# options(warn=2)
-opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
-               cache=TRUE, dev="svg")
+```{r setup, echo=FALSE, results="hide", cache=FALSE}
+suppressMessages({
+  library(knitr)
+  library(methods)
+  } )
+
+pdf.options(
+  family="Palatino"
+)
+
+opts_chunk$set(
+  fig.retina=NULL,
+  fig.align="center",
+  cache=TRUE
+  )
 
 .small_mar <- function(before, options, envir) {
   # save current
@@ -37,13 +45,26 @@ opts_chunk$set(out.width="100%", fig.width=8, fig.height=6, fig.retina=NULL,
   if(before) {
     detach("package:network", force=TRUE)
     library(igraph)
+    igraph_options(
+      vertex.color="lightskyblue",
+      edge.arrow.size=0.5,
+      vertex.size=25,
+      vertex.label.cex=0.7,
+      vertex.label.family="Palatino"
+    )
   } else {
     detach("package:igraph", force=TRUE)
     library(network)
   }
 }
 
-knit_hooks$set( small.mar = .small_mar, no.mar=.no_mar, use.igraph=.use_igraph)
+knit_hooks$set( 
+  small.mar = .small_mar, 
+  no.mar=.no_mar, 
+  use.igraph=.use_igraph
+  )
+
+set.seed(123)
 ```
 
 
@@ -216,6 +237,7 @@ As an example, let us take the classroom network we used in other tutorials. We
 need it now as a `network` object:
 
 ```{r, classroom_as_network, no.mar=TRUE}
+library(network)
 # load data
 data(IBE121, package="isnar")
 # select the "would like to play with" network
@@ -812,16 +834,6 @@ plot(stats)
 
 
 ## Social circuit models
-
-Triadic closure only.
-
-```{r, gwesp1}
-model.ibe3 <- ergm(ibe ~ edges + gwesp(alpha=0.2, fixed=TRUE),
-                   control=control.ergm(seed=666))
-fit3 <- gof(model.ibe3)
-layout(matrix(1:4, 2, 2, byrow=TRUE))
-plot(fit3)
-```
 
 Triadic closure controlling for homophily and reciprocity.
 
